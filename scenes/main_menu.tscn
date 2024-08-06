@@ -1,0 +1,47 @@
+[gd_scene load_steps=4 format=3 uid="uid://do18270a428ma"]
+
+[ext_resource type="Script" path="res://scripts/scene/MainMenu.cs" id="1_wfqfe"]
+
+[sub_resource type="SystemFont" id="SystemFont_lsskb"]
+font_names = PackedStringArray("Ubuntu")
+subpixel_positioning = 0
+
+[sub_resource type="Theme" id="Theme_nlclj"]
+resource_name = "Phoenix"
+default_font = SubResource("SystemFont_lsskb")
+
+[node name="Control" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_wfqfe")
+
+[node name="Button" type="Button" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -52.0
+offset_top = -15.5
+offset_right = 52.0
+offset_bottom = 15.5
+grow_horizontal = 2
+grow_vertical = 2
+text = "Browse Map"
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(454, 159)
+theme = SubResource("Theme_nlclj")
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+use_native_dialog = true
+
+[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
