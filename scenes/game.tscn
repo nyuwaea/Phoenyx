@@ -1,0 +1,16 @@
+[gd_scene load_steps=3 format=3 uid="uid://vp1nmsiqt5yv"]
+
+[ext_resource type="Script" path="res://scripts/scene/Game.cs" id="1_v5074"]
+
+[sub_resource type="Environment" id="Environment_rlgxn"]
+
+[node name="Node3D" type="Node3D"]
+script = ExtResource("1_v5074")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+environment = SubResource("Environment_rlgxn")
+fov = 70.0
+
+[node name="Label3D" type="Label3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
+text = "hello"

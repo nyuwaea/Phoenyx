@@ -1,9 +1,10 @@
 [gd_scene load_steps=4 format=3 uid="uid://do18270a428ma"]
 
-[ext_resource type="Script" path="res://main_menu.gd" id="1_2op4p"]
+[ext_resource type="Script" path="res://scripts/scene/MainMenu.cs" id="1_wfqfe"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
+subpixel_positioning = 0
 
 [sub_resource type="Theme" id="Theme_nlclj"]
 resource_name = "Phoenix"
@@ -16,7 +17,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_2op4p")
+script = ExtResource("1_wfqfe")
 
 [node name="Button" type="Button" parent="."]
 layout_mode = 1
@@ -43,5 +44,4 @@ file_mode = 0
 access = 2
 use_native_dialog = true
 
-[connection signal="pressed" from="Button" to="." method="_on_button_pressed"]
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
