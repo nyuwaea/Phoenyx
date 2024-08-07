@@ -4,6 +4,10 @@ public partial class MainMenu : Control
 {
 	public override void _Ready()
 	{
+		Phoenix.Util.SetupUserFolder();
+
+		Input.MouseMode = Input.MouseModeEnum.Visible;
+
 		Button button = GetNode<Button>("Button");
 		FileDialog fileDialog = GetNode<FileDialog>("FileDialog");
 		
@@ -15,8 +19,8 @@ public partial class MainMenu : Control
 	{
 		var file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
 
-		GetTree().ChangeSceneToFile("res://scenes/game.tscn");
+		Game.Play(MapParser.SSMapV1(file.GetLine()));
 
-		Game.Run(MapParser.SSMapV1(file.GetLine()));
+		GetTree().ChangeSceneToFile("res://scenes/game.tscn");
 	}
 }

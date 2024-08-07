@@ -1,16 +1,81 @@
-[gd_scene load_steps=3 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=15 format=3 uid="uid://vp1nmsiqt5yv"]
 
-[ext_resource type="Script" path="res://scripts/scene/Game.cs" id="1_v5074"]
+[ext_resource type="Script" path="res://scripts/gameplay/Game.cs" id="1_v5074"]
+[ext_resource type="ArrayMesh" uid="uid://v2cifd2durhd" path="res://meshes/square.obj" id="2_fmoub"]
+[ext_resource type="Texture2D" uid="uid://b3g4aw54n6bow" path="res://textures/grid.png" id="2_q78ea"]
+[ext_resource type="Script" path="res://scripts/gameplay/Renderer.cs" id="2_rnyvc"]
+[ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://textures/cursor.png" id="3_negii"]
+[ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="4_rvp5o"]
+[ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="5_pxgh4"]
 
 [sub_resource type="Environment" id="Environment_rlgxn"]
+background_mode = 1
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73q55"]
+vertex_color_use_as_albedo = true
+
+[sub_resource type="MultiMesh" id="MultiMesh_almyi"]
+transform_format = 1
+use_colors = true
+mesh = ExtResource("2_fmoub")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a6jk1"]
+resource_name = "Material"
+transparency = 1
+albedo_texture = ExtResource("2_q78ea")
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_aih2q"]
+material = SubResource("StandardMaterial3D_a6jk1")
+size = Vector2(4, 4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lvhmj"]
+transparency = 1
+albedo_texture = ExtResource("3_negii")
+emission_enabled = true
+emission = Color(1, 1, 1, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_xij4d"]
+material = SubResource("StandardMaterial3D_lvhmj")
+size = Vector2(0.263, 0.263)
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_v5074")
 
 [node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.75)
 environment = SubResource("Environment_rlgxn")
 fov = 70.0
 
-[node name="Label3D" type="Label3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -1)
-text = "hello"
+[node name="Notes" type="MultiMeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_73q55")
+cast_shadow = 0
+multimesh = SubResource("MultiMesh_almyi")
+script = ExtResource("2_rnyvc")
+
+[node name="Grid" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_aih2q")
+
+[node name="Cursor" type="MeshInstance3D" parent="."]
+mesh = SubResource("QuadMesh_xij4d")
+
+[node name="SongTitle" type="Label3D" parent="."]
+transform = Transform3D(7, 0, 0, 0, 6.06218, -3.49999, 0, 3.49999, 6.06218, 0, 7, -10)
+pixel_size = 0.0025
+outline_modulate = Color(0, 0, 0, 0)
+text = "N/A - N/A"
+font = ExtResource("5_pxgh4")
+font_size = 64
+
+[node name="FPSCounter" type="Label" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -23.0
+offset_right = 40.0
+grow_vertical = 0
+theme = ExtResource("4_rvp5o")
+text = "60 FPS"
