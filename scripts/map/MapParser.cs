@@ -12,7 +12,7 @@ public partial class MapParser : Node
 		{
 			string[] subsplit = split[i].Split("|");
 			
-			notes[i - 1] = new Note(subsplit[2].ToFloat(), subsplit[0].ToFloat(), subsplit[1].ToFloat());
+			notes[i - 1] = new Note(i - 1, subsplit[2].ToFloat(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 		}
 
 		return new Map(notes);

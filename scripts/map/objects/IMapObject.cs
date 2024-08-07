@@ -1,5 +1,5 @@
 public interface IMapObject
 {
-	int ID {get;}
+	int ObjectID {get;}
 	float Millisecond {get;}
 }
