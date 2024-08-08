@@ -2,16 +2,16 @@ public struct Note : IMapObject
 {
     public int ObjectID {get;}  // map object type id
     public int Index; // note index within the map
-    public float Millisecond {get;}
+    public int Millisecond {get;}
     public float X;
     public float Y;
     public bool Hit;
 
-    public Note(int index, float time, float x, float y)
+    public Note(int index, int millisecond, float x, float y)
     {
         ObjectID = 0;
         Index = index;
-        Millisecond = time;
+        Millisecond = millisecond;
         X = x;
         Y = y;
         Hit = false;

@@ -3,16 +3,20 @@ public struct Map
     public bool Loaded = false;
     public string Artist = "N/A";
     public string Title = "N/A";
+    public string FormattedTitle = "N/A";
     public string Mapper = "N/A";
     public string DifficultyName = "N/A";
     public int Difficulty = 0;
+    public int Length = 0;
     public Note[] Notes = new Note[0];
 
-    public Map(string artist = "N/A", string title = "N/A", int? difficulty = 0, Note[] data = null)
+    public Map(string artist = "N/A", string title = "N/A", int? difficulty = 0, int? length = 0, Note[] data = null)
     {
         Artist = artist;
         Title = title;
+        FormattedTitle = artist != null ? $"{artist} - {title}" : title;
         Difficulty = difficulty == null ? 0 : (int)difficulty;
+        Length = length == null ? 0 : (int)length;
         Notes = data == null ? new Note[0] : data;
         Loaded = true;
     }

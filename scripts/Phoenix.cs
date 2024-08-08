@@ -19,7 +19,7 @@ public class Constants
 public class Settings
 {
     public static string Profile {get; set;} = "default";
-    public static float Sensitivity {get; set;} = 0.5f;
+    public static float Sensitivity {get; set;} = 0.66f;
     public static float Parallax {get; set;} = 0.1f;
     public static float ApproachRate {get; set;} = 35.0f;
     public static float ApproachDistance {get; set;} = 16.0f;

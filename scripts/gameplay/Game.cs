@@ -28,10 +28,10 @@ public partial class Game : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		//DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+		DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
-		Node3D.GetNode<Label3D>("SongTitle").Text = $"{Map.Artist} - {Map.Title}";
+		Node3D.GetNode<Label3D>("SongTitle").Text = Map.FormattedTitle;
 	}
 
 	public override void _Process(double delta)
@@ -47,8 +47,14 @@ public partial class Game : Node3D
 		}
 
 		Progress += Delta * 1000;
-		ToProcess = 0;
 
+		if (Progress >= Map.Length + 1000)
+		{
+			Stop();
+			return;
+		}
+
+		ToProcess = 0;
 		Notes = new List<Note>();
 
 		for (int i = PassedNotes; i < Map.Notes.Length; i++)	// note process check
@@ -95,7 +101,8 @@ public partial class Game : Node3D
 	{
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
-			CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 50 * Phoenix.Settings.Sensitivity;
+			GD.Print(Phoenix.Settings.Sensitivity);
+			CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * Phoenix.Settings.Sensitivity;
 			CursorPosition = CursorPosition.Clamp(-Phoenix.Constants.Bounds, Phoenix.Constants.Bounds);
 
 			Cursor.Translate(new Vector3(CursorPosition.X, CursorPosition.Y, 0) - Cursor.Transform.Origin);
@@ -106,7 +113,6 @@ public partial class Game : Node3D
 			if (eventKey.Keycode == Key.Escape)
 			{
 				Stop();
-				GetTree().ChangeSceneToFile("res://scenes/main_menu.tscn");
 			}
 		}
 	}
@@ -125,5 +131,7 @@ public partial class Game : Node3D
 	{
 		Playing = false;
 		Notes = null;
+
+		Node3D.GetTree().ChangeSceneToFile("res://scenes/main_menu.tscn");
 	}
 }
