@@ -63,12 +63,12 @@ mesh = SubResource("QuadMesh_aih2q")
 mesh = SubResource("QuadMesh_xij4d")
 
 [node name="SongTitle" type="Label3D" parent="."]
-transform = Transform3D(7, 0, 0, 0, 6.06218, -3.49999, 0, 3.49999, 6.06218, 0, 7, -10)
+transform = Transform3D(7, 0, 0, 0, 6.76148, -1.81172, 0, 1.81172, 6.76148, 0, 7, -10)
 pixel_size = 0.0025
 outline_modulate = Color(0, 0, 0, 0)
 text = "N/A - N/A"
 font = ExtResource("5_pxgh4")
-font_size = 64
+font_size = 36
 
 [node name="FPSCounter" type="Label" parent="."]
 anchors_preset = 2

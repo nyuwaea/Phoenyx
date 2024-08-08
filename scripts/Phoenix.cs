@@ -1,6 +1,8 @@
 using System.IO;
+using System.Reflection;
 using Godot;
 using Godot.Collections;
+using Menu;
 
 namespace Phoenix;
 
@@ -29,8 +31,21 @@ public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins"};
+    private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
+        ["_import_path"] = true,
+        ["owner"] = true,
+        
+        ["anchor_left"] = true,
+        ["anchor_top"] = true,
+        ["anchor_right"] = true,
+        ["anchor_bottom"] = true,
 
-    public static void SetupUserFolder()
+        ["layout_mode"] = true,
+
+        ["global_position"] = true
+    };
+
+    public static void Setup()
     {
         if (Initialized)
         {
@@ -38,6 +53,18 @@ public class Util
         }
 
         Initialized = true;
+
+        if (!Directory.Exists($"{Constants.UserFolder}/cache"))
+        {
+            Directory.CreateDirectory($"{Constants.UserFolder}/cache");
+        }
+
+        string[] cacheFiles = Directory.GetFiles($"{Constants.UserFolder}/cache");
+
+        for (int i = 0; i < cacheFiles.Length; i++)
+        {
+            File.Delete(cacheFiles[i]);
+        }
 
         for (int i = 0; i < UserDirectories.Length; i++)
         {
@@ -64,15 +91,15 @@ public class Util
 
     public static void SaveSettings(string profile = "default")
     {
-        Dictionary data = new Dictionary();
-
-        data.Add("_Version", 1);
-        data.Add("Sensitivity", Settings.Sensitivity);
-        data.Add("Parallax", Settings.Parallax);
-        data.Add("ApproachRate", Settings.ApproachRate);
-        data.Add("ApproachDistance", Settings.ApproachDistance);
-        data.Add("ApproachTime", Settings.ApproachTime);
-        data.Add("Colors", Settings.Colors);
+        Dictionary data = new Dictionary(){
+            ["_Version"] = 1,
+            ["Sensitivity"] = Settings.Sensitivity,
+            ["Parallax"] = Settings.Parallax,
+            ["ApproachRate"] = Settings.ApproachRate,
+            ["ApproachDistance"] = Settings.ApproachDistance,
+            ["ApproachTime"] = Settings.ApproachTime,
+            ["Colors"] = Settings.Colors
+        };
 
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
     }
@@ -90,5 +117,36 @@ public class Util
         Settings.ApproachDistance = (float)data["ApproachDistance"];
         Settings.ApproachTime = (float)data["ApproachTime"];
         Settings.Colors = (string[])data["Colors"];
+
+        MainMenu.Notify("Loaded settings successfully");
+    }
+
+    public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()
+    {
+        T clone = new T();
+        
+        foreach (Dictionary entry in reference.GetPropertyList())
+        {
+            if ((int)entry["type"] == 0 || IgnoreProperties.ContainsKey((string)entry["name"]))
+            {
+                continue;
+            }
+
+            clone.Set((string)entry["name"], reference.Get((string)entry["name"]));
+        }
+
+        if (recursive)
+        {
+            Array<Node> children = reference.GetChildren();
+            
+            for (int i = 0; i < children.Count; i++)
+            {   
+                Node childClone = (Node)typeof(Util).GetMethod("Clone", BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(children[i].GetType()).Invoke(null, new object[]{children[i], recursive});
+
+                clone.AddChild(childClone);
+            }
+        }
+
+        return clone;
     }
 }

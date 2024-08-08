@@ -1,11 +1,11 @@
 public struct Note : IMapObject
 {
     public int ObjectID {get;}  // map object type id
-    public int Index {get; set;} // note index within the map
+    public int Index; // note index within the map
     public float Millisecond {get;}
-    public float X {get;}
-    public float Y {get;}
-    public bool Hit {set; get;}
+    public float X;
+    public float Y;
+    public bool Hit;
 
     public Note(int index, float time, float x, float y)
     {
