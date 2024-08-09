@@ -1,4 +1,4 @@
-[gd_scene load_steps=15 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=19 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/gameplay/Game.cs" id="1_v5074"]
 [ext_resource type="ArrayMesh" uid="uid://v2cifd2durhd" path="res://meshes/square.obj" id="2_fmoub"]
@@ -12,6 +12,7 @@
 background_mode = 1
 ambient_light_source = 2
 ambient_light_color = Color(1, 1, 1, 1)
+reflected_light_source = 1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73q55"]
 transparency = 1
@@ -43,6 +44,20 @@ emission = Color(1, 1, 1, 1)
 material = SubResource("StandardMaterial3D_lvhmj")
 size = Vector2(0.263, 0.263)
 
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4p8vu"]
+shading_mode = 0
+albedo_color = Color(0, 1, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_b1hbo"]
+size = Vector2(10, 1)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gr73p"]
+shading_mode = 0
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="QuadMesh" id="QuadMesh_mlcr0"]
+size = Vector2(10, 1)
+
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_v5074")
 
@@ -62,6 +77,17 @@ mesh = SubResource("QuadMesh_aih2q")
 
 [node name="Cursor" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_xij4d")
+
+[node name="Health" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.0878992, 0.0235525, 0, -0.0235525, 0.0878992, 0, -6.2, -10)
+material_override = SubResource("StandardMaterial3D_4p8vu")
+mesh = SubResource("QuadMesh_b1hbo")
+
+[node name="HealthBackground" type="MeshInstance3D" parent="Health"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0100136, -0.0499802)
+material_override = SubResource("StandardMaterial3D_gr73p")
+mesh = SubResource("QuadMesh_mlcr0")
+skeleton = NodePath("../..")
 
 [node name="SongTitle" type="Label3D" parent="."]
 transform = Transform3D(7, 0, 0, 0, 6.76148, -1.81172, 0, 1.81172, 6.76148, 0, 7, -10)

@@ -8,12 +8,14 @@ public partial class Game : Node3D
 
 	Camera3D Camera;
 	MeshInstance3D Cursor;
+	MeshInstance3D Health;
 	Label3D SongTitle;
 	Label3D Hits;
 	Label3D Accuracy;
 	Label FPSCounter;
 	AudioStreamPlayer Audio;
 	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
+	public static bool StopQueued = false;
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
@@ -31,6 +33,7 @@ public partial class Game : Node3D
 		public int PassedNotes = 0;
 		public float Accuracy = 100;
 		public float Health = 100;
+		public float HealthStep = 15;
 		public Vector2 CursorPosition = Vector2.Zero;
 
 		public Attempt(Map map, float speed, string[] mods) {
@@ -45,6 +48,26 @@ public partial class Game : Node3D
 			Health = 100;
 			CursorPosition = Vector2.Zero;
 		}
+
+		public void Hit(int index)
+		{
+			Hits++;
+			HealthStep = Math.Max(HealthStep / 1.45f, 15);
+			Health = Math.Min(100, Health + HealthStep / 1.75f);
+			Map.Notes[index].Hit = true;
+		}
+
+		public void Miss(int index)
+		{
+			Misses++;
+			Health = Math.Max(0, Health - HealthStep);
+			HealthStep *= 1.2f;
+
+			if (Health <= 0)
+			{
+				QueueStop();
+			}
+		}
 	}
 	
 	public override void _Ready()
@@ -53,6 +76,7 @@ public partial class Game : Node3D
 
 		Camera = GetNode<Camera3D>("Camera3D");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
+		Health = GetNode<MeshInstance3D>("Health");
 		FPSCounter = GetNode<Label>("FPSCounter");
 		Audio = Node3D.GetNode<AudioStreamPlayer>("AudioStreamPlayer");
 		SongTitle = Node3D.GetNode<Label3D>("SongTitle");
@@ -83,7 +107,7 @@ public partial class Game : Node3D
 		{
 			return;
 		}
-
+		
 		CurrentAttempt.Progress += Delta * 1000;
 
 		if (!Audio.Playing && CurrentAttempt.Progress >= 0)
@@ -91,7 +115,7 @@ public partial class Game : Node3D
 			Audio.Play();
 		}
 
-		if (CurrentAttempt.Progress >= CurrentAttempt.Map.Length + 1000)
+		if (CurrentAttempt.Progress >= CurrentAttempt.Map.Length + 2500)
 		{
 			Stop();
 			return;
@@ -110,7 +134,7 @@ public partial class Game : Node3D
 				{
 					if (!note.Hit)
 					{
-						CurrentAttempt.Misses++;
+						CurrentAttempt.Miss(note.Index);
 					}
 
 					CurrentAttempt.PassedNotes = i + 1;
@@ -140,8 +164,7 @@ public partial class Game : Node3D
 
 			if (CurrentAttempt.CursorPosition.X + Phoenix.Constants.CursorSize / 2 >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Phoenix.Constants.CursorSize / 2 <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Phoenix.Constants.CursorSize / 2 >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Phoenix.Constants.CursorSize / 2 <= note.Y + 0.5f)
 			{
-				CurrentAttempt.Hits++;
-				CurrentAttempt.Map.Notes[note.Index].Hit = true;
+				CurrentAttempt.Hit(note.Index);
 			}
 		}
 
@@ -150,6 +173,15 @@ public partial class Game : Node3D
 
 		Hits.Text = $"Notes\n{CurrentAttempt.Hits} / {sum}";
 		Accuracy.Text = $"Accuracy\n{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
+		Health.Mesh.Set("size", new Vector2(CurrentAttempt.Health / 10, 1));
+		Health.Mesh.Set("center_offset", new Vector3(-(100 - CurrentAttempt.Health) / 20, 0, 0));
+
+		if (StopQueued)
+		{
+			StopQueued = false;
+			Stop();
+			return;
+		}
 	}
 
 	public override void _Input(InputEvent @event)
@@ -182,15 +214,20 @@ public partial class Game : Node3D
 	public static void Play(Map map, float speed = 1, string[] mods = null)
 	{
 		CurrentAttempt = new Attempt(map, speed, mods);
-
 		Playing = true;
 		Notes = null;
+	}
+
+	public static void QueueStop()
+	{
+		StopQueued = true;
 	}
 
 	public static void Stop()
 	{
 		Playing = false;
 		Notes = null;
+		CurrentAttempt = new Attempt();
 
 		Node3D.GetTree().ChangeSceneToFile("res://scenes/main_menu.tscn");
 	}
