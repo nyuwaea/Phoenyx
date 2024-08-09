@@ -30,8 +30,10 @@ public partial class Renderer : MultiMeshInstance3D
                 alpha = 0;
             }
 
-            Multimesh.SetInstanceTransform(i, new Transform3D(Basis.Identity, new Vector3(note.X, note.Y, -depth)));
-            Multimesh.SetInstanceColor(i, Color.FromHtml(Settings.Colors[note.Index % Settings.Colors.Length] + ((int)(alpha * 255)).ToString("X2")));
+            int j = Game.ToProcess - i - 1;
+
+            Multimesh.SetInstanceTransform(j, new Transform3D(Basis.Identity, new Vector3(note.X, note.Y, -depth)));
+            Multimesh.SetInstanceColor(j, Color.FromHtml(Settings.Colors[note.Index % Settings.Colors.Length] + ((int)(alpha * 255)).ToString("X2")));
         }
     }
 }
