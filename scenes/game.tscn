@@ -1,10 +1,10 @@
 [gd_scene load_steps=19 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/gameplay/Game.cs" id="1_v5074"]
-[ext_resource type="ArrayMesh" uid="uid://v2cifd2durhd" path="res://meshes/square.obj" id="2_fmoub"]
-[ext_resource type="Texture2D" uid="uid://b3g4aw54n6bow" path="res://textures/grid.png" id="2_q78ea"]
+[ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
+[ext_resource type="Texture2D" uid="uid://b3g4aw54n6bow" path="res://skin/grid.png" id="2_q78ea"]
 [ext_resource type="Script" path="res://scripts/gameplay/Renderer.cs" id="2_rnyvc"]
-[ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://textures/cursor.png" id="3_negii"]
+[ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="3_negii"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="4_rvp5o"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="5_pxgh4"]
 
@@ -16,19 +16,21 @@ reflected_light_source = 1
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73q55"]
 transparency = 1
+cull_mode = 2
+shading_mode = 0
 vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
 
 [sub_resource type="MultiMesh" id="MultiMesh_almyi"]
 transform_format = 1
 use_colors = true
-mesh = ExtResource("2_fmoub")
+mesh = ExtResource("2_chdyw")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a6jk1"]
 resource_name = "Material"
 transparency = 1
+shading_mode = 0
 albedo_texture = ExtResource("2_q78ea")
-emission_enabled = true
-emission = Color(1, 1, 1, 1)
 
 [sub_resource type="QuadMesh" id="QuadMesh_aih2q"]
 material = SubResource("StandardMaterial3D_a6jk1")
@@ -36,9 +38,8 @@ size = Vector2(4, 4)
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lvhmj"]
 transparency = 1
+shading_mode = 0
 albedo_texture = ExtResource("3_negii")
-emission_enabled = true
-emission = Color(1, 1, 1, 1)
 
 [sub_resource type="QuadMesh" id="QuadMesh_xij4d"]
 material = SubResource("StandardMaterial3D_lvhmj")
@@ -90,26 +91,41 @@ mesh = SubResource("QuadMesh_mlcr0")
 skeleton = NodePath("../..")
 
 [node name="SongTitle" type="Label3D" parent="."]
-transform = Transform3D(7, 0, 0, 0, 6.76148, -1.81172, 0, 1.81172, 6.76148, 0, 7, -10)
+transform = Transform3D(7, 0, 0, 0, 6.06218, -3.49999, 0, 3.49999, 6.06218, 0, 7, -10)
 pixel_size = 0.0025
 outline_modulate = Color(0, 0, 0, 0)
 text = "N/A - N/A"
+font = ExtResource("5_pxgh4")
+
+[node name="Combo" type="Label3D" parent="."]
+transform = Transform3D(7, 0, 0, 0, 6.76148, -1.81173, 0, 1.81173, 6.76148, 0, 3.5, -10)
+pixel_size = 0.0025
+modulate = Color(1, 1, 1, 0.12549)
+outline_modulate = Color(0, 0, 0, 0)
+text = "0"
+font = ExtResource("5_pxgh4")
+font_size = 64
+
+[node name="Speed" type="Label3D" parent="."]
+transform = Transform3D(7, 0, 0, 0, 6.76148, 1.81173, 0, -1.81173, 6.76148, 0, -7.5, -10)
+pixel_size = 0.0025
+modulate = Color(1, 1, 1, 0.12549)
+outline_modulate = Color(0, 0, 0, 0)
+text = "1.00x"
 font = ExtResource("5_pxgh4")
 
 [node name="Hits" type="Label3D" parent="."]
 transform = Transform3D(6.76148, 0, -1.81173, 0, 7, 0, 1.81173, 0, 6.76148, 7, 1, -9)
 pixel_size = 0.0025
 outline_modulate = Color(0, 0, 0, 0)
-text = "Notes
-9999 / 9999"
+text = "0 / 0"
 font = ExtResource("5_pxgh4")
 
 [node name="Accuracy" type="Label3D" parent="."]
 transform = Transform3D(6.76148, 0, -1.81173, 0, 7, 0, 1.81173, 0, 6.76148, 7, -1, -9)
 pixel_size = 0.0025
 outline_modulate = Color(0, 0, 0, 0)
-text = "Accuracy
-100%"
+text = "100.00%"
 font = ExtResource("5_pxgh4")
 
 [node name="FPSCounter" type="Label" parent="."]
@@ -123,4 +139,4 @@ theme = ExtResource("4_rvp5o")
 text = "60 FPS"
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-volume_db = -25.0
+volume_db = -20.0

@@ -31,8 +31,7 @@ public partial class MainMenu : Control
 		{
 			if (eventKey.Keycode == Key.Escape)
 			{
-				Phoenix.Util.SaveSettings();
-				Control.GetTree().Quit();
+				Quit();
 			}
 		}
     }
@@ -49,7 +48,7 @@ public partial class MainMenu : Control
 
 		GetTree().ChangeSceneToFile("res://scenes/game.tscn");
 
-		Game.Play(map);
+		Game.Play(map, 1, new string[]{"NoFail"});
 	}
 
 	public static async void Notify(string message, int severity = 0)
@@ -101,5 +100,11 @@ public partial class MainMenu : Control
 
 		ActiveNotifications.Remove(notification);
 		notification.QueueFree();
+	}
+
+	public static void Quit()
+	{
+		Phoenix.Util.SaveSettings();
+		Control.GetTree().Quit();
 	}
 }

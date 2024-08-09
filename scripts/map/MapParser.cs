@@ -64,7 +64,7 @@ public partial class MapParser : Node
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
 
-			map = new Map(notes, null, null, null, 0, notes[notes.Length - 1].Millisecond);
+			map = new Map(notes, null, null, null, null, 0, notes[notes.Length - 1].Millisecond);
 		}
 		catch (Exception exception)
 		{
@@ -121,12 +121,14 @@ public partial class MapParser : Node
 
 			ulong markerByteOffset = BitConverter.ToUInt64(file.GetBuffer(8));
 			
-			file.GetBuffer(8);	// marker byte offset (can just use notecount)
-			file.GetBuffer(2);	// junk (?)
-
-			string id = file.GetLine();
-			string[] mapName = file.GetLine().Split("-", 2);
-
+			file.GetBuffer(8);	// marker byte length (can just use notecount)
+			
+			uint mapIdLength = BitConverter.ToUInt16(file.GetBuffer(2));
+			string id = Encoding.UTF8.GetString(file.GetBuffer(mapIdLength));
+			
+			uint mapNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
+			string[] mapName = Encoding.UTF8.GetString(file.GetBuffer(mapNameLength)).Split("-", 2);
+			
 			string artist = null;
 			string song = null;
 
@@ -140,16 +142,19 @@ public partial class MapParser : Node
 				song = mapName[1];
 			}
 
-			file.GetLine();	// song name, why is this different?
+			uint songNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
+			string songName = Encoding.UTF8.GetString(file.GetBuffer(songNameLength));	// why is this different?
 			
 			uint mapperCount = BitConverter.ToUInt16(file.GetBuffer(2));
-			string[] mappers = Array.Empty<string>();
+			string[] mappers = new string[mapperCount];
 
 			for (int i = 0; i < mapperCount; i++)
 			{
-				
-			}
+				uint mapperNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
 
+				mappers[i] = Encoding.UTF8.GetString(file.GetBuffer(mapperNameLength));
+			}
+			
 			byte[] audioBuffer = null;
 			byte[] coverBuffer = null;
 
@@ -200,7 +205,7 @@ public partial class MapParser : Node
 				notes[i].Index = i;
 			}
 
-			map = new Map(notes, id, artist, song, difficulty, (int)mapLength, audioBuffer, coverBuffer);
+			map = new Map(notes, id, artist, song, mappers, difficulty, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{

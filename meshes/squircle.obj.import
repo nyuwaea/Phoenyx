@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://rniojt7yiv8q"
+path="res://.godot/imported/squircle.obj-2a42dc411e1e8e407607d00dc6d25103.mesh"
+
+[deps]
+
+files=["res://.godot/imported/squircle.obj-2a42dc411e1e8e407607d00dc6d25103.mesh"]
+
+source_file="res://meshes/squircle.obj"
+dest_files=["res://.godot/imported/squircle.obj-2a42dc411e1e8e407607d00dc6d25103.mesh", "res://.godot/imported/squircle.obj-2a42dc411e1e8e407607d00dc6d25103.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

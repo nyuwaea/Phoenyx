@@ -8,17 +8,18 @@ namespace Phoenix;
 
 public class Constants
 {
+    public static string RootFolder {get;} = Directory.GetCurrentDirectory();
     public static string UserFolder {get;} = OS.GetUserDataDir();
     public static float CursorSize {get;} = 0.2625f;
     public static float GridSize {get;} = 3.0f;
     public static Vector2 Bounds {get;} = new Vector2(GridSize / 2 - CursorSize / 2, GridSize / 2 - CursorSize / 2);
-    public static float HitBoxSize {get;} = 1.14f;
+    public static float HitBoxSize {get;} = 0.07f;
     public static float HitWindow {get;} = 55f;
 }
 
 public class Settings
 {
-    public static string Profile {get; set;} = "default";
+    public static string Skin {get; set;} = "default";
     public static float Sensitivity {get; set;} = 0.66f;
     public static float Parallax {get; set;} = 0.1f;
     public static float ApproachRate {get; set;} = 35.0f;
@@ -33,7 +34,7 @@ public class Settings
 public class Util
 {
     private static bool Initialized = false;
-    private static string[] UserDirectories = new string[]{"maps", "profiles", "skins"};
+    private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -44,7 +45,6 @@ public class Util
         ["anchor_bottom"] = true,
 
         ["layout_mode"] = true,
-
         ["global_position"] = true
     };
 
@@ -62,11 +62,9 @@ public class Util
             Directory.CreateDirectory($"{Constants.UserFolder}/cache");
         }
 
-        string[] cacheFiles = Directory.GetFiles($"{Constants.UserFolder}/cache");
-
-        for (int i = 0; i < cacheFiles.Length; i++)
+        foreach (string cacheFile in Directory.GetFiles($"{Constants.UserFolder}/cache"))
         {
-            File.Delete(cacheFiles[i]);
+            File.Delete(cacheFile);
         }
 
         for (int i = 0; i < UserDirectories.Length; i++)
@@ -77,6 +75,23 @@ public class Util
 		    {
 		    	Directory.CreateDirectory($"{Constants.UserFolder}/{Folder}");
 		    }
+        }
+
+        if (!Directory.Exists($"{Constants.UserFolder}/skins/default"))
+        {
+            Directory.CreateDirectory($"{Constants.UserFolder}/skins/default");
+        }
+        
+        foreach (string skinFile in Directory.GetFiles($"{Constants.RootFolder}\\skin"))
+        {
+            string[] split = skinFile.Split("\\");
+
+            if (File.Exists($"{Constants.UserFolder}/skins/default/{split[split.Length - 1]}") || skinFile.GetExtension() == "import")
+            {
+                continue;
+            }
+
+            File.Copy(skinFile, $"{Constants.UserFolder}/skins/default/{split[split.Length - 1]}");
         }
 
         if (!File.Exists($"{Constants.UserFolder}/current_profile.txt"))
@@ -96,11 +111,11 @@ public class Util
     {
         Dictionary data = new Dictionary(){
             ["_Version"] = 1,
+            ["Skin"] = Settings.Skin,
             ["Sensitivity"] = Settings.Sensitivity,
             ["Parallax"] = Settings.Parallax,
             ["ApproachRate"] = Settings.ApproachRate,
             ["ApproachDistance"] = Settings.ApproachDistance,
-            ["ApproachTime"] = Settings.ApproachTime,
             ["FadeIn"] = Settings.FadeIn,
             ["FadeOut"] = Settings.FadeOut,
             ["Pushback"] = Settings.Pushback,
@@ -117,11 +132,12 @@ public class Util
 
         file.Close();
 
+        Settings.Skin = (string)data["Skin"];
         Settings.Sensitivity = (float)data["Sensitivity"];
         Settings.Parallax = (float)data["Parallax"];
         Settings.ApproachRate = (float)data["ApproachRate"];
         Settings.ApproachDistance = (float)data["ApproachDistance"];
-        Settings.ApproachTime = (float)data["ApproachTime"];
+        Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
         Settings.FadeIn = (float)data["FadeIn"];
         Settings.FadeOut = (bool)data["FadeOut"];
         Settings.Pushback = (bool)data["Pushback"];

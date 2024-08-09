@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Godot;
+using Menu;
 
 public partial class Game : Node3D
 {
@@ -8,10 +10,14 @@ public partial class Game : Node3D
 
 	Camera3D Camera;
 	MeshInstance3D Cursor;
+	MeshInstance3D Grid;
 	MeshInstance3D Health;
+	MultiMeshInstance3D NotesMultimesh;
 	Label3D SongTitle;
 	Label3D Hits;
 	Label3D Accuracy;
+	Label3D Combo;
+	Label3D SpeedLabel;
 	Label FPSCounter;
 	AudioStreamPlayer Audio;
 	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
@@ -19,7 +25,7 @@ public partial class Game : Node3D
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
-	public static List<Note> Notes;		// notes to process
+	public static List<Note> ProcessNotes;
 	public static Attempt CurrentAttempt;
 
 	public struct Attempt
@@ -30,28 +36,25 @@ public partial class Game : Node3D
 		public string[] Mods = Array.Empty<string>();
 		public int Hits = 0;
 		public int Misses = 0;
+		public int Combo = 0;
 		public int PassedNotes = 0;
 		public float Accuracy = 100;
 		public float Health = 100;
 		public float HealthStep = 15;
 		public Vector2 CursorPosition = Vector2.Zero;
 
-		public Attempt(Map map, float speed, string[] mods) {
+		public Attempt(Map map, float speed, string[] mods)
+		{
 			Map = map;
 			Speed = speed;
 			Mods = mods;
 			Progress = -1000;
-			Hits = 0;
-			Misses = 0;
-			PassedNotes = 0;
-			Accuracy = 100;
-			Health = 100;
-			CursorPosition = Vector2.Zero;
 		}
 
 		public void Hit(int index)
 		{
 			Hits++;
+			Combo++;
 			HealthStep = Math.Max(HealthStep / 1.45f, 15);
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
@@ -60,10 +63,11 @@ public partial class Game : Node3D
 		public void Miss(int index)
 		{
 			Misses++;
+			Combo = 0;
 			Health = Math.Max(0, Health - HealthStep);
-			HealthStep *= 1.2f;
+			HealthStep = Math.Min(HealthStep * 1.2f, 100);
 
-			if (Health <= 0)
+			if (Health <= 0 && !CurrentAttempt.Mods.Contains("NoFail"))
 			{
 				QueueStop();
 			}
@@ -76,12 +80,16 @@ public partial class Game : Node3D
 
 		Camera = GetNode<Camera3D>("Camera3D");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
+		Grid = GetNode<MeshInstance3D>("Grid");
 		Health = GetNode<MeshInstance3D>("Health");
+		NotesMultimesh = GetNode<MultiMeshInstance3D>("Notes");
 		FPSCounter = GetNode<Label>("FPSCounter");
 		Audio = Node3D.GetNode<AudioStreamPlayer>("AudioStreamPlayer");
 		SongTitle = Node3D.GetNode<Label3D>("SongTitle");
 		Hits = Node3D.GetNode<Label3D>("Hits");
 		Accuracy = Node3D.GetNode<Label3D>("Accuracy");
+		Combo = Node3D.GetNode<Label3D>("Combo");
+		SpeedLabel = Node3D.GetNode<Label3D>("Speed");
 
 		SongTitle.Text = CurrentAttempt.Map.PrettyTitle;
 
@@ -90,9 +98,22 @@ public partial class Game : Node3D
 		DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
+		try
+		{
+			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Phoenix.Constants.UserFolder}/skins/{Phoenix.Settings.Skin}/cursor.png"));
+			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Phoenix.Constants.UserFolder}/skins/{Phoenix.Settings.Skin}/grid.png"));
+			//NotesMultimesh.Multimesh.Mesh = 
+			
+		} catch (Exception exception)
+		{
+			MainMenu.Notify("Could not load skin", 2);
+			throw Logger.Error($"Could not load skin; {exception.Message}");
+		}
+
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
 			Audio.Stream = new AudioStreamMP3(){Data = CurrentAttempt.Map.AudioBuffer};
+			Audio.PitchScale = CurrentAttempt.Speed;
 		}
 	}
 
@@ -108,27 +129,30 @@ public partial class Game : Node3D
 			return;
 		}
 		
-		CurrentAttempt.Progress += Delta * 1000;
+		CurrentAttempt.Progress += Delta * 1000 * CurrentAttempt.Speed;
 
-		if (!Audio.Playing && CurrentAttempt.Progress >= 0)
+		if (CurrentAttempt.Progress >= Audio.GetPlaybackPosition() * 1000 + 200)
+		{
+			Audio.Stop();
+		} else if (!Audio.Playing && CurrentAttempt.Progress >= 0)
 		{
 			Audio.Play();
 		}
-
-		if (CurrentAttempt.Progress >= CurrentAttempt.Map.Length + 2500)
+		
+		if (CurrentAttempt.Progress >= CurrentAttempt.Map.Length + 2000)
 		{
 			Stop();
 			return;
 		}
 
 		ToProcess = 0;
-		Notes = new List<Note>();
+		ProcessNotes = new List<Note>();
 
 		for (int i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)	// note process check
 		{
 			Note note = CurrentAttempt.Map.Notes[i];
 
-			if (note.Millisecond + Phoenix.Constants.HitWindow < CurrentAttempt.Progress)	// past hit window
+			if (note.Millisecond + Phoenix.Constants.HitWindow * CurrentAttempt.Speed < CurrentAttempt.Progress)	// past hit window
 			{
 				if (i + 1 > CurrentAttempt.PassedNotes)
 				{
@@ -141,7 +165,7 @@ public partial class Game : Node3D
 				}
 
 				continue;
-			} else if (note.Millisecond > CurrentAttempt.Progress + Phoenix.Settings.ApproachTime * 1000)	// past approach distance
+			} else if (note.Millisecond > CurrentAttempt.Progress + Phoenix.Settings.ApproachTime * 1000 * CurrentAttempt.Speed)	// past approach distance
 			{
 				break;
 			} else if (note.Hit)	// no point
@@ -150,31 +174,33 @@ public partial class Game : Node3D
 			}
 			
 			ToProcess++;
-			Notes.Add(note);
+			ProcessNotes.Add(note);
 		}
 
 		for (int i = 0; i < ToProcess; i++)	// hitreg check
 		{
-			Note note = Notes[i];
+			Note note = ProcessNotes[i];
 
 			if (note.Hit || note.Millisecond - CurrentAttempt.Progress > 0)
 			{
 				continue;
 			}
 
-			if (CurrentAttempt.CursorPosition.X + Phoenix.Constants.CursorSize / 2 >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Phoenix.Constants.CursorSize / 2 <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Phoenix.Constants.CursorSize / 2 >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Phoenix.Constants.CursorSize / 2 <= note.Y + 0.5f)
+			if (CurrentAttempt.CursorPosition.X + Phoenix.Constants.HitBoxSize >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Phoenix.Constants.HitBoxSize <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Phoenix.Constants.HitBoxSize >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Phoenix.Constants.HitBoxSize <= note.Y + 0.5f)
 			{
 				CurrentAttempt.Hit(note.Index);
 			}
 		}
 
 		int sum = CurrentAttempt.Hits + CurrentAttempt.Misses;
-		string accuracy = (Math.Floor((float)CurrentAttempt.Hits / (float)sum * 10000) / 100).ToString().PadDecimals(2);
+		string accuracy = (Math.Floor((float)CurrentAttempt.Hits / sum * 10000) / 100).ToString().PadDecimals(2);
 
-		Hits.Text = $"Notes\n{CurrentAttempt.Hits} / {sum}";
-		Accuracy.Text = $"Accuracy\n{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
+		Hits.Text = $"{CurrentAttempt.Hits} / {sum}";
+		Accuracy.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
 		Health.Mesh.Set("size", new Vector2(CurrentAttempt.Health / 10, 1));
 		Health.Mesh.Set("center_offset", new Vector3(-(100 - CurrentAttempt.Health) / 20, 0, 0));
+		Combo.Text = CurrentAttempt.Combo.ToString();
+		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 
 		if (StopQueued)
 		{
@@ -208,6 +234,16 @@ public partial class Game : Node3D
 			{
 				Phoenix.Settings.Pushback = !Phoenix.Settings.Pushback;
 			}
+			else if (eventKey.Keycode == Key.Equal)
+			{
+				CurrentAttempt.Speed += 0.05f;
+				Audio.PitchScale = CurrentAttempt.Speed;
+			}
+			else if (eventKey.Keycode == Key.Minus)
+			{
+				CurrentAttempt.Speed = Math.Max(0.05f, CurrentAttempt.Speed - 0.05f);
+				Audio.PitchScale = CurrentAttempt.Speed;
+			}
 		}
 	}
 
@@ -215,7 +251,7 @@ public partial class Game : Node3D
 	{
 		CurrentAttempt = new Attempt(map, speed, mods);
 		Playing = true;
-		Notes = null;
+		ProcessNotes = null;
 	}
 
 	public static void QueueStop()
@@ -226,7 +262,7 @@ public partial class Game : Node3D
 	public static void Stop()
 	{
 		Playing = false;
-		Notes = null;
+		ProcessNotes = null;
 		CurrentAttempt = new Attempt();
 
 		Node3D.GetTree().ChangeSceneToFile("res://scenes/main_menu.tscn");
