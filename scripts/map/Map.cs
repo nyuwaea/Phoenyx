@@ -3,7 +3,6 @@ using Godot;
 
 public struct Map
 {
-    public bool Loaded = false;
     public string ID = "0";
     public string Artist = "N/A";
     public string Title = "N/A";
@@ -30,7 +29,6 @@ public struct Map
         AudioBuffer = audioBuffer;
         CoverBuffer = coverBuffer;
         Notes = data == null ? new Note[0] : data;
-        Loaded = true;
 
         foreach (string mapper in Mappers)
         {

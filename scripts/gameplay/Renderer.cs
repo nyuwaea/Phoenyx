@@ -32,7 +32,7 @@ public partial class Renderer : MultiMeshInstance3D
 
             int j = Game.ToProcess - i - 1;
 
-            Multimesh.SetInstanceTransform(j, new Transform3D(Basis.Identity, new Vector3(note.X, note.Y, -depth)));
+            Multimesh.SetInstanceTransform(j, new Transform3D(new Vector3(Settings.NoteSize, 0, 0), new Vector3(0, Settings.NoteSize, 0), new Vector3(0, 0, Settings.NoteSize), new Vector3(note.X, note.Y, -depth)));
             Multimesh.SetInstanceColor(j, Color.FromHtml(Settings.Colors[note.Index % Settings.Colors.Length] + ((int)(alpha * 255)).ToString("X2")));
         }
     }

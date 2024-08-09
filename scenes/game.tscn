@@ -91,7 +91,7 @@ mesh = SubResource("QuadMesh_mlcr0")
 skeleton = NodePath("../..")
 
 [node name="SongTitle" type="Label3D" parent="."]
-transform = Transform3D(7, 0, 0, 0, 6.06218, -3.49999, 0, 3.49999, 6.06218, 0, 7, -10)
+transform = Transform3D(7, 0, 0, 0, 6.89365, -1.21554, 0, 1.21554, 6.89365, 0, 7, -10)
 pixel_size = 0.0025
 outline_modulate = Color(0, 0, 0, 0)
 text = "N/A - N/A"

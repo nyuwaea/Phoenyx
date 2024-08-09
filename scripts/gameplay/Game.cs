@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using Godot;
 using Menu;
 
@@ -112,7 +113,18 @@ public partial class Game : Node3D
 
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
-			Audio.Stream = new AudioStreamMP3(){Data = CurrentAttempt.Map.AudioBuffer};
+			AudioStream stream;
+
+			if (Encoding.UTF8.GetString(CurrentAttempt.Map.AudioBuffer[0..4]) == "OggS")
+			{
+				stream = AudioStreamOggVorbis.LoadFromBuffer(CurrentAttempt.Map.AudioBuffer);
+			}
+			else
+			{
+				stream = new AudioStreamMP3(){Data = CurrentAttempt.Map.AudioBuffer};
+			}
+			
+			Audio.Stream = stream;
 			Audio.PitchScale = CurrentAttempt.Speed;
 		}
 	}
@@ -134,7 +146,8 @@ public partial class Game : Node3D
 		if (CurrentAttempt.Progress >= Audio.GetPlaybackPosition() * 1000 + 200)
 		{
 			Audio.Stop();
-		} else if (!Audio.Playing && CurrentAttempt.Progress >= 0)
+		}
+		else if (!Audio.Playing && CurrentAttempt.Progress >= 0)
 		{
 			Audio.Play();
 		}
@@ -165,10 +178,12 @@ public partial class Game : Node3D
 				}
 
 				continue;
-			} else if (note.Millisecond > CurrentAttempt.Progress + Phoenix.Settings.ApproachTime * 1000 * CurrentAttempt.Speed)	// past approach distance
+			}
+			else if (note.Millisecond > CurrentAttempt.Progress + Phoenix.Settings.ApproachTime * 1000 * CurrentAttempt.Speed)	// past approach distance
 			{
 				break;
-			} else if (note.Hit)	// no point
+			}
+			else if (note.Hit)	// no point
 			{
 				continue;
 			}

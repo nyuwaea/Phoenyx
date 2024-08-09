@@ -28,6 +28,7 @@ public class Settings
     public static float FadeIn {get; set;} = 0;
     public static bool FadeOut {get; set;} = true;
     public static bool Pushback {get; set;} = true;
+    public static float NoteSize {get; set;} = 0.875f;
     public static string[] Colors {get; set;} = {"#00ffed", "#ff8ff9"};
 }
 
@@ -119,6 +120,7 @@ public class Util
             ["FadeIn"] = Settings.FadeIn,
             ["FadeOut"] = Settings.FadeOut,
             ["Pushback"] = Settings.Pushback,
+            ["NoteSize"] = Settings.NoteSize,
             ["Colors"] = Settings.Colors
         };
 
@@ -141,6 +143,7 @@ public class Util
         Settings.FadeIn = (float)data["FadeIn"];
         Settings.FadeOut = (bool)data["FadeOut"];
         Settings.Pushback = (bool)data["Pushback"];
+        Settings.NoteSize = (float)data["NoteSize"];
         Settings.Colors = (string[])data["Colors"];
 
         MainMenu.Notify("Loaded settings successfully");

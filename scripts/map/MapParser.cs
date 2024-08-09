@@ -64,7 +64,11 @@ public partial class MapParser : Node
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
 
-			map = new Map(notes, null, null, null, null, 0, notes[notes.Length - 1].Millisecond);
+			map = new Map(){
+				Notes = notes,
+				Difficulty = 0,
+				Length = notes[notes.Length - 1].Millisecond
+			};
 		}
 		catch (Exception exception)
 		{

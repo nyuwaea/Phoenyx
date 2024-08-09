@@ -40,12 +40,6 @@ public partial class MainMenu : Control
 	{
 		Map map = MapParser.Parse(path);
 		
-		if (!map.Loaded)
-		{
-			Notify("Map could not be loaded", 2);
-			return;
-		}
-
 		GetTree().ChangeSceneToFile("res://scenes/game.tscn");
 
 		Game.Play(map, 1, new string[]{"NoFail"});
