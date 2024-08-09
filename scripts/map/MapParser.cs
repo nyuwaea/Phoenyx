@@ -54,17 +54,21 @@ public partial class MapParser : Node
 		try
 		{
 			string[] split = data.Split(",");
-
+			
 			Note[] notes = new Note[split.Length - 1];
-
+			
 			for (int i = 1; i < split.Length; i++)
 			{
 				string[] subsplit = split[i].Split("|");
-
-				notes[i - 1] = new Note(i - 1, subsplit[2].ToFloat(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
+				
+				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
 
-			map = new Map(null, null, null, notes);
+			map = new Map(){
+				Notes = notes,
+				Difficulty = 0,
+				Length = notes[notes.Length - 1].Millisecond
+			};
 		}
 		catch (Exception exception)
 		{
@@ -78,7 +82,7 @@ public partial class MapParser : Node
 	public static Map SSPMV2(Godot.FileAccess file)
 	{
 		Map map;
-
+		
 		try
 		{
 			byte[] sig = file.GetBuffer(4);
@@ -92,7 +96,7 @@ public partial class MapParser : Node
 			{
 				throw new Exception("Old SSPM format");
 			}
-
+			
 			file.GetBuffer(4);	// reserved
 			file.GetBuffer(20);	// hash
 
@@ -120,72 +124,92 @@ public partial class MapParser : Node
 			file.GetBuffer(16);	// marker definitions offset & marker definitions length
 
 			ulong markerByteOffset = BitConverter.ToUInt64(file.GetBuffer(8));
+			
+			file.GetBuffer(8);	// marker byte length (can just use notecount)
+			
+			uint mapIdLength = BitConverter.ToUInt16(file.GetBuffer(2));
+			string id = Encoding.UTF8.GetString(file.GetBuffer(mapIdLength));
+			
+			uint mapNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
+			string[] mapName = Encoding.UTF8.GetString(file.GetBuffer(mapNameLength)).Split("-", 2);
+			
+			string artist = null;
+			string song = null;
 
-			file.GetBuffer(8);	// marker byte offset (can just use notecount)
-			file.GetBuffer(2);	// junk (?)
+			if (mapName.Length == 1)
+			{
+				song = mapName[0];
+			}
+			else
+			{
+				artist = mapName[0];
+				song = mapName[1];
+			}
 
-			string id = file.GetLine();
-			string[] mapName = file.GetLine().Split("-", 2);
-
-			string artist = mapName[0];
-			string song = mapName[1];
-
-			file.GetLine();	// song name, why is this different?
+			uint songNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
+			string songName = Encoding.UTF8.GetString(file.GetBuffer(songNameLength));	// why is this different?
 			
 			uint mapperCount = BitConverter.ToUInt16(file.GetBuffer(2));
-			string[] mappers = Array.Empty<string>();
+			string[] mappers = new string[mapperCount];
 
 			for (int i = 0; i < mapperCount; i++)
 			{
-				
+				uint mapperNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
+
+				mappers[i] = Encoding.UTF8.GetString(file.GetBuffer(mapperNameLength));
 			}
+			
+			byte[] audioBuffer = null;
+			byte[] coverBuffer = null;
 
 			if (hasAudio)
 			{
 				file.Seek(audioByteOffset);
-
-				Godot.FileAccess audioFile = Godot.FileAccess.Open($"{Phoenix.Constants.UserFolder}/cache/audio.mp3", Godot.FileAccess.ModeFlags.Write);
-
-				audioFile.StoreBuffer(file.GetBuffer((long)audioByteLength));
+				audioBuffer = file.GetBuffer((long)audioByteLength);
 			}
-
+			
 			if (hasCover)
 			{
 				file.Seek(coverByteOffset);
-
-				Godot.FileAccess coverFile = Godot.FileAccess.Open($"{Phoenix.Constants.UserFolder}/cache/cover.png", Godot.FileAccess.ModeFlags.Write);
-
-				coverFile.StoreBuffer(file.GetBuffer((long)coverByteLength));
+				coverBuffer = file.GetBuffer((long)coverByteLength);
 			}
-
+			
 			file.Seek(markerByteOffset);
 
 			Note[] notes = new Note[noteCount];
 			
 			for (int i = 0; i < noteCount; i++)
 			{
-				uint millisecond = BitConverter.ToUInt16(file.GetBuffer(4));
-				bool isQuantum = file.GetBuffer(1)[0] == 1;
+				uint millisecond = BitConverter.ToUInt32(file.GetBuffer(4));
 
-				Vector2 position = Vector2.Zero;
+				file.GetBuffer(1);	// marker type, always note
 
+				bool isQuantum = BitConverter.ToBoolean(file.GetBuffer(1));
+				float x;
+				float y;
+				
 				if (isQuantum)
 				{
-					position.X = BitConverter.ToSingle(file.GetBuffer(4));
-					position.Y = BitConverter.ToSingle(file.GetBuffer(4));
+					x = BitConverter.ToSingle(file.GetBuffer(4));
+					y = BitConverter.ToSingle(file.GetBuffer(4));
 				}
 				else
 				{
-					position.X = file.GetBuffer(1)[0];
-					position.Y = file.GetBuffer(1)[0];
+					x = file.GetBuffer(1)[0];
+					y = file.GetBuffer(1)[0];
 				}
 
-				notes.Append(new Note(i, millisecond, position.X, position.Y));
+				notes[i] = new Note(0, (int)millisecond, x - 1, -y + 1);
 			}
-
+			
 			Array.Sort(notes, new NoteComparer());
 
-			map = new Map(artist, song, difficulty, notes);
+			for (int i = 0; i < notes.Length; i++)
+			{
+				notes[i].Index = i;
+			}
+
+			map = new Map(notes, id, artist, song, mappers, difficulty, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{

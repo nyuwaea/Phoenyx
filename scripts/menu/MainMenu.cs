@@ -16,6 +16,7 @@ public partial class MainMenu : Control
 
 		Phoenix.Util.Setup();
 		Input.MouseMode = Input.MouseModeEnum.Visible;
+		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
 
 		Button button = GetNode<Button>("Button");
 		FileDialog fileDialog = GetNode<FileDialog>("FileDialog");
@@ -30,7 +31,7 @@ public partial class MainMenu : Control
 		{
 			if (eventKey.Keycode == Key.Escape)
 			{
-				Control.GetTree().Quit();
+				Quit();
 			}
 		}
     }
@@ -39,15 +40,9 @@ public partial class MainMenu : Control
 	{
 		Map map = MapParser.Parse(path);
 		
-		if (!map.Loaded)
-		{
-			Notify("Map could not be loaded", 2);
-			return;
-		}
-
 		GetTree().ChangeSceneToFile("res://scenes/game.tscn");
 
-		Game.Play(map);
+		Game.Play(map, 1, new string[]{"NoFail"});
 	}
 
 	public static async void Notify(string message, int severity = 0)
@@ -99,5 +94,11 @@ public partial class MainMenu : Control
 
 		ActiveNotifications.Remove(notification);
 		notification.QueueFree();
+	}
+
+	public static void Quit()
+	{
+		Phoenix.Util.SaveSettings();
+		Control.GetTree().Quit();
 	}
 }
