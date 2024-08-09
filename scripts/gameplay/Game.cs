@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Godot;
 
@@ -7,16 +8,44 @@ public partial class Game : Node3D
 
 	Camera3D Camera;
 	MeshInstance3D Cursor;
+	Label3D SongTitle;
+	Label3D Hits;
+	Label3D Accuracy;
 	Label FPSCounter;
+	AudioStreamPlayer Audio;
 	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
 
 	public static bool Playing = false;
-	public static double Progress = 0;	// ms
-	public static Map Map;
-	public static List<Note> Notes;
-	public static int PassedNotes = 0;
 	public static int ToProcess = 0;
-    public static Vector2 CursorPosition = new Vector2();
+	public static List<Note> Notes;		// notes to process
+	public static Attempt CurrentAttempt;
+
+	public struct Attempt
+	{
+		public double Progress = 0;	// ms
+		public Map Map = new Map();
+		public float Speed = 1;
+		public string[] Mods = Array.Empty<string>();
+		public int Hits = 0;
+		public int Misses = 0;
+		public int PassedNotes = 0;
+		public float Accuracy = 100;
+		public float Health = 100;
+		public Vector2 CursorPosition = Vector2.Zero;
+
+		public Attempt(Map map, float speed, string[] mods) {
+			Map = map;
+			Speed = speed;
+			Mods = mods;
+			Progress = -1000;
+			Hits = 0;
+			Misses = 0;
+			PassedNotes = 0;
+			Accuracy = 100;
+			Health = 100;
+			CursorPosition = Vector2.Zero;
+		}
+	}
 	
 	public override void _Ready()
 	{
@@ -25,13 +54,22 @@ public partial class Game : Node3D
 		Camera = GetNode<Camera3D>("Camera3D");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
 		FPSCounter = GetNode<Label>("FPSCounter");
+		Audio = Node3D.GetNode<AudioStreamPlayer>("AudioStreamPlayer");
+		SongTitle = Node3D.GetNode<Label3D>("SongTitle");
+		Hits = Node3D.GetNode<Label3D>("Hits");
+		Accuracy = Node3D.GetNode<Label3D>("Accuracy");
+
+		SongTitle.Text = CurrentAttempt.Map.PrettyTitle;
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
 		DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
-		Node3D.GetNode<Label3D>("SongTitle").Text = Map.FormattedTitle;
+		if (CurrentAttempt.Map.AudioBuffer != null)
+		{
+			Audio.Stream = new AudioStreamMP3(){Data = CurrentAttempt.Map.AudioBuffer};
+		}
 	}
 
 	public override void _Process(double delta)
@@ -46,9 +84,14 @@ public partial class Game : Node3D
 			return;
 		}
 
-		Progress += Delta * 1000;
+		CurrentAttempt.Progress += Delta * 1000;
 
-		if (Progress >= Map.Length + 1000)
+		if (!Audio.Playing && CurrentAttempt.Progress >= 0)
+		{
+			Audio.Play();
+		}
+
+		if (CurrentAttempt.Progress >= CurrentAttempt.Map.Length + 1000)
 		{
 			Stop();
 			return;
@@ -57,19 +100,24 @@ public partial class Game : Node3D
 		ToProcess = 0;
 		Notes = new List<Note>();
 
-		for (int i = PassedNotes; i < Map.Notes.Length; i++)	// note process check
+		for (int i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)	// note process check
 		{
-			Note note = Map.Notes[i];
+			Note note = CurrentAttempt.Map.Notes[i];
 
-			if (note.Millisecond + Phoenix.Constants.HitWindow < Progress)	// past hit window
+			if (note.Millisecond + Phoenix.Constants.HitWindow < CurrentAttempt.Progress)	// past hit window
 			{
-				if (i + 1 > PassedNotes)
+				if (i + 1 > CurrentAttempt.PassedNotes)
 				{
-					PassedNotes = i + 1;
+					if (!note.Hit)
+					{
+						CurrentAttempt.Misses++;
+					}
+
+					CurrentAttempt.PassedNotes = i + 1;
 				}
 
 				continue;
-			} else if (note.Millisecond + Phoenix.Constants.HitWindow > Progress + Phoenix.Settings.ApproachTime * 1000)	// past approach distance
+			} else if (note.Millisecond > CurrentAttempt.Progress + Phoenix.Settings.ApproachTime * 1000)	// past approach distance
 			{
 				break;
 			} else if (note.Hit)	// no point
@@ -85,28 +133,34 @@ public partial class Game : Node3D
 		{
 			Note note = Notes[i];
 
-			if (note.Hit || note.Millisecond - Progress > 0)
+			if (note.Hit || note.Millisecond - CurrentAttempt.Progress > 0)
 			{
 				continue;
 			}
 
-			if (CursorPosition.X + Phoenix.Constants.CursorSize / 2 >= note.X - 0.5f && CursorPosition.X - Phoenix.Constants.CursorSize / 2 <= note.X + 0.5f && CursorPosition.Y + Phoenix.Constants.CursorSize / 2 >= note.Y - 0.5f && CursorPosition.Y - Phoenix.Constants.CursorSize / 2 <= note.Y + 0.5f)
+			if (CurrentAttempt.CursorPosition.X + Phoenix.Constants.CursorSize / 2 >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Phoenix.Constants.CursorSize / 2 <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Phoenix.Constants.CursorSize / 2 >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Phoenix.Constants.CursorSize / 2 <= note.Y + 0.5f)
 			{
-				Map.Notes[note.Index].Hit = true;
+				CurrentAttempt.Hits++;
+				CurrentAttempt.Map.Notes[note.Index].Hit = true;
 			}
 		}
+
+		int sum = CurrentAttempt.Hits + CurrentAttempt.Misses;
+		string accuracy = (Math.Floor((float)CurrentAttempt.Hits / (float)sum * 10000) / 100).ToString().PadDecimals(2);
+
+		Hits.Text = $"Notes\n{CurrentAttempt.Hits} / {sum}";
+		Accuracy.Text = $"Accuracy\n{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
 	}
 
 	public override void _Input(InputEvent @event)
 	{
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
-			GD.Print(Phoenix.Settings.Sensitivity);
-			CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * Phoenix.Settings.Sensitivity;
-			CursorPosition = CursorPosition.Clamp(-Phoenix.Constants.Bounds, Phoenix.Constants.Bounds);
+			CurrentAttempt.CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * Phoenix.Settings.Sensitivity;
+			CurrentAttempt.CursorPosition = CurrentAttempt.CursorPosition.Clamp(-Phoenix.Constants.Bounds, Phoenix.Constants.Bounds);
 
-			Cursor.Translate(new Vector3(CursorPosition.X, CursorPosition.Y, 0) - Cursor.Transform.Origin);
-			Camera.Translate(new Vector3(0, 0, 3.75f) + new Vector3(CursorPosition.X, CursorPosition.Y, 0) * Phoenix.Settings.Parallax - Camera.Transform.Origin);
+			Cursor.Translate(new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) - Cursor.Transform.Origin);
+			Camera.Translate(new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * Phoenix.Settings.Parallax - Camera.Transform.Origin);
 		}
 		else if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
@@ -114,17 +168,23 @@ public partial class Game : Node3D
 			{
 				Stop();
 			}
+			else if (eventKey.Keycode == Key.F)
+			{
+				Phoenix.Settings.FadeOut = !Phoenix.Settings.FadeOut;
+			}
+			else if (eventKey.Keycode == Key.P)
+			{
+				Phoenix.Settings.Pushback = !Phoenix.Settings.Pushback;
+			}
 		}
 	}
 
-	public static void Play(Map map)
+	public static void Play(Map map, float speed = 1, string[] mods = null)
 	{
-		Map = map;
-		Progress = -1000;	// 1 second break before start
-		Notes = null;
-		PassedNotes = 0;
-		CursorPosition = new Vector2();
+		CurrentAttempt = new Attempt(map, speed, mods);
+
 		Playing = true;
+		Notes = null;
 	}
 
 	public static void Stop()

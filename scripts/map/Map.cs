@@ -1,28 +1,34 @@
 public struct Map
 {
     public bool Loaded = false;
+    public string ID = "0";
     public string Artist = "N/A";
     public string Title = "N/A";
-    public string FormattedTitle = "N/A";
+    public string PrettyTitle = "N/A";
     public string Mapper = "N/A";
     public string DifficultyName = "N/A";
     public int Difficulty = 0;
     public int Length = 0;
+    public byte[] AudioBuffer = new byte[0];
+    public byte[] CoverBuffer = new byte[0];
     public Note[] Notes = new Note[0];
 
-    public Map(string artist = "N/A", string title = "N/A", int? difficulty = 0, int? length = 0, Note[] data = null)
+    public Map(Note[] data = null, string id = "0", string artist = "N/A", string title = "N/A", int difficulty = 0, int length = 0, byte[] audioBuffer = null, byte[] coverBuffer = null)
     {
+        ID = id;
         Artist = artist;
         Title = title;
-        FormattedTitle = artist != null ? $"{artist} - {title}" : title;
-        Difficulty = difficulty == null ? 0 : (int)difficulty;
-        Length = length == null ? 0 : (int)length;
+        PrettyTitle = artist != null ? $"{artist} - {title}" : title;
+        Difficulty = difficulty;
+        Length = length;
+        AudioBuffer = audioBuffer;
+        CoverBuffer = coverBuffer;
         Notes = data == null ? new Note[0] : data;
         Loaded = true;
     }
 
     public override string ToString()
     {
-        return $"{Artist} - {Title} by {Mapper}";
+        return $"{PrettyTitle} by {Mapper}";
     }
 }

@@ -8,12 +8,12 @@ namespace Phoenix;
 
 public class Constants
 {
-    public static string UserFolder = OS.GetUserDataDir();
-    public static float CursorSize = 0.2625f;
-    public static float GridSize = 3.0f;
-    public static Vector2 Bounds = new Vector2(GridSize / 2 - CursorSize / 2, GridSize / 2 - CursorSize / 2);
-    public static float HitBoxSize = 1.14f;
-    public static float HitWindow = 55f;
+    public static string UserFolder {get;} = OS.GetUserDataDir();
+    public static float CursorSize {get;} = 0.2625f;
+    public static float GridSize {get;} = 3.0f;
+    public static Vector2 Bounds {get;} = new Vector2(GridSize / 2 - CursorSize / 2, GridSize / 2 - CursorSize / 2);
+    public static float HitBoxSize {get;} = 1.14f;
+    public static float HitWindow {get;} = 55f;
 }
 
 public class Settings
@@ -24,6 +24,9 @@ public class Settings
     public static float ApproachRate {get; set;} = 35.0f;
     public static float ApproachDistance {get; set;} = 16.0f;
     public static float ApproachTime {get; set;} = ApproachDistance / ApproachRate;
+    public static float FadeIn {get; set;} = 0;
+    public static bool FadeOut {get; set;} = true;
+    public static bool Pushback {get; set;} = true;
     public static string[] Colors {get; set;} = {"#00ffed", "#ff8ff9"};
 }
 
@@ -98,6 +101,9 @@ public class Util
             ["ApproachRate"] = Settings.ApproachRate,
             ["ApproachDistance"] = Settings.ApproachDistance,
             ["ApproachTime"] = Settings.ApproachTime,
+            ["FadeIn"] = Settings.FadeIn,
+            ["FadeOut"] = Settings.FadeOut,
+            ["Pushback"] = Settings.Pushback,
             ["Colors"] = Settings.Colors
         };
 
@@ -116,6 +122,9 @@ public class Util
         Settings.ApproachRate = (float)data["ApproachRate"];
         Settings.ApproachDistance = (float)data["ApproachDistance"];
         Settings.ApproachTime = (float)data["ApproachTime"];
+        Settings.FadeIn = (float)data["FadeIn"];
+        Settings.FadeOut = (bool)data["FadeOut"];
+        Settings.Pushback = (bool)data["Pushback"];
         Settings.Colors = (string[])data["Colors"];
 
         MainMenu.Notify("Loaded settings successfully");

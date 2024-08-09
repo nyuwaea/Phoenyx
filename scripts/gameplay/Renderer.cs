@@ -1,4 +1,6 @@
+using System;
 using Godot;
+using Phoenix;
 
 public partial class Renderer : MultiMeshInstance3D
 {
@@ -15,8 +17,21 @@ public partial class Renderer : MultiMeshInstance3D
         {
             Note note = Game.Notes[i];
 
-            Multimesh.SetInstanceTransform(i, new Transform3D(Basis.Identity, new Vector3(note.X, note.Y, (float)(Game.Progress - note.Millisecond) / (1000 * Phoenix.Settings.ApproachTime) * Phoenix.Settings.ApproachDistance)));
-            Multimesh.SetInstanceColor(i, Color.FromHtml(Phoenix.Settings.Colors[note.Index % Phoenix.Settings.Colors.Length]));
+            float depth = (float)(note.Millisecond - Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance;
+            float alpha = 1;
+            
+            if (Settings.FadeOut)
+            {
+                alpha -= Math.Clamp((Settings.ApproachDistance / 2 - depth) / (Settings.ApproachDistance / 2 + Constants.HitWindow * Settings.ApproachRate / 1000), 0, 0.75f);
+            }
+
+            if (!Settings.Pushback && note.Millisecond - Game.CurrentAttempt.Progress <= 0)
+            {
+                alpha = 0;
+            }
+
+            Multimesh.SetInstanceTransform(i, new Transform3D(Basis.Identity, new Vector3(note.X, note.Y, -depth)));
+            Multimesh.SetInstanceColor(i, Color.FromHtml(Settings.Colors[note.Index % Settings.Colors.Length] + ((int)(alpha * 255)).ToString("X2")));
         }
     }
 }

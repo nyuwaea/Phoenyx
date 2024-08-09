@@ -16,6 +16,7 @@ public partial class MainMenu : Control
 
 		Phoenix.Util.Setup();
 		Input.MouseMode = Input.MouseModeEnum.Visible;
+		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
 
 		Button button = GetNode<Button>("Button");
 		FileDialog fileDialog = GetNode<FileDialog>("FileDialog");
@@ -30,6 +31,7 @@ public partial class MainMenu : Control
 		{
 			if (eventKey.Keycode == Key.Escape)
 			{
+				Phoenix.Util.SaveSettings();
 				Control.GetTree().Quit();
 			}
 		}

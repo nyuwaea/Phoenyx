@@ -54,17 +54,17 @@ public partial class MapParser : Node
 		try
 		{
 			string[] split = data.Split(",");
-
+			
 			Note[] notes = new Note[split.Length - 1];
-
+			
 			for (int i = 1; i < split.Length; i++)
 			{
 				string[] subsplit = split[i].Split("|");
-
+				
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
 
-			map = new Map(null, null, null, notes[notes.Length].Millisecond, notes);
+			map = new Map(notes, null, null, null, 0, notes[notes.Length - 1].Millisecond);
 		}
 		catch (Exception exception)
 		{
@@ -150,22 +150,19 @@ public partial class MapParser : Node
 				
 			}
 
+			byte[] audioBuffer = null;
+			byte[] coverBuffer = null;
+
 			if (hasAudio)
 			{
 				file.Seek(audioByteOffset);
-
-				Godot.FileAccess audioFile = Godot.FileAccess.Open($"{Phoenix.Constants.UserFolder}/cache/audio.mp3", Godot.FileAccess.ModeFlags.Write);
-
-				audioFile.StoreBuffer(file.GetBuffer((long)audioByteLength));
+				audioBuffer = file.GetBuffer((long)audioByteLength);
 			}
 			
 			if (hasCover)
 			{
 				file.Seek(coverByteOffset);
-
-				Godot.FileAccess coverFile = Godot.FileAccess.Open($"{Phoenix.Constants.UserFolder}/cache/cover.png", Godot.FileAccess.ModeFlags.Write);
-
-				coverFile.StoreBuffer(file.GetBuffer((long)coverByteLength));
+				coverBuffer = file.GetBuffer((long)coverByteLength);
 			}
 			
 			file.Seek(markerByteOffset);
@@ -178,7 +175,6 @@ public partial class MapParser : Node
 
 				file.GetBuffer(1);	// marker type, always note
 
-				//bool isQuantum = file.GetBuffer(1)[0] == 1;
 				bool isQuantum = BitConverter.ToBoolean(file.GetBuffer(1));
 				float x;
 				float y;
@@ -204,7 +200,7 @@ public partial class MapParser : Node
 				notes[i].Index = i;
 			}
 
-			map = new Map(artist, song, difficulty, (int)mapLength, notes);
+			map = new Map(notes, id, artist, song, difficulty, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{
