@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 using System.Reflection;
 using Godot;
@@ -36,6 +37,7 @@ public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "note.obj"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -82,17 +84,15 @@ public class Util
         {
             Directory.CreateDirectory($"{Constants.UserFolder}/skins/default");
         }
-        
-        foreach (string skinFile in Directory.GetFiles($"{Constants.RootFolder}\\skin"))
+
+        foreach (string skinFile in SkinFiles)
         {
-            string[] split = skinFile.Split("\\");
-
-            if (File.Exists($"{Constants.UserFolder}/skins/default/{split[split.Length - 1]}") || skinFile.GetExtension() == "import")
+            Godot.FileAccess file = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
+            
+            if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
             {
-                continue;
+                Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write).StoreBuffer(file.GetBuffer((long)file.GetLength()));
             }
-
-            File.Copy(skinFile, $"{Constants.UserFolder}/skins/default/{split[split.Length - 1]}");
         }
 
         if (!File.Exists($"{Constants.UserFolder}/current_profile.txt"))
@@ -129,24 +129,32 @@ public class Util
 
     public static void LoadSettings(string profile = "default")
     {
-        Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/profiles/{profile}.json", Godot.FileAccess.ModeFlags.Read);
-        Dictionary data = (Dictionary)Json.ParseString(file.GetAsText());
+        try
+        {
+            Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/profiles/{profile}.json", Godot.FileAccess.ModeFlags.Read);
+            Dictionary data = (Dictionary)Json.ParseString(file.GetAsText());
 
-        file.Close();
+            file.Close();
 
-        Settings.Skin = (string)data["Skin"];
-        Settings.Sensitivity = (float)data["Sensitivity"];
-        Settings.Parallax = (float)data["Parallax"];
-        Settings.ApproachRate = (float)data["ApproachRate"];
-        Settings.ApproachDistance = (float)data["ApproachDistance"];
-        Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
-        Settings.FadeIn = (float)data["FadeIn"];
-        Settings.FadeOut = (bool)data["FadeOut"];
-        Settings.Pushback = (bool)data["Pushback"];
-        Settings.NoteSize = (float)data["NoteSize"];
-        Settings.Colors = (string[])data["Colors"];
+            Settings.Skin = (string)data["Skin"];
+            Settings.Sensitivity = (float)data["Sensitivity"];
+            Settings.Parallax = (float)data["Parallax"];
+            Settings.ApproachRate = (float)data["ApproachRate"];
+            Settings.ApproachDistance = (float)data["ApproachDistance"];
+            Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+            Settings.FadeIn = (float)data["FadeIn"];
+            Settings.FadeOut = (bool)data["FadeOut"];
+            Settings.Pushback = (bool)data["Pushback"];
+            Settings.NoteSize = (float)data["NoteSize"];
+            Settings.Colors = (string[])data["Colors"];
 
-        MainMenu.Notify("Loaded settings successfully");
+            MainMenu.Notify("Loaded settings successfully");
+        }
+        catch (Exception exception)
+        {
+            MainMenu.Notify("Could not load settings", 2);
+            throw Logger.Error($"Could not load settings; {exception.Message}");
+        }
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()

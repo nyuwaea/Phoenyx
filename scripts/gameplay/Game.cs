@@ -21,7 +21,7 @@ public partial class Game : Node3D
 	Label3D SpeedLabel;
 	Label FPSCounter;
 	AudioStreamPlayer Audio;
-	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
+	float LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
 	public static bool StopQueued = false;
 
 	public static bool Playing = false;
@@ -31,7 +31,7 @@ public partial class Game : Node3D
 
 	public struct Attempt
 	{
-		public double Progress = 0;	// ms
+		public float Progress = 0;	// ms
 		public Map Map = new Map();
 		public float Speed = 1;
 		public string[] Mods = Array.Empty<string>();
@@ -96,7 +96,7 @@ public partial class Game : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+		//DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		try
@@ -131,7 +131,7 @@ public partial class Game : Node3D
 
 	public override void _Process(double delta)
 	{
-		double Delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
+		float Delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
 		LastFrame = Time.GetTicksUsec();
 		
 		FPSCounter.Text = $"{Mathf.Floor(1 / Delta)} FPS";

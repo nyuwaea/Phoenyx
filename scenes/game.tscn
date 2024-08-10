@@ -98,7 +98,7 @@ text = "N/A - N/A"
 font = ExtResource("5_pxgh4")
 
 [node name="Combo" type="Label3D" parent="."]
-transform = Transform3D(7, 0, 0, 0, 6.76148, -1.81173, 0, 1.81173, 6.76148, 0, 3.5, -10)
+transform = Transform3D(7, 0, 0, 0, 6.89365, -1.21554, 0, 1.21554, 6.89365, 0, 3.5, -10)
 pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0.12549)
 outline_modulate = Color(0, 0, 0, 0)
