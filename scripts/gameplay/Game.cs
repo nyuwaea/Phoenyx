@@ -96,7 +96,7 @@ public partial class Game : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+		//DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		try

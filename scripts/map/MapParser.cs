@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
 using Godot;
 using Menu;
@@ -26,8 +25,8 @@ public partial class MapParser : Node
 
 		Map map;
 		Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
-
 		string ext = path.GetExtension();
+		double start = Time.GetTicksUsec();
 
 		switch (ext)
 		{
@@ -35,7 +34,7 @@ public partial class MapParser : Node
 				map = SSMapV1(file.GetLine());
 				break;
 			case "sspm":
-				map = SSPMV2(file);
+				map = SSPMV2(new FileParser(path));
 				break;
 			default:
 				MainMenu.Notify("File extension not supported", 2);
@@ -43,6 +42,7 @@ public partial class MapParser : Node
 		}
 
 		file.Close();
+		Logger.Log($"Parsing: {(Time.GetTicksUsec() - start) / 1000}ms");
 
 		return map;
 	}
@@ -79,59 +79,57 @@ public partial class MapParser : Node
 		return map;
 	}
 
-	public static Map SSPMV2(Godot.FileAccess file)
+	public static Map SSPMV2(FileParser file)
 	{
 		Map map;
-		
+
 		try
 		{
-			byte[] sig = file.GetBuffer(4);
-
-			if (Encoding.ASCII.GetString(sig) != "SS+m")
+			if (file.GetString(4) != "SS+m")
 			{
 				throw new Exception("Incorrect file signature");
 			}
 
-			if (BitConverter.ToUInt16(file.GetBuffer(2)) != 2)
+			if (file.GetUInt16() != 2)
 			{
 				throw new Exception("Old SSPM format");
 			}
+
+			file.Skip(4);	// reserved
+			file.Skip(20);	// hash
+
+			uint mapLength = file.GetUInt32();
+			uint noteCount = file.GetUInt32();
+
+			file.Skip(4);	// marker count
+
+			int difficulty = file.Get(1)[0];
+
+			file.Skip(2);	// map rating
+
+			bool hasAudio = file.GetBool();
+			bool hasCover = file.GetBool();
+
+			file.Skip(1);	// 1mod
+			file.Skip(16);	// custom data offset & custom data length
+
+			ulong audioByteOffset = file.GetUInt64();
+			ulong audioByteLength = file.GetUInt64();
+
+			ulong coverByteOffset = file.GetUInt64();
+			ulong coverByteLength = file.GetUInt64();
+
+			file.Skip(16);	// marker definitions offset & marker definitions length
+
+			ulong markerByteOffset = file.GetUInt64();
 			
-			file.GetBuffer(4);	// reserved
-			file.GetBuffer(20);	// hash
-
-			uint mapLength = BitConverter.ToUInt32(file.GetBuffer(4));
-			uint noteCount = BitConverter.ToUInt32(file.GetBuffer(4));
-
-			file.GetBuffer(4);	// marker count
-
-			int difficulty = file.GetBuffer(1)[0];
-
-			file.GetBuffer(2);	// map rating
-
-			bool hasAudio = BitConverter.ToBoolean(file.GetBuffer(1));
-			bool hasCover = BitConverter.ToBoolean(file.GetBuffer(1));
-
-			file.GetBuffer(1);	// 1mod
-			file.GetBuffer(16);	// custom data offset & custom data length
-
-			ulong audioByteOffset = BitConverter.ToUInt64(file.GetBuffer(8));
-			ulong audioByteLength = BitConverter.ToUInt64(file.GetBuffer(8));
-
-			ulong coverByteOffset = BitConverter.ToUInt64(file.GetBuffer(8));
-			ulong coverByteLength = BitConverter.ToUInt64(file.GetBuffer(8));
-
-			file.GetBuffer(16);	// marker definitions offset & marker definitions length
-
-			ulong markerByteOffset = BitConverter.ToUInt64(file.GetBuffer(8));
+			file.Skip(8);	// marker byte length (can just use notecount)
 			
-			file.GetBuffer(8);	// marker byte length (can just use notecount)
+			uint mapIdLength = file.GetUInt16();
+			string id = file.GetString((int)mapIdLength);
 			
-			uint mapIdLength = BitConverter.ToUInt16(file.GetBuffer(2));
-			string id = Encoding.UTF8.GetString(file.GetBuffer(mapIdLength));
-			
-			uint mapNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
-			string[] mapName = Encoding.UTF8.GetString(file.GetBuffer(mapNameLength)).Split("-", 2);
+			uint mapNameLength = file.GetUInt16();
+			string[] mapName = file.GetString((int)mapNameLength).Split("-", 2);
 			
 			string artist = null;
 			string song = null;
@@ -146,17 +144,18 @@ public partial class MapParser : Node
 				song = mapName[1];
 			}
 
-			uint songNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
-			string songName = Encoding.UTF8.GetString(file.GetBuffer(songNameLength));	// why is this different?
+			uint songNameLength = file.GetUInt16();
+
+			file.Skip((int)songNameLength);	// why is this different?
 			
-			uint mapperCount = BitConverter.ToUInt16(file.GetBuffer(2));
+			uint mapperCount = file.GetUInt16();
 			string[] mappers = new string[mapperCount];
 
 			for (int i = 0; i < mapperCount; i++)
 			{
-				uint mapperNameLength = BitConverter.ToUInt16(file.GetBuffer(2));
+				uint mapperNameLength = file.GetUInt16();
 
-				mappers[i] = Encoding.UTF8.GetString(file.GetBuffer(mapperNameLength));
+				mappers[i] = file.GetString((int)mapperNameLength);
 			}
 			
 			byte[] audioBuffer = null;
@@ -164,39 +163,39 @@ public partial class MapParser : Node
 
 			if (hasAudio)
 			{
-				file.Seek(audioByteOffset);
-				audioBuffer = file.GetBuffer((long)audioByteLength);
+				file.Seek((int)audioByteOffset);
+				audioBuffer = file.Get((int)audioByteLength);
 			}
 			
 			if (hasCover)
 			{
-				file.Seek(coverByteOffset);
-				coverBuffer = file.GetBuffer((long)coverByteLength);
+				file.Seek((int)coverByteOffset);
+				coverBuffer = file.Get((int)coverByteLength);
 			}
 			
-			file.Seek(markerByteOffset);
+			file.Seek((int)markerByteOffset);
 
 			Note[] notes = new Note[noteCount];
 			
 			for (int i = 0; i < noteCount; i++)
 			{
-				uint millisecond = BitConverter.ToUInt32(file.GetBuffer(4));
+				uint millisecond = file.GetUInt32();
 
-				file.GetBuffer(1);	// marker type, always note
+				file.Skip(1);	// marker type, always note
 
-				bool isQuantum = BitConverter.ToBoolean(file.GetBuffer(1));
+				bool isQuantum = file.GetBool();
 				float x;
 				float y;
 				
 				if (isQuantum)
 				{
-					x = BitConverter.ToSingle(file.GetBuffer(4));
-					y = BitConverter.ToSingle(file.GetBuffer(4));
+					x = file.GetFloat();
+					y = file.GetFloat();
 				}
 				else
 				{
-					x = file.GetBuffer(1)[0];
-					y = file.GetBuffer(1)[0];
+					x = file.Get(1)[0];
+					y = file.Get(1)[0];
 				}
 
 				notes[i] = new Note(0, (int)millisecond, x - 1, -y + 1);
