@@ -13,11 +13,13 @@ public partial class Renderer : MultiMeshInstance3D
 
         Multimesh.InstanceCount = Game.ToProcess;
 
+        Transform3D transform = new Transform3D(new Vector3(Settings.NoteSize, 0, 0), new Vector3(0, Settings.NoteSize, 0), new Vector3(0, 0, Settings.NoteSize), Vector3.Zero);
+
         for (int i = 0; i < Game.ToProcess; i++)
         {
             Note note = Game.ProcessNotes[i];
 
-            float depth = (float)(note.Millisecond - Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance / Game.CurrentAttempt.Speed;
+            float depth = (note.Millisecond - Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance / Game.CurrentAttempt.Speed;
             float alpha = 1;
             
             if (Settings.FadeOut)
@@ -32,7 +34,8 @@ public partial class Renderer : MultiMeshInstance3D
 
             int j = Game.ToProcess - i - 1;
 
-            Multimesh.SetInstanceTransform(j, new Transform3D(new Vector3(Settings.NoteSize, 0, 0), new Vector3(0, Settings.NoteSize, 0), new Vector3(0, 0, Settings.NoteSize), new Vector3(note.X, note.Y, -depth)));
+            transform.Origin = new Vector3(note.X, note.Y, -depth);
+            Multimesh.SetInstanceTransform(j, transform);
             Multimesh.SetInstanceColor(j, Color.FromHtml(Settings.Colors[note.Index % Settings.Colors.Length] + ((int)(alpha * 255)).ToString("X2")));
         }
     }
