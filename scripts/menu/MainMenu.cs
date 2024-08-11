@@ -13,7 +13,7 @@ public partial class MainMenu : Control
 	public override void _Ready()
 	{
 		Control = this;
-
+		GD.Print("");
 		Phoenix.Util.Setup();
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
