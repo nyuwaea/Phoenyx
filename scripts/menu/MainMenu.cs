@@ -17,6 +17,7 @@ public partial class MainMenu : Control
 		Phoenix.Util.Setup();
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
+		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Adaptive);
 
 		Button button = GetNode<Button>("Button");
 		FileDialog fileDialog = GetNode<FileDialog>("FileDialog");

@@ -4,34 +4,38 @@ using System.Linq;
 using System.Text;
 using Godot;
 using Menu;
+using Phoenix;
 
 public partial class Game : Node3D
 {
 	public static Node3D Node3D;
 
+	Label FPSCounter;
 	Camera3D Camera;
-	MeshInstance3D Cursor;
-	MeshInstance3D Grid;
-	MeshInstance3D Health;
-	MultiMeshInstance3D NotesMultimesh;
-	Label3D SongTitle;
+	Label3D Title;
 	Label3D Hits;
 	Label3D Accuracy;
 	Label3D Combo;
-	Label3D SpeedLabel;
-	Label FPSCounter;
+	Label3D Speed;
+	Label3D Progress;
+	MeshInstance3D Cursor;
+	MeshInstance3D Grid;
+	MeshInstance3D Health;
+	MeshInstance3D ProgressBar;
 	AudioStreamPlayer Audio;
-	float LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
+	AudioStreamPlayer HitSound;
+	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
 	public static bool StopQueued = false;
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
 	public static List<Note> ProcessNotes;
 	public static Attempt CurrentAttempt;
+	public static float MapLength;
 
 	public struct Attempt
 	{
-		public float Progress = 0;	// ms
+		public double Progress = 0;	// ms
 		public Map Map = new Map();
 		public float Speed = 1;
 		public string[] Mods = Array.Empty<string>();
@@ -79,20 +83,23 @@ public partial class Game : Node3D
 	{
 		Node3D = this;
 
+		FPSCounter = GetNode<Label>("FPSCounter");
 		Camera = GetNode<Camera3D>("Camera3D");
+		Title = GetNode<Label3D>("Title");
+		Hits = GetNode<Label3D>("Hits");
+		Accuracy = GetNode<Label3D>("Accuracy");
+		Combo = GetNode<Label3D>("Combo");
+		Speed = GetNode<Label3D>("Speed");
+		Progress = GetNode<Label3D>("Progress");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
 		Grid = GetNode<MeshInstance3D>("Grid");
 		Health = GetNode<MeshInstance3D>("Health");
-		NotesMultimesh = GetNode<MultiMeshInstance3D>("Notes");
-		FPSCounter = GetNode<Label>("FPSCounter");
-		Audio = Node3D.GetNode<AudioStreamPlayer>("AudioStreamPlayer");
-		SongTitle = Node3D.GetNode<Label3D>("SongTitle");
-		Hits = Node3D.GetNode<Label3D>("Hits");
-		Accuracy = Node3D.GetNode<Label3D>("Accuracy");
-		Combo = Node3D.GetNode<Label3D>("Combo");
-		SpeedLabel = Node3D.GetNode<Label3D>("Speed");
+		ProgressBar = GetNode<MeshInstance3D>("ProgressBar");
+		Audio = Node3D.GetNode<AudioStreamPlayer>("SongPlayer");
+		HitSound = Node3D.GetNode<AudioStreamPlayer>("HitSoundPlayer");
 
-		SongTitle.Text = CurrentAttempt.Map.PrettyTitle;
+		Camera.Fov = Settings.FoV;
+		Title.Text = CurrentAttempt.Map.PrettyTitle;
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
@@ -101,8 +108,12 @@ public partial class Game : Node3D
 
 		try
 		{
-			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Phoenix.Constants.UserFolder}/skins/{Phoenix.Settings.Skin}/cursor.png"));
-			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Phoenix.Constants.UserFolder}/skins/{Phoenix.Settings.Skin}/grid.png"));
+			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
+			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
+			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
+			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
+			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
 			//NotesMultimesh.Multimesh.Mesh = 
 			
 		} catch (Exception exception)
@@ -113,25 +124,25 @@ public partial class Game : Node3D
 
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
-			AudioStream stream;
-
-			if (Encoding.UTF8.GetString(CurrentAttempt.Map.AudioBuffer[0..4]) == "OggS")
-			{
-				stream = AudioStreamOggVorbis.LoadFromBuffer(CurrentAttempt.Map.AudioBuffer);
-			}
-			else
-			{
-				stream = new AudioStreamMP3(){Data = CurrentAttempt.Map.AudioBuffer};
-			}
-			
-			Audio.Stream = stream;
+			Audio.Stream = LoadAudioStream(CurrentAttempt.Map.AudioBuffer);
 			Audio.PitchScale = CurrentAttempt.Speed;
+			MapLength = (float)Audio.Stream.GetLength() * 1000;
 		}
+		else
+		{
+			MapLength = CurrentAttempt.Map.Length + 1000;
+		}
+
+		FileAccess hitSoundFile = FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", FileAccess.ModeFlags.Read);
+
+		HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
+
+		hitSoundFile.Close();
 	}
 
 	public override void _Process(double delta)
 	{
-		float Delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
+		double Delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
 		LastFrame = Time.GetTicksUsec();
 		
 		FPSCounter.Text = $"{Mathf.Floor(1 / Delta)} FPS";
@@ -143,16 +154,12 @@ public partial class Game : Node3D
 		
 		CurrentAttempt.Progress += Delta * 1000 * CurrentAttempt.Speed;
 
-		if (CurrentAttempt.Progress >= Audio.GetPlaybackPosition() * 1000 + 200)
-		{
-			Audio.Stop();
-		}
-		else if (!Audio.Playing && CurrentAttempt.Progress >= 0)
+		if (CurrentAttempt.Map.AudioBuffer != null && !Audio.Playing && CurrentAttempt.Progress >= 0)
 		{
 			Audio.Play();
 		}
 		
-		if (CurrentAttempt.Progress >= CurrentAttempt.Map.Length + 2000 * CurrentAttempt.Speed)
+		if (CurrentAttempt.Progress >= MapLength)
 		{
 			Stop();
 			return;
@@ -165,7 +172,7 @@ public partial class Game : Node3D
 		{
 			Note note = CurrentAttempt.Map.Notes[i];
 
-			if (note.Millisecond + Phoenix.Constants.HitWindow * CurrentAttempt.Speed < CurrentAttempt.Progress)	// past hit window
+			if (note.Millisecond + Constants.HitWindow * CurrentAttempt.Speed < CurrentAttempt.Progress)	// past hit window
 			{
 				if (i + 1 > CurrentAttempt.PassedNotes)
 				{
@@ -179,7 +186,7 @@ public partial class Game : Node3D
 
 				continue;
 			}
-			else if (note.Millisecond > CurrentAttempt.Progress + Phoenix.Settings.ApproachTime * 1000 * CurrentAttempt.Speed)	// past approach distance
+			else if (note.Millisecond > CurrentAttempt.Progress + Settings.ApproachTime * 1000 * CurrentAttempt.Speed)	// past approach distance
 			{
 				break;
 			}
@@ -201,9 +208,10 @@ public partial class Game : Node3D
 				continue;
 			}
 
-			if (CurrentAttempt.CursorPosition.X + Phoenix.Constants.HitBoxSize >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Phoenix.Constants.HitBoxSize <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Phoenix.Constants.HitBoxSize >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Phoenix.Constants.HitBoxSize <= note.Y + 0.5f)
+			if (CurrentAttempt.CursorPosition.X + Constants.HitBoxSize >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Constants.HitBoxSize <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Constants.HitBoxSize >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Constants.HitBoxSize <= note.Y + 0.5f)
 			{
 				CurrentAttempt.Hit(note.Index);
+				HitSound.Play();
 			}
 		}
 
@@ -212,10 +220,11 @@ public partial class Game : Node3D
 
 		Hits.Text = $"{CurrentAttempt.Hits} / {sum}";
 		Accuracy.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
-		Health.Mesh.Set("size", new Vector2(CurrentAttempt.Health / 10, 1));
-		Health.Mesh.Set("center_offset", new Vector3(-(100 - CurrentAttempt.Health) / 20, 0, 0));
 		Combo.Text = CurrentAttempt.Combo.ToString();
-		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
+		Speed.Text = $"{(Math.Round(CurrentAttempt.Speed * 100) / 100).ToString().PadDecimals(2)}x";
+		Progress.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
+		Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(CurrentAttempt.Health * 10, 10);
+		ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(1000 * (float)(CurrentAttempt.Progress / MapLength), 10);
 
 		if (StopQueued)
 		{
@@ -229,11 +238,26 @@ public partial class Game : Node3D
 	{
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
-			CurrentAttempt.CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * Phoenix.Settings.Sensitivity;
-			CurrentAttempt.CursorPosition = CurrentAttempt.CursorPosition.Clamp(-Phoenix.Constants.Bounds, Phoenix.Constants.Bounds);
+			if (Settings.CameraLock)
+			{
+				CurrentAttempt.CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * Settings.Sensitivity;
+				CurrentAttempt.CursorPosition = CurrentAttempt.CursorPosition.Clamp(-Constants.Bounds, Constants.Bounds);
 
-			Cursor.Translate(new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) - Cursor.Transform.Origin);
-			Camera.Translate(new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * Phoenix.Settings.Parallax - Camera.Transform.Origin);
+				Cursor.GlobalPosition = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
+				Camera.GlobalPosition = new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * Settings.Parallax;
+				Camera.GlobalRotation = Vector3.Zero;
+			}
+			else
+			{
+				Camera.GlobalRotation += new Vector3(-eventMouseMotion.Relative.Y / 100 * Settings.Sensitivity / (float)Math.PI / 2, -eventMouseMotion.Relative.X / 100 * Settings.Sensitivity / (float)Math.PI / 2, 0);
+				Camera.GlobalPosition = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
+				
+				float hypotenuse = 3.5f / Camera.Basis.Z.Z;
+				float distance = (float)Math.Sqrt(Math.Pow(hypotenuse, 2) - Math.Pow(3.5f, 2));
+				
+				CurrentAttempt.CursorPosition = (new Vector2(Camera.Basis.Z.X, Camera.Basis.Z.Y).Normalized() * -distance).Clamp(-Constants.Bounds, Constants.Bounds);
+				Cursor.GlobalPosition = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
+			}
 		}
 		else if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
@@ -243,11 +267,15 @@ public partial class Game : Node3D
 			}
 			else if (eventKey.Keycode == Key.F)
 			{
-				Phoenix.Settings.FadeOut = !Phoenix.Settings.FadeOut;
+				Settings.FadeOut = !Settings.FadeOut;
 			}
 			else if (eventKey.Keycode == Key.P)
 			{
-				Phoenix.Settings.Pushback = !Phoenix.Settings.Pushback;
+				Settings.Pushback = !Settings.Pushback;
+			}
+			else if (eventKey.Keycode == Key.C)
+			{
+				Settings.CameraLock = !Settings.CameraLock;
 			}
 			else if (eventKey.Keycode == Key.Equal)
 			{
@@ -281,5 +309,31 @@ public partial class Game : Node3D
 		CurrentAttempt = new Attempt();
 
 		Node3D.GetTree().ChangeSceneToFile("res://scenes/main_menu.tscn");
+	}
+
+	private static string FormatTime(double seconds, bool padMinutes = false)
+	{
+		int minutes = (int)Math.Floor(seconds / 60);
+
+		seconds -= minutes * 60;
+		seconds = Math.Floor(seconds);
+
+		return $"{(seconds < 0 ? "-" : "")}{(padMinutes ? minutes.ToString().PadZeros(2) : minutes)}:{seconds.ToString().PadZeros(2)}";
+	}
+
+	private static AudioStream LoadAudioStream(byte[] buffer)
+	{
+		AudioStream stream;
+
+		if (Encoding.UTF8.GetString(buffer[0..4]) == "OggS")
+		{
+			stream = AudioStreamOggVorbis.LoadFromBuffer(buffer);
+		}
+		else
+		{
+			stream = new AudioStreamMP3(){Data = buffer};
+		}
+
+		return stream;
 	}
 }
