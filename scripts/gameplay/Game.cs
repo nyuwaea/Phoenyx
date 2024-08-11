@@ -103,13 +103,17 @@ public partial class Game : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		//DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+		DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		try
 		{
-			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Phoenix.Constants.UserFolder}/skins/{Phoenix.Settings.Skin}/cursor.png"));
-			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Phoenix.Constants.UserFolder}/skins/{Phoenix.Settings.Skin}/grid.png"));
+			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
+			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
+			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
+			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
+			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
 			//NotesMultimesh.Multimesh.Mesh = 
 			
 		} catch (Exception exception)
@@ -217,7 +221,7 @@ public partial class Game : Node3D
 		Hits.Text = $"{CurrentAttempt.Hits} / {sum}";
 		Accuracy.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
 		Combo.Text = CurrentAttempt.Combo.ToString();
-		Speed.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
+		Speed.Text = $"{(Math.Round(CurrentAttempt.Speed * 100) / 100).ToString().PadDecimals(2)}x";
 		Progress.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
 		Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(CurrentAttempt.Health * 10, 10);
 		ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(1000 * (float)(CurrentAttempt.Progress / MapLength), 10);
@@ -272,8 +276,6 @@ public partial class Game : Node3D
 			else if (eventKey.Keycode == Key.C)
 			{
 				Settings.CameraLock = !Settings.CameraLock;
-				Settings.ApproachRate *= Settings.CameraLock ? 2 : 0.5f;
-				Settings.ApproachDistance *= Settings.CameraLock ? 2 : 0.5f;
 			}
 			else if (eventKey.Keycode == Key.Equal)
 			{

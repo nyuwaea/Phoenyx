@@ -95,16 +95,14 @@ public class Util
 
         foreach (string skinFile in SkinFiles)
         {
-            Godot.FileAccess file = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
-            
             if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
             {
-                Godot.FileAccess newFile = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
-                newFile.StoreBuffer(file.GetBuffer((long)file.GetLength()));
-                newFile.Close();
+                Godot.FileAccess source = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
+                Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
+                target.StoreBuffer(source.GetBuffer((long)source.GetLength()));
+                target.Close();
+                source.Close();
             }
-
-            file.Close();
         }
 
         if (!File.Exists($"{Constants.UserFolder}/current_profile.txt"))
