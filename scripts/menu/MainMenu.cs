@@ -13,10 +13,11 @@ public partial class MainMenu : Control
 	public override void _Ready()
 	{
 		Control = this;
-		GD.Print("");
+
 		Phoenix.Util.Setup();
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
+		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Adaptive);
 
 		Button button = GetNode<Button>("Button");
 		FileDialog fileDialog = GetNode<FileDialog>("FileDialog");

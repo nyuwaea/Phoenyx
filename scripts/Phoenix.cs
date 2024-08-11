@@ -1,13 +1,14 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Xml;
 using Godot;
 using Godot.Collections;
 using Menu;
 
 namespace Phoenix;
 
-public class Constants
+public struct Constants
 {
     public static string RootFolder {get;} = Directory.GetCurrentDirectory();
     public static string UserFolder {get;} = OS.GetUserDataDir();
@@ -18,9 +19,14 @@ public class Constants
     public static float HitWindow {get;} = 55f;
 }
 
-public class Settings
+public struct Settings
 {
+    public static float MasterVolume {get; set;} = 0.5f;
+    public static float MusicVolume {get; set;} = 1;
+    public static float SFXVolume {get; set;} = 1;
     public static string Skin {get; set;} = "default";
+    public static bool CameraLock {get; set;} = true;
+    public static int FoV {get; set;} = 70;
     public static float Sensitivity {get; set;} = 0.66f;
     public static float Parallax {get; set;} = 0.1f;
     public static float ApproachRate {get; set;} = 35.0f;
@@ -31,13 +37,15 @@ public class Settings
     public static bool Pushback {get; set;} = true;
     public static float NoteSize {get; set;} = 0.875f;
     public static string[] Colors {get; set;} = {"#00ffed", "#ff8ff9"};
+
+    public Settings() {}
 }
 
 public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "note.obj"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "health_background.png", "progress.png", "progress_background.png", "note.obj", "hit.mp3"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -91,8 +99,12 @@ public class Util
             
             if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
             {
-                Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write).StoreBuffer(file.GetBuffer((long)file.GetLength()));
+                Godot.FileAccess newFile = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
+                newFile.StoreBuffer(file.GetBuffer((long)file.GetLength()));
+                newFile.Close();
             }
+
+            file.Close();
         }
 
         if (!File.Exists($"{Constants.UserFolder}/current_profile.txt"))
@@ -105,14 +117,26 @@ public class Util
             SaveSettings();
         }
 
-        LoadSettings(Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine());
+        try
+        {
+            LoadSettings(Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine());
+        }
+        catch
+        {
+            SaveSettings();
+        }
     }
 
     public static void SaveSettings(string profile = "default")
     {
         Dictionary data = new Dictionary(){
             ["_Version"] = 1,
+            ["MasterVolume"] = Settings.MasterVolume,
+            ["MusicVolume"] = Settings.MusicVolume,
+            ["SFXVolume"] = Settings.SFXVolume,
             ["Skin"] = Settings.Skin,
+            ["CameraLock"] = Settings.CameraLock,
+            ["FoV"] = Settings.FoV,
             ["Sensitivity"] = Settings.Sensitivity,
             ["Parallax"] = Settings.Parallax,
             ["ApproachRate"] = Settings.ApproachRate,
@@ -135,8 +159,13 @@ public class Util
             Dictionary data = (Dictionary)Json.ParseString(file.GetAsText());
 
             file.Close();
-
+            
+            Settings.MasterVolume = (float)data["MasterVolume"];            
+            Settings.MusicVolume = (float)data["MusicVolume"];
+            Settings.SFXVolume = (float)data["SFXVolume"];
             Settings.Skin = (string)data["Skin"];
+            Settings.CameraLock = (bool)data["CameraLock"];
+            Settings.FoV = (int)data["FoV"];
             Settings.Sensitivity = (float)data["Sensitivity"];
             Settings.Parallax = (float)data["Parallax"];
             Settings.ApproachRate = (float)data["ApproachRate"];
@@ -152,8 +181,8 @@ public class Util
         }
         catch (Exception exception)
         {
-            MainMenu.Notify("Could not load settings", 2);
-            throw Logger.Error($"Could not load settings; {exception.Message}");
+            MainMenu.Notify("Settings file corrupted", 2);
+            throw Logger.Error($"Settings file corrupted; {exception.Message}");
         }
     }
 

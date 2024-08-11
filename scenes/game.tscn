@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=25 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/gameplay/Game.cs" id="1_v5074"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -7,6 +7,10 @@
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="3_negii"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="4_rvp5o"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="5_pxgh4"]
+[ext_resource type="Texture2D" uid="uid://cxv6ey5xb6b0f" path="res://skin/health_background.png" id="6_bbly8"]
+[ext_resource type="Texture2D" uid="uid://4x2vfpyjkri6" path="res://skin/health.png" id="7_wjg6i"]
+[ext_resource type="Texture2D" uid="uid://dmc5f6ajp8xv1" path="res://skin/progress_background.png" id="8_eu3ux"]
+[ext_resource type="Texture2D" uid="uid://d3s17ehomjscd" path="res://skin/progress.png" id="9_nde5v"]
 
 [sub_resource type="Environment" id="Environment_rlgxn"]
 background_mode = 1
@@ -45,19 +49,35 @@ albedo_texture = ExtResource("3_negii")
 material = SubResource("StandardMaterial3D_lvhmj")
 size = Vector2(0.263, 0.263)
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_q2syx"]
+viewport_path = NodePath("Health/SubViewport")
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4p8vu"]
+resource_local_to_scene = true
+transparency = 1
 shading_mode = 0
-albedo_color = Color(0, 1, 0, 1)
+albedo_texture = SubResource("ViewportTexture_q2syx")
+texture_repeat = false
 
 [sub_resource type="QuadMesh" id="QuadMesh_b1hbo"]
-size = Vector2(10, 1)
+resource_local_to_scene = true
+material = SubResource("StandardMaterial3D_4p8vu")
+size = Vector2(10, 0.1)
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_gr73p"]
+[sub_resource type="ViewportTexture" id="ViewportTexture_n4au3"]
+viewport_path = NodePath("ProgressBar/SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p1h21"]
+resource_local_to_scene = true
+transparency = 1
 shading_mode = 0
-albedo_color = Color(1, 0, 0, 1)
+albedo_texture = SubResource("ViewportTexture_n4au3")
+texture_repeat = false
 
-[sub_resource type="QuadMesh" id="QuadMesh_mlcr0"]
-size = Vector2(10, 1)
+[sub_resource type="QuadMesh" id="QuadMesh_7mook"]
+resource_local_to_scene = true
+material = SubResource("StandardMaterial3D_p1h21")
+size = Vector2(10, 0.125)
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_v5074")
@@ -80,31 +100,78 @@ mesh = SubResource("QuadMesh_aih2q")
 mesh = SubResource("QuadMesh_xij4d")
 
 [node name="Health" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.0878992, 0.0235525, 0, -0.0235525, 0.0878992, 0, -6.2, -10)
-material_override = SubResource("StandardMaterial3D_4p8vu")
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -6.2, -10)
+cast_shadow = 0
 mesh = SubResource("QuadMesh_b1hbo")
 
-[node name="HealthBackground" type="MeshInstance3D" parent="Health"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0100136, -0.0499802)
-material_override = SubResource("StandardMaterial3D_gr73p")
-mesh = SubResource("QuadMesh_mlcr0")
-skeleton = NodePath("../..")
+[node name="SubViewport" type="SubViewport" parent="Health"]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(1000, 10)
+render_target_update_mode = 4
 
-[node name="SongTitle" type="Label3D" parent="."]
-transform = Transform3D(7, 0, 0, 0, 6.89365, -1.21554, 0, 1.21554, 6.89365, 0, 7, -10)
+[node name="Background" type="TextureRect" parent="Health/SubViewport"]
+offset_right = 1000.0
+offset_bottom = 10.0
+texture = ExtResource("6_bbly8")
+
+[node name="Main" type="TextureRect" parent="Health/SubViewport"]
+offset_right = 1000.0
+offset_bottom = 10.0
+texture = ExtResource("7_wjg6i")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="ProgressBar" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 6.3, -10)
+cast_shadow = 0
+mesh = SubResource("QuadMesh_7mook")
+
+[node name="SubViewport" type="SubViewport" parent="ProgressBar"]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(1000, 10)
+render_target_update_mode = 4
+
+[node name="Background" type="TextureRect" parent="ProgressBar/SubViewport"]
+offset_right = 1000.0
+offset_bottom = 10.0
+texture = ExtResource("8_eu3ux")
+
+[node name="Main" type="TextureRect" parent="ProgressBar/SubViewport"]
+offset_right = 1000.0
+offset_bottom = 10.0
+texture = ExtResource("9_nde5v")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="Progress" type="Label3D" parent="."]
+transform = Transform3D(3.5, 0, 0, 0, 3.38074, -0.905867, 0, 0.905867, 3.38074, 0, 7, -10)
 pixel_size = 0.0025
+modulate = Color(1, 1, 1, 0.25098)
+outline_modulate = Color(0, 0, 0, 0)
+text = "0:00 / 0:00"
+font = ExtResource("5_pxgh4")
+font_size = 64
+
+[node name="Title" type="Label3D" parent="."]
+transform = Transform3D(2, 0, 0, 0, 1.93185, -0.517638, 0, 0.517638, 1.93185, 0, 8.25, -10)
 outline_modulate = Color(0, 0, 0, 0)
 text = "N/A - N/A"
 font = ExtResource("5_pxgh4")
+font_size = 64
+autowrap_mode = 3
+width = 2500.0
 
 [node name="Combo" type="Label3D" parent="."]
 transform = Transform3D(7, 0, 0, 0, 6.89365, -1.21554, 0, 1.21554, 6.89365, 0, 3.5, -10)
 pixel_size = 0.0025
-modulate = Color(1, 1, 1, 0.12549)
-outline_modulate = Color(0, 0, 0, 0)
+modulate = Color(1, 1, 1, 0)
+outline_modulate = Color(1, 1, 1, 0.0941176)
 text = "0"
 font = ExtResource("5_pxgh4")
 font_size = 64
+outline_size = 4
 
 [node name="Speed" type="Label3D" parent="."]
 transform = Transform3D(7, 0, 0, 0, 6.76148, 1.81173, 0, -1.81173, 6.76148, 0, -7.5, -10)
@@ -115,18 +182,20 @@ text = "1.00x"
 font = ExtResource("5_pxgh4")
 
 [node name="Hits" type="Label3D" parent="."]
-transform = Transform3D(6.76148, 0, -1.81173, 0, 7, 0, 1.81173, 0, 6.76148, 7, 1, -9)
+transform = Transform3D(3.38074, 0, -0.905865, 0, 3.5, 0, 0.905865, 0, 3.38074, 7, 1, -9)
 pixel_size = 0.0025
 outline_modulate = Color(0, 0, 0, 0)
 text = "0 / 0"
 font = ExtResource("5_pxgh4")
+font_size = 64
 
 [node name="Accuracy" type="Label3D" parent="."]
-transform = Transform3D(6.76148, 0, -1.81173, 0, 7, 0, 1.81173, 0, 6.76148, 7, -1, -9)
+transform = Transform3D(3.38074, 0, -0.905865, 0, 3.5, 0, 0.905865, 0, 3.38074, 7, -1, -9)
 pixel_size = 0.0025
 outline_modulate = Color(0, 0, 0, 0)
 text = "100.00%"
 font = ExtResource("5_pxgh4")
+font_size = 64
 
 [node name="FPSCounter" type="Label" parent="."]
 anchors_preset = 2
@@ -138,5 +207,9 @@ grow_vertical = 0
 theme = ExtResource("4_rvp5o")
 text = "60 FPS"
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+[node name="SongPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -20.0
+
+[node name="HitSoundPlayer" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
+max_polyphony = 2048
