@@ -17,6 +17,7 @@ public struct Constants
     public static Vector2 Bounds {get;} = new Vector2(GridSize / 2 - CursorSize / 2, GridSize / 2 - CursorSize / 2);
     public static float HitBoxSize {get;} = 0.07f;
     public static float HitWindow {get;} = 55f;
+    public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
 }
 
 public struct Settings

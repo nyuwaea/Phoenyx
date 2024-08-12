@@ -47,8 +47,9 @@ public partial class Game : Node3D
 		public float Health = 100;
 		public float HealthStep = 15;
 		public Vector2 CursorPosition = Vector2.Zero;
+		public bool Skippable = false;
 
-		public Attempt(Map map, float speed, string[] mods)
+		public Attempt(Map map, float speed, string[] mods, bool replay = false)
 		{
 			Map = map;
 			Speed = speed;
@@ -103,7 +104,7 @@ public partial class Game : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+		//DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		try
@@ -142,17 +143,18 @@ public partial class Game : Node3D
 
 	public override void _Process(double delta)
 	{
-		double Delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
+		delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
 		LastFrame = Time.GetTicksUsec();
 		
-		FPSCounter.Text = $"{Mathf.Floor(1 / Delta)} FPS";
+		FPSCounter.Text = $"{Mathf.Floor(1 / delta)} FPS";
 
 		if (!Playing)
 		{
 			return;
 		}
 		
-		CurrentAttempt.Progress += Delta * 1000 * CurrentAttempt.Speed;
+		CurrentAttempt.Progress += delta * 1000 * CurrentAttempt.Speed;
+		CurrentAttempt.Skippable = false;
 
 		if (CurrentAttempt.Map.AudioBuffer != null && !Audio.Playing && CurrentAttempt.Progress >= 0)
 		{
@@ -163,6 +165,19 @@ public partial class Game : Node3D
 		{
 			Stop();
 			return;
+		}
+
+		int nextNoteMillisecond = CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length ? (int)(Audio.Stream.GetLength() * 1000) + Constants.BreakTime : CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond;
+		
+		if (nextNoteMillisecond - CurrentAttempt.Progress >= Constants.BreakTime * CurrentAttempt.Speed)
+		{
+			int lastNoteMillisecond = CurrentAttempt.PassedNotes > 0 ? CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes - 1].Millisecond : 0;
+			int skipWindow = nextNoteMillisecond - Constants.BreakTime - lastNoteMillisecond;
+			
+			if (skipWindow >= 1000) // only allow skipping if i'm gonna allow it for at least 1 second
+			{
+				CurrentAttempt.Skippable = true;
+			}
 		}
 
 		ToProcess = 0;
@@ -223,8 +238,9 @@ public partial class Game : Node3D
 		Combo.Text = CurrentAttempt.Combo.ToString();
 		Speed.Text = $"{(Math.Round(CurrentAttempt.Speed * 100) / 100).ToString().PadDecimals(2)}x";
 		Progress.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
-		Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(CurrentAttempt.Health * 10, 10);
-		ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(1000 * (float)(CurrentAttempt.Progress / MapLength), 10);
+		Progress.Modulate = Color.FromHtml("ffffff" + (CurrentAttempt.Skippable ? "ff" : "40"));
+		Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(CurrentAttempt.Health * 10.88f, 80);
+		ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
 
 		if (StopQueued)
 		{
@@ -261,31 +277,62 @@ public partial class Game : Node3D
 		}
 		else if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
-			if (eventKey.Keycode == Key.Escape)
+			switch (eventKey.Keycode)
 			{
-				Stop();
-			}
-			else if (eventKey.Keycode == Key.F)
-			{
-				Settings.FadeOut = !Settings.FadeOut;
-			}
-			else if (eventKey.Keycode == Key.P)
-			{
-				Settings.Pushback = !Settings.Pushback;
-			}
-			else if (eventKey.Keycode == Key.C)
-			{
-				Settings.CameraLock = !Settings.CameraLock;
-			}
-			else if (eventKey.Keycode == Key.Equal)
-			{
-				CurrentAttempt.Speed += 0.05f;
-				Audio.PitchScale = CurrentAttempt.Speed;
-			}
-			else if (eventKey.Keycode == Key.Minus)
-			{
-				CurrentAttempt.Speed = Math.Max(0.05f, CurrentAttempt.Speed - 0.05f);
-				Audio.PitchScale = CurrentAttempt.Speed;
+				case Key.Escape:
+				{
+					Stop();
+					break;
+				}
+				case Key.Space:
+				{
+					if (CurrentAttempt.Skippable)
+					{
+						if (CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length)
+						{
+							CurrentAttempt.Progress = Audio.Stream.GetLength() * 1000;
+						}
+						else
+						{
+							CurrentAttempt.Progress = CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond - Settings.ApproachTime * 1250 * CurrentAttempt.Speed; // turn AT to ms and multiply by 1.25x
+
+							if (!Audio.Playing)
+							{
+								Audio.Play();
+							}
+
+							Audio.Seek((float)CurrentAttempt.Progress / 1000);
+						}
+					}
+					break;
+				}
+				case Key.F:
+				{
+					Settings.FadeOut = !Settings.FadeOut;
+					break;
+				}
+				case Key.P:
+				{
+					Settings.Pushback = !Settings.Pushback;
+					break;
+				}
+				case Key.C:
+				{
+					Settings.CameraLock = !Settings.CameraLock;
+					break;
+				}
+				case Key.Equal:
+				{
+					CurrentAttempt.Speed += 0.05f;
+					Audio.PitchScale = CurrentAttempt.Speed;
+					break;
+				}
+				case Key.Minus:
+				{
+					CurrentAttempt.Speed = Math.Max(0.05f, CurrentAttempt.Speed - 0.05f);
+					Audio.PitchScale = CurrentAttempt.Speed;
+					break;
+				}
 			}
 		}
 	}
