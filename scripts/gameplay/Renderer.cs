@@ -20,11 +20,11 @@ public partial class Renderer : MultiMeshInstance3D
             Note note = Game.ProcessNotes[i];
 
             float depth = (note.Millisecond - (float)Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance / Game.CurrentAttempt.Speed;
-            float alpha = 1;
+            float alpha = Math.Clamp((1 - depth / Settings.ApproachDistance) / Settings.FadeIn, 0, 1);
             
             if (Settings.FadeOut)
             {
-                alpha -= Math.Clamp((Settings.ApproachDistance - depth) / (Settings.ApproachDistance + Constants.HitWindow * Settings.ApproachRate / 1000), 0, 1);
+                alpha -= (Settings.ApproachDistance - depth) / (Settings.ApproachDistance + Constants.HitWindow * Settings.ApproachRate / 1000);
             }
 
             if (!Settings.Pushback && note.Millisecond - Game.CurrentAttempt.Progress <= 0)
@@ -36,7 +36,7 @@ public partial class Renderer : MultiMeshInstance3D
 
             transform.Origin = new Vector3(note.X, note.Y, -depth);
             Multimesh.SetInstanceTransform(j, transform);
-            Multimesh.SetInstanceColor(j, Color.FromHtml(Settings.Colors[note.Index % Settings.Colors.Length] + ((int)(alpha * 255)).ToString("X2")));
+            Multimesh.SetInstanceColor(j, Color.FromHtml(Settings.Colors[note.Index % Settings.Colors.Length] + ((int)(Math.Clamp(alpha, 0, 1) * 255)).ToString("X2")));
         }
     }
 }

@@ -134,6 +134,8 @@ public partial class Game : Node3D
 			MapLength = CurrentAttempt.Map.Length + 1000;
 		}
 
+		MapLength += Constants.HitWindow;
+
 		FileAccess hitSoundFile = FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", FileAccess.ModeFlags.Read);
 
 		HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
@@ -319,6 +321,8 @@ public partial class Game : Node3D
 				case Key.C:
 				{
 					Settings.CameraLock = !Settings.CameraLock;
+					Settings.ApproachRate *= Settings.CameraLock ? 2.5f : 0.4f;
+					Settings.ApproachDistance *= Settings.CameraLock ? 2.5f : 0.4f;
 					break;
 				}
 				case Key.Equal:

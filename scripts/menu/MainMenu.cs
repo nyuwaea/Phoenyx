@@ -15,6 +15,9 @@ public partial class MainMenu : Control
 		Control = this;
 
 		Phoenix.Util.Setup();
+		Phoenix.Util.DiscordRPC.Call("Set", "app_id", 1272588732834254878);
+		Phoenix.Util.DiscordRPC.Call("Set", "large_image", "wizardry");
+
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Adaptive);

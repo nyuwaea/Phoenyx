@@ -1,7 +1,6 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Xml;
 using Godot;
 using Godot.Collections;
 using Menu;
@@ -59,6 +58,8 @@ public class Util
         ["layout_mode"] = true,
         ["global_position"] = true
     };
+
+    public static GodotObject DiscordRPC = (GodotObject)GD.Load<GDScript>("res://scripts/DiscordRPC.gd").New();
 
     public static void Setup()
     {
@@ -177,6 +178,7 @@ public class Util
             Settings.Colors = (string[])data["Colors"];
 
             MainMenu.Notify("Loaded settings successfully");
+            MainMenu.Notify($"Loaded skin [{Settings.Skin}]");
         }
         catch (Exception exception)
         {
