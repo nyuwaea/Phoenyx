@@ -1,9 +1,9 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Godot;
 using Godot.Collections;
-using Menu;
 
 namespace Phoenix;
 
@@ -94,16 +94,36 @@ public class Util
         {
             Directory.CreateDirectory($"{Constants.UserFolder}/skins/default");
         }
-
+        
         foreach (string skinFile in SkinFiles)
         {
             if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
             {
-                Godot.FileAccess source = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
+                var source = ResourceLoader.Load($"res://skin/{skinFile}");
+                byte[] buffer = System.Array.Empty<byte>();
                 Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
-                target.StoreBuffer(source.GetBuffer((long)source.GetLength()));
+                
+                switch (source.GetType().Name)
+                {
+                    case "CompressedTexture2D":
+                    {
+                        buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
+                        break;
+                    }
+                    case "AudioStreamMP3":
+                    {
+                        buffer = (source as AudioStreamMP3).Data;
+                        break;
+                    }
+                    case "ArrayMesh":
+                    {
+                        //buffer = (source as ArrayMesh).
+                        break;
+                    }
+                }
+
+                target.StoreBuffer(buffer);
                 target.Close();
-                source.Close();
             }
         }
 
