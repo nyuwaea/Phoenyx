@@ -158,18 +158,22 @@ public partial class Game : Node3D
 		CurrentAttempt.Progress += delta * 1000 * CurrentAttempt.Speed;
 		CurrentAttempt.Skippable = false;
 
-		if (CurrentAttempt.Map.AudioBuffer != null && !Audio.Playing && CurrentAttempt.Progress >= 0)
+		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
-			Audio.Play();
+			if (CurrentAttempt.Progress >= MapLength - Constants.HitWindow)
+			{
+				if (Audio.Playing)
+				{
+					Audio.Stop();
+				}
+			}
+			else if (!Audio.Playing && CurrentAttempt.Progress >= 0)
+			{
+				Audio.Play();
+			}
 		}
 		
-		if (CurrentAttempt.Progress >= MapLength)
-		{
-			Stop();
-			return;
-		}
-
-		int nextNoteMillisecond = CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length ? (int)(Audio.Stream.GetLength() * 1000) + Constants.BreakTime : CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond;
+		int nextNoteMillisecond = CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length ? (int)MapLength + Constants.BreakTime : CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond;
 		
 		if (nextNoteMillisecond - CurrentAttempt.Progress >= Constants.BreakTime * CurrentAttempt.Speed)
 		{
@@ -232,6 +236,12 @@ public partial class Game : Node3D
 				CurrentAttempt.Hit(note.Index);
 				HitSound.Play();
 			}
+		}
+
+		if (CurrentAttempt.Progress >= MapLength)
+		{
+			Stop();
+			return;
 		}
 
 		int sum = CurrentAttempt.Hits + CurrentAttempt.Misses;
