@@ -214,3 +214,17 @@ volume_db = -20.0
 [node name="HitSoundPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -8.0
 max_polyphony = 1024
+
+[node name="NotificationHolder" type="VBoxContainer" parent="."]
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -210.0
+offset_top = -110.0
+offset_right = -10.0
+offset_bottom = -10.0
+grow_horizontal = 0
+grow_vertical = 0
+alignment = 2

@@ -1,11 +1,10 @@
-[gd_scene load_steps=10 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=8 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
 [ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="3_cp44m"]
 [ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="4_iqqm8"]
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
-[ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="5_482id"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -14,10 +13,6 @@ subpixel_positioning = 0
 [sub_resource type="Theme" id="Theme_nlclj"]
 resource_name = "Phoenix"
 default_font = SubResource("SystemFont_lsskb")
-
-[sub_resource type="LabelSettings" id="LabelSettings_ceujo"]
-font = ExtResource("5_482id")
-font_size = 14
 
 [node name="Control" type="Control"]
 layout_mode = 3
@@ -69,41 +64,19 @@ theme_override_styles/hover = ExtResource("4_xf0oq")
 theme_override_styles/pressed = ExtResource("4_iqqm8")
 text = "Browse Map"
 
-[node name="NotificationTemplate" type="ColorRect" parent="."]
-visible = false
-z_index = 10
+[node name="NotificationHolder" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = -204.0
-offset_top = -29.0
-offset_right = -4.0
-offset_bottom = -4.0
+offset_left = -210.0
+offset_top = -110.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 0
 grow_vertical = 0
-theme = ExtResource("2_46xtp")
-color = Color(0, 0, 0, 0.498039)
-
-[node name="Severity" type="ColorRect" parent="NotificationTemplate"]
-layout_mode = 1
-anchors_preset = 9
-anchor_bottom = 1.0
-offset_right = 2.0
-grow_vertical = 2
-color = Color(0, 1, 0, 1)
-
-[node name="Label" type="Label" parent="NotificationTemplate"]
-layout_mode = 0
-offset_left = 5.0
-offset_right = 200.0
-offset_bottom = 25.0
-theme = ExtResource("2_46xtp")
-text = "Map file corrupted aaaaa"
-label_settings = SubResource("LabelSettings_ceujo")
-vertical_alignment = 1
-clip_text = true
+alignment = 2
 
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]

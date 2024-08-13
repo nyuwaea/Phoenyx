@@ -31,7 +31,7 @@ public partial class Renderer : MultiMeshInstance3D
             {
                 alpha = 0;
             }
-
+            
             int j = Game.ToProcess - i - 1;
 
             transform.Origin = new Vector3(note.X, note.Y, -depth);

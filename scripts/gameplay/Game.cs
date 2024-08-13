@@ -119,7 +119,7 @@ public partial class Game : Node3D
 			
 		} catch (Exception exception)
 		{
-			MainMenu.Notify("Could not load skin", 2);
+			ToastNotification.Notify("Could not load skin", 2);
 			throw Logger.Error($"Could not load skin; {exception.Message}");
 		}
 
@@ -185,7 +185,8 @@ public partial class Game : Node3D
 		ToProcess = 0;
 		ProcessNotes = new List<Note>();
 
-		for (int i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)	// note process check
+		// note process check
+		for (int i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)
 		{
 			Note note = CurrentAttempt.Map.Notes[i];
 
@@ -216,7 +217,8 @@ public partial class Game : Node3D
 			ProcessNotes.Add(note);
 		}
 
-		for (int i = 0; i < ToProcess; i++)	// hitreg check
+		// hitreg check
+		for (int i = 0; i < ToProcess; i++)
 		{
 			Note note = ProcessNotes[i];
 
@@ -359,7 +361,7 @@ public partial class Game : Node3D
 		ProcessNotes = null;
 		CurrentAttempt = new Attempt();
 
-		Node3D.GetTree().ChangeSceneToFile("res://scenes/main_menu.tscn");
+		SceneManager.Load(Node3D.GetTree(), "res://scenes/main_menu.tscn");
 	}
 
 	private static string FormatTime(double seconds, bool padMinutes = false)

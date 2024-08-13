@@ -177,12 +177,12 @@ public class Util
             Settings.NoteSize = (float)data["NoteSize"];
             Settings.Colors = (string[])data["Colors"];
 
-            MainMenu.Notify("Loaded settings successfully");
-            MainMenu.Notify($"Loaded skin [{Settings.Skin}]");
+            ToastNotification.Notify("Loaded settings successfully");
+            ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
         }
         catch (Exception exception)
         {
-            MainMenu.Notify("Settings file corrupted", 2);
+            ToastNotification.Notify("Settings file corrupted", 2);
             throw Logger.Error($"Settings file corrupted; {exception.Message}");
         }
     }

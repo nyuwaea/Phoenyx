@@ -1,0 +1,45 @@
+[gd_scene load_steps=4 format=3 uid="uid://c14sd5pdkof4x"]
+
+[ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="1_3cmdo"]
+[ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="2_bcotu"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_jovrf"]
+font = ExtResource("2_bcotu")
+font_size = 14
+
+[node name="NotificationTemplate" type="ColorRect"]
+visible = false
+z_index = 10
+custom_minimum_size = Vector2(200, 25)
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -204.0
+offset_top = -29.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 0
+grow_vertical = 0
+theme = ExtResource("1_3cmdo")
+color = Color(0, 0, 0, 0.498039)
+
+[node name="Severity" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 2.0
+grow_vertical = 2
+color = Color(0, 1, 0, 1)
+
+[node name="Label" type="Label" parent="."]
+layout_mode = 0
+offset_left = 5.0
+offset_right = 200.0
+offset_bottom = 25.0
+theme = ExtResource("1_3cmdo")
+text = "Map file corrupted aaaaa"
+label_settings = SubResource("LabelSettings_jovrf")
+vertical_alignment = 1
+clip_text = true
