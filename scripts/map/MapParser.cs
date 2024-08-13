@@ -18,7 +18,7 @@ public partial class MapParser : Node
 	{
 		if (!File.Exists(path))
 		{
-			MainMenu.Notify("Invalid file path", 2);
+			ToastNotification.Notify("Invalid file path", 2);
 			throw Logger.Error("Invalid file path");
 		}
 
@@ -36,7 +36,7 @@ public partial class MapParser : Node
 				map = SSPMV2(new FileParser(path));
 				break;
 			default:
-				MainMenu.Notify("File extension not supported", 2);
+				ToastNotification.Notify("File extension not supported", 2);
 				throw Logger.Error("File extension not supported");
 		}
 
@@ -71,7 +71,7 @@ public partial class MapParser : Node
 		}
 		catch (Exception exception)
 		{
-			MainMenu.Notify($"SSMapV1 file corrupted", 2);
+			ToastNotification.Notify($"SSMapV1 file corrupted", 2);
 			throw Logger.Error($"SSMapV1 file corrupted; {exception.Message}");
 		}
 
@@ -211,7 +211,7 @@ public partial class MapParser : Node
 		}
 		catch (Exception exception)
 		{
-			MainMenu.Notify($"SSPMV2 file corrupted", 2);
+			ToastNotification.Notify($"SSPMV2 file corrupted", 2);
 			throw Logger.Error($"SSPMV2 file corrupted; {exception.Message}");
 		}
 

@@ -12,9 +12,9 @@ public struct Map
     public string DifficultyName = "N/A";
     public int Difficulty = 0;
     public int Length = 0;
-    public byte[] AudioBuffer = new byte[0];
-    public byte[] CoverBuffer = new byte[0];
-    public Note[] Notes = new Note[0];
+    public byte[] AudioBuffer = Array.Empty<byte>();
+    public byte[] CoverBuffer = Array.Empty<byte>();
+    public Note[] Notes = Array.Empty<Note>();
 
     public Map(Note[] data = null, string id = "0", string artist = "N/A", string title = "N/A", string[] mappers = null, int difficulty = 0, int length = 0, byte[] audioBuffer = null, byte[] coverBuffer = null)
     {
@@ -28,7 +28,7 @@ public struct Map
         Length = length;
         AudioBuffer = audioBuffer;
         CoverBuffer = coverBuffer;
-        Notes = data == null ? new Note[0] : data;
+        Notes = data ?? Array.Empty<Note>();
 
         foreach (string mapper in Mappers)
         {
@@ -38,8 +38,5 @@ public struct Map
         PrettyMappers = PrettyMappers.Substr(0, PrettyMappers.Length - 2);
     }
 
-    public override string ToString()
-    {
-        return $"{PrettyTitle} by {PrettyMappers}";
-    }
+    public readonly override string ToString() => $"{PrettyTitle} by {PrettyMappers}";
 }

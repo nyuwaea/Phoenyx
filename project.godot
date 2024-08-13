@@ -19,6 +19,10 @@ boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
 config/icon="res://icon.svg"
 
+[autoload]
+
+DiscordRPCLoader="*res://addons/discord-rpc-gd/nodes/discord_autoload.gd"
+
 [debug]
 
 file_logging/enable_file_logging=true
@@ -27,6 +31,10 @@ file_logging/enable_file_logging=true
 
 project/assembly_name="Phoenix"
 
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/discord-rpc-gd/plugin.cfg")
+
 [physics]
 
 common/physics_ticks_per_second=120
@@ -34,4 +42,5 @@ common/physics_ticks_per_second=120
 [rendering]
 
 anti_aliasing/quality/msaa_2d=1
-anti_aliasing/quality/msaa_3d=2
+anti_aliasing/quality/msaa_3d=3
+anti_aliasing/quality/use_taa=true

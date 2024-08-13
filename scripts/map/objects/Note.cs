@@ -17,8 +17,5 @@ public struct Note : IMapObject
         Hit = false;
     }
 
-    public override string ToString()
-    {
-        return $"({X}, {Y}) @{Millisecond}ms";
-    }
+    public readonly override string ToString() => $"({X}, {Y}) @{Millisecond}ms";
 }
