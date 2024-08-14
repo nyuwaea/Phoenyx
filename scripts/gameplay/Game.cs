@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Godot;
-using Menu;
-using Phoenix;
+using Phoenyx;
 
-public partial class Game : Node3D
+namespace Game;
+
+public partial class Runner : Node3D
 {
 	public static Node3D Node3D;
 

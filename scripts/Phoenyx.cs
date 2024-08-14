@@ -1,11 +1,10 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Text.RegularExpressions;
 using Godot;
 using Godot.Collections;
 
-namespace Phoenix;
+namespace Phoenyx;
 
 public struct Constants
 {
