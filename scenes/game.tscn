@@ -209,7 +209,7 @@ theme = ExtResource("4_rvp5o")
 text = "60 FPS"
 
 [node name="SongPlayer" type="AudioStreamPlayer" parent="."]
-volume_db = -20.0
+volume_db = -25.0
 
 [node name="HitSoundPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -8.0

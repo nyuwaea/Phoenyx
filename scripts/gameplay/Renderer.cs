@@ -1,6 +1,6 @@
 using System;
 using Godot;
-using Phoenix;
+using Phoenyx;
 
 public partial class Renderer : MultiMeshInstance3D
 {

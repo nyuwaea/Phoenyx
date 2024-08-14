@@ -10,10 +10,10 @@ config_version=5
 
 [application]
 
-config/name="Phoenix"
+config/name="Phoenyx"
 run/main_scene="res://scenes/main_menu.tscn"
 config/use_custom_user_dir=true
-config/custom_user_dir_name="Phoenix"
+config/custom_user_dir_name="Phoenyx"
 config/features=PackedStringArray("4.2", "C#", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
@@ -29,7 +29,7 @@ file_logging/enable_file_logging=true
 
 [dotnet]
 
-project/assembly_name="Phoenix"
+project/assembly_name="Phoenyx"
 
 [editor_plugins]
 

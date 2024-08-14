@@ -3,27 +3,26 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Godot;
-using Menu;
-using Phoenix;
+using Phoenyx;
 
 public partial class Game : Node3D
 {
 	public static Node3D Node3D;
 
-	Label FPSCounter;
-	Camera3D Camera;
-	Label3D Title;
-	Label3D Hits;
-	Label3D Accuracy;
-	Label3D Combo;
-	Label3D Speed;
-	Label3D Progress;
-	MeshInstance3D Cursor;
-	MeshInstance3D Grid;
-	MeshInstance3D Health;
-	MeshInstance3D ProgressBar;
-	AudioStreamPlayer Audio;
-	AudioStreamPlayer HitSound;
+	private static Label FPSCounter;
+	private static Camera3D Camera;
+	private static Label3D Title;
+	private static Label3D Hits;
+	private static Label3D Accuracy;
+	private static Label3D Combo;
+	private static Label3D Speed;
+	private static Label3D Progress;
+	private static MeshInstance3D Cursor;
+	private static MeshInstance3D Grid;
+	private static MeshInstance3D Health;
+	private static MeshInstance3D ProgressBar;
+	private static AudioStreamPlayer Audio;
+	private static AudioStreamPlayer HitSound;
 	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
 	public static bool StopQueued = false;
 
@@ -137,10 +136,10 @@ public partial class Game : Node3D
 		MapLength += Constants.HitWindow;
 
 		FileAccess hitSoundFile = FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", FileAccess.ModeFlags.Read);
-
 		HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
-
 		hitSoundFile.Close();
+
+		UpdateVolume();
 	}
 
 	public override void _Process(double delta)
@@ -300,24 +299,7 @@ public partial class Game : Node3D
 				}
 				case Key.Space:
 				{
-					if (CurrentAttempt.Skippable)
-					{
-						if (CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length)
-						{
-							CurrentAttempt.Progress = Audio.Stream.GetLength() * 1000;
-						}
-						else
-						{
-							CurrentAttempt.Progress = CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond - Settings.ApproachTime * 1250 * CurrentAttempt.Speed; // turn AT to ms and multiply by 1.25x
-
-							if (!Audio.Playing)
-							{
-								Audio.Play();
-							}
-
-							Audio.Seek((float)CurrentAttempt.Progress / 1000);
-						}
-					}
+					Skip();
 					break;
 				}
 				case Key.F:
@@ -353,11 +335,59 @@ public partial class Game : Node3D
 		}
 	}
 
+	public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.Pressed)
+		{
+			if (eventMouseButton.CtrlPressed)
+			{
+				switch (eventMouseButton.ButtonIndex)
+				{
+					case MouseButton.WheelUp:
+					{
+						Settings.VolumeMaster = Math.Min(1, Settings.VolumeMaster + 0.025f);
+						break;
+					}
+					case MouseButton.WheelDown:
+					{
+						Settings.VolumeMaster = Math.Max(0, Settings.VolumeMaster - 0.025f);
+						break;
+					}
+				}
+
+				GD.Print(Settings.VolumeMaster);
+				UpdateVolume();
+			}
+		}
+    }
+
 	public static void Play(Map map, float speed = 1, string[] mods = null)
 	{
 		CurrentAttempt = new Attempt(map, speed, mods);
 		Playing = true;
 		ProcessNotes = null;
+	}
+
+	public static void Skip()
+	{
+		if (CurrentAttempt.Skippable)
+		{
+			if (CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length)
+			{
+				CurrentAttempt.Progress = Audio.Stream.GetLength() * 1000;
+			}
+			else
+			{
+				CurrentAttempt.Progress = CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond - Settings.ApproachTime * 1250 * CurrentAttempt.Speed; // turn AT to ms and multiply by 1.25x
+		
+				if (!Audio.Playing)
+				{
+					Audio.Play();
+				}
+				
+				Audio.Seek((float)CurrentAttempt.Progress / 1000);
+			}
+		}
 	}
 
 	public static void QueueStop()
@@ -372,6 +402,12 @@ public partial class Game : Node3D
 		CurrentAttempt = new Attempt();
 
 		SceneManager.Load(Node3D.GetTree(), "res://scenes/main_menu.tscn");
+	}
+
+	private static void UpdateVolume()
+	{
+		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
+		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
 	}
 
 	private static string FormatTime(double seconds, bool padMinutes = false)
