@@ -30,10 +30,10 @@ public partial class MainMenu : Control
 		button.Pressed += () => fileDialog.Visible = true;
 		fileDialog.FileSelected += (string path) => {
 			SceneManager.Load(GetTree(), "res://scenes/game.tscn");
-			Game.Runner.Play(MapParser.Parse(path), 1, new string[]{"NoFail"});
+			Game.Play(MapParser.Parse(path), 1, new string[]{"NoFail"});
 		};
 	}
-
+	
     public override void _Input(InputEvent @event)
     {
         if (@event is InputEventKey eventKey && eventKey.Pressed)
@@ -43,13 +43,9 @@ public partial class MainMenu : Control
 				Quit();
 			}
 		}
-		else if (@event is InputEventMouseButton eventMouseButton)
-		{
-			//GD.Print(eventMouseButton.ButtonIndex);
-		}
     }
 
-	public static void Quit()
+    public static void Quit()
 	{
 		Util.SaveSettings();
 		Control.GetTree().Quit();

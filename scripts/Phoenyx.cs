@@ -20,9 +20,9 @@ public struct Constants
 
 public struct Settings
 {
-    public static float MasterVolume {get; set;} = 0.5f;
-    public static float MusicVolume {get; set;} = 1;
-    public static float SFXVolume {get; set;} = 1;
+    public static float VolumeMaster {get; set;} = 1;
+    public static float VolumeMusic {get; set;} = 0.5f;
+    public static float VolumeSFX {get; set;} = 0.5f;
     public static string Skin {get; set;} = "default";
     public static bool CameraLock {get; set;} = true;
     public static int FoV {get; set;} = 70;
@@ -36,7 +36,7 @@ public struct Settings
     public static bool Pushback {get; set;} = true;
     public static float NoteSize {get; set;} = 0.875f;
     public static string[] Colors {get; set;} = {"#00ffed", "#ff8ff9"};
-
+    
     public Settings() {}
 }
 
@@ -150,9 +150,9 @@ public class Util
     {
         Dictionary data = new Dictionary(){
             ["_Version"] = 1,
-            ["MasterVolume"] = Settings.MasterVolume,
-            ["MusicVolume"] = Settings.MusicVolume,
-            ["SFXVolume"] = Settings.SFXVolume,
+            ["VolumeMaster"] = Settings.VolumeMaster,
+            ["VolumeMusic"] = Settings.VolumeMusic,
+            ["VolumeSFX"] = Settings.VolumeSFX,
             ["Skin"] = Settings.Skin,
             ["CameraLock"] = Settings.CameraLock,
             ["FoV"] = Settings.FoV,
@@ -179,9 +179,9 @@ public class Util
 
             file.Close();
             
-            Settings.MasterVolume = (float)data["MasterVolume"];            
-            Settings.MusicVolume = (float)data["MusicVolume"];
-            Settings.SFXVolume = (float)data["SFXVolume"];
+            Settings.VolumeMaster = (float)data["VolumeMaster"];            
+            Settings.VolumeMusic = (float)data["VolumeMusic"];
+            Settings.VolumeSFX = (float)data["VolumeSFX"];
             Settings.Skin = (string)data["Skin"];
             Settings.CameraLock = (bool)data["CameraLock"];
             Settings.FoV = (int)data["FoV"];
