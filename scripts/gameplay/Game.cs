@@ -7,7 +7,8 @@ using Phoenyx;
 
 public partial class Game : Node3D
 {
-	public static Node3D Node3D;
+	private static Node3D Node3D;
+	private static readonly PackedScene PlayerScore = GD.Load<PackedScene>("res://prefabs/player_score.tscn");
 
 	private static Label FPSCounter;
 	private static Camera3D Camera;
@@ -21,6 +22,7 @@ public partial class Game : Node3D
 	private static MeshInstance3D Grid;
 	private static MeshInstance3D Health;
 	private static MeshInstance3D ProgressBar;
+	private static MeshInstance3D Leaderboard;
 	private static AudioStreamPlayer Audio;
 	private static AudioStreamPlayer HitSound;
 	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
@@ -38,6 +40,7 @@ public partial class Game : Node3D
 		public Map Map = new Map();
 		public float Speed = 1;
 		public string[] Mods = Array.Empty<string>();
+		public string[] Players = Array.Empty<string>();
 		public int Hits = 0;
 		public int Misses = 0;
 		public int Combo = 0;
@@ -48,11 +51,12 @@ public partial class Game : Node3D
 		public Vector2 CursorPosition = Vector2.Zero;
 		public bool Skippable = false;
 
-		public Attempt(Map map, float speed, string[] mods, bool replay = false)
+		public Attempt(Map map, float speed, string[] mods, string[] players = null, bool replay = false)
 		{
 			Map = map;
 			Speed = speed;
 			Mods = mods;
+			Players = players ?? Array.Empty<string>();
 			Progress = -1000;
 		}
 
@@ -63,6 +67,8 @@ public partial class Game : Node3D
 			HealthStep = Math.Max(HealthStep / 1.45f, 15);
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
+
+
 		}
 
 		public void Miss(int index)
@@ -95,6 +101,7 @@ public partial class Game : Node3D
 		Grid = GetNode<MeshInstance3D>("Grid");
 		Health = GetNode<MeshInstance3D>("Health");
 		ProgressBar = GetNode<MeshInstance3D>("ProgressBar");
+		Leaderboard = GetNode<MeshInstance3D>("Leaderboard");
 		Audio = Node3D.GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = Node3D.GetNode<AudioStreamPlayer>("HitSoundPlayer");
 
@@ -116,10 +123,19 @@ public partial class Game : Node3D
 			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
 			//NotesMultimesh.Multimesh.Mesh = 
 			
-		} catch (Exception exception)
+		}
+		catch (Exception exception)
 		{
 			ToastNotification.Notify("Could not load skin", 2);
 			throw Logger.Error($"Could not load skin; {exception.Message}");
+		}
+
+		foreach (string player in CurrentAttempt.Players)
+		{
+			ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
+			playerScore.GetNode<Label>("Name").Text = player;
+			playerScore.Name = player;
+			Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
 		}
 
 		if (CurrentAttempt.Map.AudioBuffer != null)
@@ -355,15 +371,14 @@ public partial class Game : Node3D
 					}
 				}
 
-				GD.Print(Settings.VolumeMaster);
 				UpdateVolume();
 			}
 		}
     }
 
-	public static void Play(Map map, float speed = 1, string[] mods = null)
+	public static void Play(Map map, float speed = 1, string[] mods = null, string[] players = null)
 	{
-		CurrentAttempt = new Attempt(map, speed, mods);
+		CurrentAttempt = new Attempt(map, speed, mods, players);
 		Playing = true;
 		ProcessNotes = null;
 	}
@@ -388,6 +403,11 @@ public partial class Game : Node3D
 				Audio.Seek((float)CurrentAttempt.Progress / 1000);
 			}
 		}
+	}
+
+	public static void SetPlayerScore(string player, int score)
+	{
+		Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode(player).GetNode<Label>("Score").Text = score.ToString();
 	}
 
 	public static void QueueStop()

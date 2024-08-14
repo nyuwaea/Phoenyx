@@ -1,0 +1,13 @@
+[gd_scene load_steps=2 format=3 uid="uid://0tpyo1pmbbw"]
+
+[ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="1_mtqbs"]
+
+[node name="ChatMessage" type="Label"]
+custom_minimum_size = Vector2(440.8, 20)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_mtqbs")
+text = "[Player] hi"

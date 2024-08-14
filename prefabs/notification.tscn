@@ -10,7 +10,7 @@ font_size = 14
 [node name="NotificationTemplate" type="ColorRect"]
 visible = false
 z_index = 10
-custom_minimum_size = Vector2(200, 25)
+custom_minimum_size = Vector2(270, 25)
 anchors_preset = 3
 anchor_left = 1.0
 anchor_top = 1.0
@@ -18,7 +18,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -204.0
 offset_top = -29.0
-offset_right = -4.0
+offset_right = 66.0
 offset_bottom = -4.0
 grow_horizontal = 0
 grow_vertical = 0
@@ -36,7 +36,7 @@ color = Color(0, 1, 0, 1)
 [node name="Label" type="Label" parent="."]
 layout_mode = 0
 offset_left = 5.0
-offset_right = 200.0
+offset_right = 270.0
 offset_bottom = 25.0
 theme = ExtResource("1_3cmdo")
 text = "Map file corrupted aaaaa"
