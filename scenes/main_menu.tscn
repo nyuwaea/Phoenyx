@@ -23,16 +23,6 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_wfqfe")
 
-[node name="FileDialog" type="FileDialog" parent="."]
-title = "Open a File"
-initial_position = 2
-size = Vector2i(454, 159)
-theme = SubResource("Theme_nlclj")
-ok_button_text = "Open"
-file_mode = 0
-access = 2
-use_native_dialog = true
-
 [node name="Background" type="ColorRect" parent="."]
 z_index = -10
 layout_mode = 1
@@ -43,7 +33,7 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
-[node name="Button" type="Button" parent="."]
+[node name="Browse" type="Button" parent="."]
 layout_mode = 1
 anchors_preset = 8
 anchor_left = 0.5
@@ -59,10 +49,100 @@ grow_vertical = 2
 focus_mode = 0
 theme = ExtResource("2_46xtp")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Browse Map"
+
+[node name="Multiplayer" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_top = 0.6
+anchor_right = 0.7
+anchor_bottom = 0.9
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Host" type="Button" parent="Multiplayer"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -160.0
+offset_top = 10.0
+offset_right = -90.0
+offset_bottom = 41.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_styles/normal = ExtResource("3_cp44m")
 theme_override_styles/hover = ExtResource("4_xf0oq")
 theme_override_styles/pressed = ExtResource("4_iqqm8")
-text = "Browse Map"
+text = "Host"
+
+[node name="Join" type="Button" parent="Multiplayer"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -80.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = 41.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/normal = ExtResource("3_cp44m")
+theme_override_styles/hover = ExtResource("4_xf0oq")
+theme_override_styles/pressed = ExtResource("4_iqqm8")
+text = "Join"
+
+[node name="Port" type="LineEdit" parent="Multiplayer"]
+layout_mode = 0
+offset_left = 155.0
+offset_top = 10.0
+offset_right = 290.0
+offset_bottom = 41.0
+tooltip_text = "Don't forget to port forward!"
+theme = ExtResource("2_46xtp")
+placeholder_text = "44220"
+
+[node name="IP" type="LineEdit" parent="Multiplayer"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 145.0
+offset_bottom = 41.0
+tooltip_text = "Set this to your local IPv4 (192.168.X.XXX) "
+theme = ExtResource("2_46xtp")
+placeholder_text = "127.0.0.1"
+
+[node name="ChatInput" type="LineEdit" parent="Multiplayer"]
+layout_mode = 0
+offset_left = 10.0
+offset_top = 152.4
+offset_right = 450.8
+offset_bottom = 183.4
+tooltip_text = "Chat"
+theme = ExtResource("2_46xtp")
+
+[node name="Chat" type="ScrollContainer" parent="Multiplayer"]
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = -143.4
+offset_right = -9.99997
+offset_bottom = -43.4
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="Holder" type="VBoxContainer" parent="Multiplayer/Chat"]
+custom_minimum_size = Vector2(440.8, 100)
+layout_mode = 2
+size_flags_horizontal = 4
 
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -78,5 +158,15 @@ offset_bottom = -10.0
 grow_horizontal = 0
 grow_vertical = 0
 alignment = 2
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Open a File"
+initial_position = 2
+size = Vector2i(454, 159)
+theme = SubResource("Theme_nlclj")
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+use_native_dialog = true
 
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]

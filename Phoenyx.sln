@@ -1,6 +1,6 @@
 ﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenix", "Phoenix.csproj", "{CD1E1126-B6A6-4FE4-BEA8-AF0C0A8E1B34}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Phoenyx", "Phoenyx.csproj", "{CD1E1126-B6A6-4FE4-BEA8-AF0C0A8E1B34}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

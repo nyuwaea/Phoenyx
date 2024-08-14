@@ -1,6 +1,16 @@
-[gd_resource type="Theme" load_steps=2 format=3 uid="uid://dhuhu3mmaew1a"]
+[gd_resource type="Theme" load_steps=7 format=3 uid="uid://dhuhu3mmaew1a"]
 
-[ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="1_3tolf"]
+[ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="1_u4ll2"]
+[ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="2_3vn8k"]
+[ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="3_efm32"]
+[ext_resource type="StyleBox" uid="uid://bfimbyi3x5h0n" path="res://theme/line_edit_stylebox_normal.tres" id="4_8uol7"]
+[ext_resource type="StyleBox" uid="uid://dl8f08rate1f5" path="res://theme/line_edit_stylebox_focus.tres" id="4_nc0pl"]
+[ext_resource type="FontFile" uid="uid://dvb6fvy008bhv" path="res://fonts/Roboto-Medium.ttf" id="6_wt65s"]
 
 [resource]
-default_font = ExtResource("1_3tolf")
+default_font = ExtResource("6_wt65s")
+Button/styles/hover = ExtResource("1_u4ll2")
+Button/styles/normal = ExtResource("2_3vn8k")
+Button/styles/pressed = ExtResource("3_efm32")
+LineEdit/styles/focus = ExtResource("4_nc0pl")
+LineEdit/styles/normal = ExtResource("4_8uol7")
