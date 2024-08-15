@@ -68,7 +68,10 @@ public partial class Game : Node3D
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
 
-
+			if (Lobby.PlayerCount > 1)
+			{
+				ServerManager.Node.Rpc("ValidateScore", Hits);
+			}
 		}
 
 		public void Miss(int index)
@@ -105,12 +108,19 @@ public partial class Game : Node3D
 		Audio = Node3D.GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = Node3D.GetNode<AudioStreamPlayer>("HitSoundPlayer");
 
+		foreach (KeyValuePair<string, Player> entry in Lobby.Players)
+		{
+			ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
+			playerScore.GetNode<Label>("Name").Text = entry.Key;
+			playerScore.Name = entry.Key;
+			Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
+		}
+
 		Camera.Fov = Settings.FoV;
 		Title.Text = CurrentAttempt.Map.PrettyTitle;
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		//DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		try
@@ -128,14 +138,6 @@ public partial class Game : Node3D
 		{
 			ToastNotification.Notify("Could not load skin", 2);
 			throw Logger.Error($"Could not load skin; {exception.Message}");
-		}
-
-		foreach (string player in CurrentAttempt.Players)
-		{
-			ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
-			playerScore.GetNode<Label>("Name").Text = player;
-			playerScore.Name = player;
-			Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
 		}
 
 		if (CurrentAttempt.Map.AudioBuffer != null)
@@ -315,6 +317,11 @@ public partial class Game : Node3D
 				}
 				case Key.Space:
 				{
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+					
 					Skip();
 					break;
 				}
@@ -330,6 +337,11 @@ public partial class Game : Node3D
 				}
 				case Key.C:
 				{
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+
 					Settings.CameraLock = !Settings.CameraLock;
 					Settings.ApproachRate *= Settings.CameraLock ? 2.5f : 0.4f;
 					Settings.ApproachDistance *= Settings.CameraLock ? 2.5f : 0.4f;
@@ -337,12 +349,22 @@ public partial class Game : Node3D
 				}
 				case Key.Equal:
 				{
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+					
 					CurrentAttempt.Speed += 0.05f;
 					Audio.PitchScale = CurrentAttempt.Speed;
 					break;
 				}
 				case Key.Minus:
 				{
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+					
 					CurrentAttempt.Speed = Math.Max(0.05f, CurrentAttempt.Speed - 0.05f);
 					Audio.PitchScale = CurrentAttempt.Speed;
 					break;
@@ -405,11 +427,6 @@ public partial class Game : Node3D
 		}
 	}
 
-	public static void SetPlayerScore(string player, int score)
-	{
-		Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode(player).GetNode<Label>("Score").Text = score.ToString();
-	}
-
 	public static void QueueStop()
 	{
 		StopQueued = true;
@@ -428,6 +445,13 @@ public partial class Game : Node3D
 	{
 		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
 		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
+	}
+
+	public static void UpdateScore(string player, int score)
+	{
+		Label scoreLabel = Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode(player).GetNode<Label>("Score");
+		scoreLabel.Position = new Vector2(scoreLabel.Position.X, score);
+		scoreLabel.Text = score.ToString();
 	}
 
 	private static string FormatTime(double seconds, bool padMinutes = false)

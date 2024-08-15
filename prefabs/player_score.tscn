@@ -6,6 +6,7 @@
 font_size = 96
 
 [node name="PlayerScoreTemplate" type="ColorRect"]
+y_sort_enabled = true
 custom_minimum_size = Vector2(400, 200)
 theme = ExtResource("1_b0eme")
 color = Color(0, 0, 0, 0.25098)

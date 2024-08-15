@@ -170,6 +170,7 @@ transparent_bg = true
 size = Vector2i(1200, 2000)
 
 [node name="Players" type="VBoxContainer" parent="Leaderboard/SubViewport"]
+y_sort_enabled = true
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

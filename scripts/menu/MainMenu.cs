@@ -1,3 +1,5 @@
+using System;
+using System.IO;
 using Godot;
 using Phoenyx;
 
@@ -6,7 +8,6 @@ namespace Menu;
 public partial class MainMenu : Control
 {
 	private static Control Control;
-	private static readonly PackedScene Lobby = GD.Load<PackedScene>("res://prefabs/lobby.tscn");
 	private static readonly PackedScene ChatMessage = GD.Load<PackedScene>("res://prefabs/chat_message.tscn");
 
 	private static Panel multiplayer;
@@ -17,7 +18,6 @@ public partial class MainMenu : Control
 	private static Button join;
 	private static ScrollContainer chatScrollContainer;
 	private static VBoxContainer chatHolder;
-	private static Node lobby;
 
 	public override void _Ready()
 	{
@@ -38,17 +38,23 @@ public partial class MainMenu : Control
 		
 		browse.Pressed += () => fileDialog.Visible = true;
 		fileDialog.FileSelected += (string path) => {
-			if ((bool)lobby.Get("Connected"))
+			if (Lobby.PlayerCount > 0)
 			{
-				FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
-				byte[] buffer = file.GetBuffer((long)file.GetLength());
+				Lobby.Map = MapParser.Parse(path);
+				string[] split = path.Split("\\");
+				
+				ClientManager.Node.Rpc("ReceiveMapName", split[split.Length - 1]);
 
-				lobby.EmitSignal("Start", buffer, lobby.Get("Players"));
+				Lobby.Ready("1");
+
+				Lobby.AllReady += () => {
+					ClientManager.Node.Rpc("ReceiveAllReady", split[split.Length - 1], Lobby.Speed, Lobby.Mods);
+				};
 			}
 			else
 			{
-				SceneManager.Load(GetTree(), "res://scenes/game.tscn");
-				Game.Play(MapParser.Parse(path), 1, new string[]{"NoFail"});
+				SceneManager.Load(Control.GetTree(), "res://scenes/game.tscn");
+				Game.Play(MapParser.Parse(path), Lobby.Speed, Lobby.Mods);
 			}
 		};
 
@@ -61,22 +67,35 @@ public partial class MainMenu : Control
 		join = multiplayer.GetNode<Button>("Join");
 		chatScrollContainer = multiplayer.GetNode<ScrollContainer>("Chat");
 		chatHolder = chatScrollContainer.GetNode<VBoxContainer>("Holder");
-		lobby = Lobby.Instantiate();
-
-		AddChild(lobby);
 
 		host.Pressed += () => {
+			try
+			{
+				ServerManager.CreateServer(ipLine.Text, portLine.Text);
+			}
+			catch (Exception exception)
+			{
+				ToastNotification.Notify($"{exception.Message}", 2);
+				return;
+			}
+
 			host.Disabled = true;
 			join.Disabled = true;
-
-			lobby.EmitSignal("CreateServer", ipLine.Text, portLine.Text);
 		};
 		join.Pressed += () => {
+			try
+			{
+				ClientManager.CreateClient(ipLine.Text, portLine.Text);
+			}
+			catch (Exception exception)
+			{
+				ToastNotification.Notify($"{exception.Message}", 2);
+				return;
+			}
+
 			host.Disabled = true;
 			join.Disabled = true;
 			browse.Disabled = true;
-
-			lobby.EmitSignal("CreateClient", ipLine.Text, portLine.Text);
 		};
 	}
 
@@ -93,13 +112,12 @@ public partial class MainMenu : Control
 				}
 				case Key.Enter:
 				{
-					if (!(bool)lobby.Get("Connected") || chatLine.Text.Replace(" ", "") == "")
-					{
-						return;
-					}
-
-					lobby.EmitSignal("Chat", $"[{lobby.Get("LocalName")}] {chatLine.Text}");
-					chatLine.Text = "";
+					SendMessage();
+					break;
+				}
+				case Key.KpEnter:
+				{
+					SendMessage();
 					break;
 				}
 			}
@@ -112,6 +130,17 @@ public partial class MainMenu : Control
 		chatMessage.Text = message;
 		chatHolder.AddChild(chatMessage);
 		chatScrollContainer.ScrollVertical += 100;
+	}
+
+	private static void SendMessage()
+	{
+		if (chatLine.Text.Replace(" ", "") == "")
+		{
+			return;
+		}
+	
+		ServerManager.Node.Rpc("ValidateChat", chatLine.Text);
+		chatLine.Text = "";
 	}
 
     private static void Quit()
