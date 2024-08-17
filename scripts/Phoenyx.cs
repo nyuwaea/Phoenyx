@@ -44,7 +44,7 @@ public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "health_background.png", "progress.png", "progress_background.png", "note.obj", "hit.mp3"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "note.obj", "hit.mp3"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -68,6 +68,9 @@ public class Util
         }
 
         Initialized = true;
+
+        DiscordRPC.Call("Set", "app_id", 1272588732834254878);
+		DiscordRPC.Call("Set", "large_image", "wizardry");
 
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))
         {

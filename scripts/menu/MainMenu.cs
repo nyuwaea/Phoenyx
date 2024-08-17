@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using Godot;
 using Phoenyx;
 
@@ -25,8 +24,10 @@ public partial class MainMenu : Control
 		SceneManager.Scene = this;
 		
 		Util.Setup();
-		Util.DiscordRPC.Call("Set", "app_id", 1272588732834254878);
-		Util.DiscordRPC.Call("Set", "large_image", "wizardry");
+
+		Util.DiscordRPC.Call("Set", "details", "In the menu");
+		Util.DiscordRPC.Call("Set", "state", "");
+		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 		
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);

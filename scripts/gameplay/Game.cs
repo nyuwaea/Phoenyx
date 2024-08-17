@@ -20,9 +20,11 @@ public partial class Game : Node3D
 	private static Label3D Progress;
 	private static MeshInstance3D Cursor;
 	private static MeshInstance3D Grid;
-	private static MeshInstance3D Health;
-	private static MeshInstance3D ProgressBar;
-	private static MeshInstance3D Leaderboard;
+	private static TextureRect Health;
+	private static TextureRect ProgressBar;
+	//private static MeshInstance3D Leaderboard;
+	private static SubViewport PanelLeft;
+	private static SubViewport PanelRight;
 	private static AudioStreamPlayer Audio;
 	private static AudioStreamPlayer HitSound;
 	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
@@ -55,9 +57,10 @@ public partial class Game : Node3D
 		{
 			Map = map;
 			Speed = speed;
-			Mods = mods;
 			Players = players ?? Array.Empty<string>();
 			Progress = -1000;
+
+			Mods = mods;
 		}
 
 		public void Hit(int index)
@@ -102,22 +105,28 @@ public partial class Game : Node3D
 		Progress = GetNode<Label3D>("Progress");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
 		Grid = GetNode<MeshInstance3D>("Grid");
-		Health = GetNode<MeshInstance3D>("Health");
-		ProgressBar = GetNode<MeshInstance3D>("ProgressBar");
-		Leaderboard = GetNode<MeshInstance3D>("Leaderboard");
+		Health = GetNode("Health").GetNode("SubViewport").GetNode<TextureRect>("Main");
+		ProgressBar = GetNode("ProgressBar").GetNode("SubViewport").GetNode<TextureRect>("Main");
+		//Leaderboard = GetNode<MeshInstance3D>("Leaderboard");
+		PanelLeft = GetNode("PanelLeft").GetNode<SubViewport>("SubViewport");
+		PanelRight = GetNode("PanelRight").GetNode<SubViewport>("SubViewport");
 		Audio = Node3D.GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = Node3D.GetNode<AudioStreamPlayer>("HitSoundPlayer");
 
-		foreach (KeyValuePair<string, Player> entry in Lobby.Players)
-		{
-			ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
-			playerScore.GetNode<Label>("Name").Text = entry.Key;
-			playerScore.Name = entry.Key;
-			Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
-		}
+		//foreach (KeyValuePair<string, Player> entry in Lobby.Players)
+		//{
+		//	ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
+		//	playerScore.GetNode<Label>("Name").Text = entry.Key;
+		//	playerScore.Name = entry.Key;
+		//	Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
+		//}
 
 		Camera.Fov = Settings.FoV;
 		Title.Text = CurrentAttempt.Map.PrettyTitle;
+
+		Util.DiscordRPC.Call("Set", "details", "Playing a map");
+		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
+		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000);
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
@@ -127,10 +136,10 @@ public partial class Game : Node3D
 		{
 			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
 			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
-			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
-			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
-			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
-			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
+			Health.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
+			Health.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
+			ProgressBar.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
+			ProgressBar.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
 			//NotesMultimesh.Multimesh.Mesh = 
 			
 		}
@@ -270,8 +279,8 @@ public partial class Game : Node3D
 		Speed.Text = $"{(Math.Round(CurrentAttempt.Speed * 100) / 100).ToString().PadDecimals(2)}x";
 		Progress.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
 		Progress.Modulate = Color.FromHtml("ffffff" + (CurrentAttempt.Skippable ? "ff" : "40"));
-		Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(CurrentAttempt.Health * 10.88f, 80);
-		ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
+		Health.Size = new Vector2(CurrentAttempt.Health * 10.88f, 80);
+		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
 
 		if (StopQueued)
 		{
@@ -447,10 +456,10 @@ public partial class Game : Node3D
 
 	public static void UpdateScore(string player, int score)
 	{
-		ColorRect playerScore = Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode<ColorRect>(player);
-		Label scoreLabel = playerScore.GetNode<Label>("Score");
+		//ColorRect playerScore = Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode<ColorRect>(player);
+		//Label scoreLabel = playerScore.GetNode<Label>("Score");
 		//playerScore.Position = new Vector2(playerScore.Position.X, score);
-		scoreLabel.Text = score.ToString();
+		//scoreLabel.Text = score.ToString();
 	}
 
 	private static string FormatTime(double seconds, bool padMinutes = false)
