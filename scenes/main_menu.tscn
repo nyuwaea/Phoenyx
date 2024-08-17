@@ -52,6 +52,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Browse Map"
 
 [node name="Multiplayer" type="Panel" parent="."]
+visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.3

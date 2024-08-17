@@ -296,7 +296,7 @@ public partial class Game : Node3D
 			}
 			else
 			{
-				Camera.GlobalRotation += new Vector3(-eventMouseMotion.Relative.Y / 100 * Settings.Sensitivity / (float)Math.PI / 2, -eventMouseMotion.Relative.X / 100 * Settings.Sensitivity / (float)Math.PI / 2, 0);
+				Camera.GlobalRotation += new Vector3(-eventMouseMotion.Relative.Y / 120 * Settings.Sensitivity / (float)Math.PI, -eventMouseMotion.Relative.X / 120 * Settings.Sensitivity / (float)Math.PI, 0);
 				Camera.GlobalPosition = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
 				
 				float hypotenuse = 3.5f / Camera.Basis.Z.Z;
@@ -343,8 +343,6 @@ public partial class Game : Node3D
 					}
 
 					Settings.CameraLock = !Settings.CameraLock;
-					Settings.ApproachRate *= Settings.CameraLock ? 2.5f : 0.4f;
-					Settings.ApproachDistance *= Settings.CameraLock ? 2.5f : 0.4f;
 					break;
 				}
 				case Key.Equal:
@@ -449,8 +447,9 @@ public partial class Game : Node3D
 
 	public static void UpdateScore(string player, int score)
 	{
-		Label scoreLabel = Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode(player).GetNode<Label>("Score");
-		scoreLabel.Position = new Vector2(scoreLabel.Position.X, score);
+		ColorRect playerScore = Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode<ColorRect>(player);
+		Label scoreLabel = playerScore.GetNode<Label>("Score");
+		//playerScore.Position = new Vector2(playerScore.Position.X, score);
 		scoreLabel.Text = score.ToString();
 	}
 

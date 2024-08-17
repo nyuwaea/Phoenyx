@@ -6,16 +6,9 @@ public partial class Keybinds : Node
     {
         if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
-            if (eventKey.Keycode == Key.F11 || (eventKey.AltPressed && eventKey.Keycode == Key.Enter))
+            if (eventKey.Keycode == Key.F11 || (eventKey.AltPressed && (eventKey.Keycode == Key.Enter || eventKey.Keycode == Key.KpEnter)))
             {
-                if (DisplayServer.WindowGetMode() == DisplayServer.WindowMode.ExclusiveFullscreen)
-                {
-                    DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
-                }
-                else
-                {
-                    DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
-                }
+                DisplayServer.WindowSetMode(DisplayServer.WindowGetMode() == DisplayServer.WindowMode.ExclusiveFullscreen ? DisplayServer.WindowMode.Windowed : DisplayServer.WindowMode.ExclusiveFullscreen);
             }
         }
     }

@@ -68,7 +68,7 @@ public partial class ClientManager : Node
         Logger.Error($"Connection failed, {IP}, {Port}");
     }
 
-    [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
+    [Rpc(MultiplayerApi.RpcMode.AnyPeer)]
     public void ReceivePlayer(string name)
     {
         Lobby.AddPlayer(new Player(name));

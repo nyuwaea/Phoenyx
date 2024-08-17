@@ -133,12 +133,12 @@ public class Util
 
         if (!File.Exists($"{Constants.UserFolder}/profiles/default.json"))
         {
-            SaveSettings();
+            SaveSettings("default");
         }
 
         try
         {
-            LoadSettings(Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine());
+            LoadSettings();
         }
         catch
         {
@@ -146,8 +146,18 @@ public class Util
         }
     }
 
-    public static void SaveSettings(string profile = "default")
+    public static string GetProfile()
     {
+        return Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine();
+    }
+
+    public static void SaveSettings(string profile = null)
+    {
+        if (profile == null)
+        {
+            profile = GetProfile();
+        }
+
         Dictionary data = new Dictionary(){
             ["_Version"] = 1,
             ["VolumeMaster"] = Settings.VolumeMaster,
@@ -170,8 +180,13 @@ public class Util
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
     }
 
-    public static void LoadSettings(string profile = "default")
+    public static void LoadSettings(string profile = null)
     {
+        if (profile == null)
+        {
+            profile = GetProfile();
+        }
+
         try
         {
             Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/profiles/{profile}.json", Godot.FileAccess.ModeFlags.Read);
@@ -196,7 +211,7 @@ public class Util
             Settings.NoteSize = (float)data["NoteSize"];
             Settings.Colors = (string[])data["Colors"];
 
-            ToastNotification.Notify("Loaded settings successfully");
+            ToastNotification.Notify($"Loaded profile [{profile}]");
             ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
         }
         catch (Exception exception)
