@@ -13,8 +13,8 @@ public partial class Game : Node3D
 	private static Label FPSCounter;
 	private static Camera3D Camera;
 	private static Label3D Title;
-	private static Label3D Hits;
-	private static Label3D Accuracy;
+	//private static Label3D Hits;
+	//private static Label3D Accuracy;
 	private static Label3D Combo;
 	private static Label3D Speed;
 	private static Label3D Progress;
@@ -25,10 +25,19 @@ public partial class Game : Node3D
 	//private static MeshInstance3D Leaderboard;
 	private static SubViewport PanelLeft;
 	private static SubViewport PanelRight;
+	private static Label AccuracyLabel;
+	private static Label HitsLabel;
+	private static Label MissesLabel;
+	private static Label SumLabel;
 	private static AudioStreamPlayer Audio;
 	private static AudioStreamPlayer HitSound;
-	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
-	public static bool StopQueued = false;
+
+	private static double LastFrame = Time.GetTicksUsec(); 	// delta arg unreliable..
+	private static double LastSecond = Time.GetTicksUsec();	// better framerate calculation
+	private static int FrameCount = 0;
+	private static bool StopQueued = false;
+	private static Tween HitTween;
+	private static Tween MissTween;
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
@@ -41,7 +50,7 @@ public partial class Game : Node3D
 		public double Progress = 0;	// ms
 		public Map Map = new Map();
 		public float Speed = 1;
-		public string[] Mods = Array.Empty<string>();
+		public Dictionary<string, bool> Mods;
 		public string[] Players = Array.Empty<string>();
 		public int Hits = 0;
 		public int Misses = 0;
@@ -60,7 +69,9 @@ public partial class Game : Node3D
 			Players = players ?? Array.Empty<string>();
 			Progress = -1000;
 
-			Mods = mods;
+			Mods = new(){
+				["NoFail"] = mods.Contains("NoFail")
+			};
 		}
 
 		public void Hit(int index)
@@ -70,6 +81,18 @@ public partial class Game : Node3D
 			HealthStep = Math.Max(HealthStep / 1.45f, 15);
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
+
+			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+
+			if (HitTween != null)
+			{
+				HitTween.Kill();
+			}
+
+			HitTween = HitsLabel.CreateTween();
+			HitTween.TweenProperty(HitsLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
+			HitTween.Play();
 
 			if (Lobby.PlayerCount > 1)
 			{
@@ -84,7 +107,19 @@ public partial class Game : Node3D
 			Health = Math.Max(0, Health - HealthStep);
 			HealthStep = Math.Min(HealthStep * 1.2f, 100);
 
-			if (Health <= 0 && !CurrentAttempt.Mods.Contains("NoFail"))
+			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+
+			if (MissTween != null)
+			{
+				MissTween.Kill();
+			}
+
+			MissTween = MissesLabel.CreateTween();
+			MissTween.TweenProperty(MissesLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
+			MissTween.Play();
+
+			if (Health <= 0 && !CurrentAttempt.Mods["NoFail"])
 			{
 				QueueStop();
 			}
@@ -98,8 +133,6 @@ public partial class Game : Node3D
 		FPSCounter = GetNode<Label>("FPSCounter");
 		Camera = GetNode<Camera3D>("Camera3D");
 		Title = GetNode<Label3D>("Title");
-		Hits = GetNode<Label3D>("Hits");
-		Accuracy = GetNode<Label3D>("Accuracy");
 		Combo = GetNode<Label3D>("Combo");
 		Speed = GetNode<Label3D>("Speed");
 		Progress = GetNode<Label3D>("Progress");
@@ -110,6 +143,10 @@ public partial class Game : Node3D
 		//Leaderboard = GetNode<MeshInstance3D>("Leaderboard");
 		PanelLeft = GetNode("PanelLeft").GetNode<SubViewport>("SubViewport");
 		PanelRight = GetNode("PanelRight").GetNode<SubViewport>("SubViewport");
+		AccuracyLabel = PanelRight.GetNode<Label>("Accuracy");
+		HitsLabel = PanelRight.GetNode<Label>("Hits");
+		MissesLabel = PanelRight.GetNode<Label>("Misses");
+		SumLabel = PanelRight.GetNode<Label>("Sum");
 		Audio = Node3D.GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = Node3D.GetNode<AudioStreamPlayer>("HitSoundPlayer");
 
@@ -171,10 +208,18 @@ public partial class Game : Node3D
 
 	public override void _Process(double delta)
 	{
-		delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
-		LastFrame = Time.GetTicksUsec();
-		
-		FPSCounter.Text = $"{Mathf.Floor(1 / delta)} FPS";
+		double now = Time.GetTicksUsec();
+
+		delta = (now - LastFrame) / 1000000;	// more reliable
+		LastFrame = now;
+		FrameCount++;
+
+		if (LastSecond + 1000000 <= now)
+		{
+			FPSCounter.Text = $"{FrameCount} FPS";
+			FrameCount = 0;
+			LastSecond += 1000000;
+		}
 
 		if (!Playing)
 		{
@@ -273,14 +318,26 @@ public partial class Game : Node3D
 		int sum = CurrentAttempt.Hits + CurrentAttempt.Misses;
 		string accuracy = (Math.Floor((float)CurrentAttempt.Hits / sum * 10000) / 100).ToString().PadDecimals(2);
 
-		Hits.Text = $"{CurrentAttempt.Hits} / {sum}";
-		Accuracy.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
+		HitsLabel.Text = $"{CurrentAttempt.Hits}";
+		MissesLabel.Text = $"{CurrentAttempt.Misses}";
+		SumLabel.Text = $"{sum}";
+		AccuracyLabel.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
 		Combo.Text = CurrentAttempt.Combo.ToString();
 		Speed.Text = $"{(Math.Round(CurrentAttempt.Speed * 100) / 100).ToString().PadDecimals(2)}x";
 		Progress.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
-		Progress.Modulate = Color.FromHtml("ffffff" + (CurrentAttempt.Skippable ? "ff" : "40"));
 		Health.Size = new Vector2(CurrentAttempt.Health * 10.88f, 80);
 		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
+
+		if (CurrentAttempt.Skippable)
+		{
+			int alpha = 64 + (int)(172 * (Math.Sin(now / 250000) / 2 + 0.5f));
+			
+			Progress.Modulate = Color.FromHtml("ffffff" + alpha.ToString("X2"));
+		}
+		else
+		{
+			Progress.Modulate = Color.FromHtml("ffffff40");
+		}
 
 		if (StopQueued)
 		{
