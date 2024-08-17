@@ -75,9 +75,9 @@ grow_horizontal = 0
 focus_mode = 0
 theme = ExtResource("2_46xtp")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_styles/normal = ExtResource("3_cp44m")
 theme_override_styles/hover = ExtResource("4_xf0oq")
 theme_override_styles/pressed = ExtResource("4_iqqm8")
+theme_override_styles/normal = ExtResource("3_cp44m")
 text = "Host"
 
 [node name="Join" type="Button" parent="Multiplayer"]
@@ -93,9 +93,9 @@ grow_horizontal = 0
 focus_mode = 0
 theme = ExtResource("2_46xtp")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_styles/normal = ExtResource("3_cp44m")
 theme_override_styles/hover = ExtResource("4_xf0oq")
 theme_override_styles/pressed = ExtResource("4_iqqm8")
+theme_override_styles/normal = ExtResource("3_cp44m")
 text = "Join"
 
 [node name="Port" type="LineEdit" parent="Multiplayer"]
@@ -163,7 +163,7 @@ alignment = 2
 [node name="FileDialog" type="FileDialog" parent="."]
 title = "Open a File"
 initial_position = 2
-size = Vector2i(454, 159)
+size = Vector2i(454, 175)
 theme = SubResource("Theme_nlclj")
 ok_button_text = "Open"
 file_mode = 0

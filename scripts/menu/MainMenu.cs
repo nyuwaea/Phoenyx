@@ -54,8 +54,10 @@ public partial class MainMenu : Control
 			}
 			else
 			{
+				Map map = MapParser.Parse(path);
+				
 				SceneManager.Load(Control.GetTree(), "res://scenes/game.tscn");
-				Game.Play(MapParser.Parse(path), Lobby.Speed, Lobby.Mods);
+				Game.Play(map, Lobby.Speed, Lobby.Mods);
 			}
 		};
 

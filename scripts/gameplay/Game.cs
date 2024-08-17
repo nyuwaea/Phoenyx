@@ -381,8 +381,8 @@ public partial class Game : Node3D
 	}
 
 	public override void _UnhandledInput(InputEvent @event)
-    {
-        if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.Pressed)
+	{
+		if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.Pressed)
 		{
 			if (eventMouseButton.CtrlPressed)
 			{
@@ -403,7 +403,7 @@ public partial class Game : Node3D
 				UpdateVolume();
 			}
 		}
-    }
+	}
 
 	public static void Play(Map map, float speed = 1, string[] mods = null, string[] players = null)
 	{
