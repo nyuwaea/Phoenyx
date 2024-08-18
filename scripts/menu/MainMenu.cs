@@ -40,7 +40,7 @@ public partial class MainMenu : Control
 		fileDialog.FileSelected += (string path) => {
 			if (Lobby.PlayerCount > 0)
 			{
-				Lobby.Map = MapParser.Parse(path);
+				Lobby.Map = MapParser.Decode(path);
 				string[] split = path.Split("\\");
 				
 				ClientManager.Node.Rpc("ReceiveMapName", split[split.Length - 1]);
@@ -53,7 +53,7 @@ public partial class MainMenu : Control
 			}
 			else
 			{
-				Map map = MapParser.Parse(path);
+				Map map = MapParser.Decode(path);
 				
 				SceneManager.Load(Control.GetTree(), "res://scenes/game.tscn");
 				Game.Play(map, Lobby.Speed, Lobby.Mods);
@@ -108,20 +108,14 @@ public partial class MainMenu : Control
 			switch (eventKey.Keycode)
 			{
 				case Key.Escape:
-				{
 					Quit();
 					break;
-				}
 				case Key.Enter:
-				{
 					SendMessage();
 					break;
-				}
 				case Key.KpEnter:
-				{
 					SendMessage();
 					break;
-				}
 			}
 		}
     }

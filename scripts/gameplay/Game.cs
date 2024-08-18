@@ -35,13 +35,13 @@ public partial class Game : Node3D
 	private static Tween HitTween;
 	private static Tween MissTween;
 	private static bool StopQueued = false;
-	private static float SkipLabelAlpha = 0;
-	private static float TargetSkipLabelAlpha = 0;
 	private static int MissIcons = 0;
 
 	private double LastFrame = Time.GetTicksUsec(); 	// delta arg unreliable..
 	private double LastSecond = Time.GetTicksUsec();	// better framerate calculation
 	private int FrameCount = 0;
+	private float SkipLabelAlpha = 0;
+	private float TargetSkipLabelAlpha = 0;
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
@@ -414,12 +414,9 @@ public partial class Game : Node3D
 			switch (eventKey.Keycode)
 			{
 				case Key.Escape:
-				{
 					Stop();
 					break;
-				}
 				case Key.Space:
-				{
 					if (Lobby.PlayerCount > 1)
 					{
 						break;
@@ -427,19 +424,13 @@ public partial class Game : Node3D
 					
 					Skip();
 					break;
-				}
 				case Key.F:
-				{
 					Settings.FadeOut = !Settings.FadeOut;
 					break;
-				}
 				case Key.P:
-				{
 					Settings.Pushback = !Settings.Pushback;
 					break;
-				}
 				case Key.C:
-				{
 					if (Lobby.PlayerCount > 1)
 					{
 						break;
@@ -447,9 +438,7 @@ public partial class Game : Node3D
 
 					Settings.CameraLock = !Settings.CameraLock;
 					break;
-				}
 				case Key.Equal:
-				{
 					if (Lobby.PlayerCount > 1)
 					{
 						break;
@@ -458,9 +447,7 @@ public partial class Game : Node3D
 					CurrentAttempt.Speed = Math.Round((CurrentAttempt.Speed + 0.05) * 100) / 100;
 					Audio.PitchScale = (float)CurrentAttempt.Speed;
 					break;
-				}
 				case Key.Minus:
-				{
 					if (Lobby.PlayerCount > 1)
 					{
 						break;
@@ -469,7 +456,6 @@ public partial class Game : Node3D
 					CurrentAttempt.Speed = Math.Max(0.05, Math.Round((CurrentAttempt.Speed - 0.05) * 100) / 100);
 					Audio.PitchScale = (float)CurrentAttempt.Speed;
 					break;
-				}
 			}
 		}
 	}
@@ -483,15 +469,11 @@ public partial class Game : Node3D
 				switch (eventMouseButton.ButtonIndex)
 				{
 					case MouseButton.WheelUp:
-					{
 						Settings.VolumeMaster = Math.Min(1, Settings.VolumeMaster + 0.025f);
 						break;
-					}
 					case MouseButton.WheelDown:
-					{
 						Settings.VolumeMaster = Math.Max(0, Settings.VolumeMaster - 0.025f);
 						break;
-					}
 				}
 
 				UpdateVolume();

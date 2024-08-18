@@ -1,34 +1,36 @@
 using System;
+using System.Text.RegularExpressions;
 using Godot;
 
 public struct Map
 {
-    public string ID = "0";
-    public string Artist = "N/A";
-    public string Title = "N/A";
-    public string PrettyTitle = "N/A";
-    public string[] Mappers = Array.Empty<string>();
-    public string PrettyMappers = "N/A";
-    public string DifficultyName = "N/A";
-    public int Difficulty = 0;
-    public int Length = 0;
-    public byte[] AudioBuffer = Array.Empty<byte>();
-    public byte[] CoverBuffer = Array.Empty<byte>();
-    public Note[] Notes = Array.Empty<Note>();
+    public string ID;
+    public string Artist;
+    public string Title;
+    public string PrettyTitle;
+    public string[] Mappers;
+    public string PrettyMappers;
+    public string DifficultyName;
+    public int Difficulty;
+    public int Length;
+    public byte[] AudioBuffer;
+    public byte[] CoverBuffer;
+    public Note[] Notes;
 
-    public Map(Note[] data = null, string id = "0", string artist = "N/A", string title = "N/A", string[] mappers = null, int difficulty = 0, int length = 0, byte[] audioBuffer = null, byte[] coverBuffer = null)
+    public Map(Note[] data = null, string id = null, string artist = "N/A", string title = "N/A", string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null)
     {
-        ID = id;
         Artist = artist;
         Title = title;
         PrettyTitle = artist != null ? $"{artist} - {title}" : title;
-        Mappers = mappers;
+        Mappers = mappers ?? new string[]{"N/A"};
         PrettyMappers = "";
         Difficulty = difficulty;
-        Length = length;
+        DifficultyName = difficultyName ?? "N/A";
         AudioBuffer = audioBuffer;
         CoverBuffer = coverBuffer;
         Notes = data ?? Array.Empty<Note>();
+        Length = length ?? Notes[Notes.Length - 1].Millisecond;
+        ID = id ?? new Regex("[^a-zA-Z0-9_ -]").Replace($"{Mappers.Stringify()}_{PrettyTitle}".Replace(" ", "_"), "");
 
         foreach (string mapper in Mappers)
         {

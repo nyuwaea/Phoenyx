@@ -108,19 +108,11 @@ public class Util
                 switch (source.GetType().Name)
                 {
                     case "CompressedTexture2D":
-                    {
                         buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
                         break;
-                    }
                     case "AudioStreamMP3":
-                    {
                         buffer = (source as AudioStreamMP3).Data;
                         break;
-                    }
-                    case "ArrayMesh":
-                    {
-                        break;
-                    }
                 }
 
                 if (buffer.Length == 0)
@@ -167,7 +159,7 @@ public class Util
             profile = GetProfile();
         }
 
-        Dictionary data = new Dictionary(){
+        Dictionary data = new(){
             ["_Version"] = 1,
             ["VolumeMaster"] = Settings.VolumeMaster,
             ["VolumeMusic"] = Settings.VolumeMusic,
