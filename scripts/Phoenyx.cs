@@ -44,7 +44,7 @@ public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "health_background.png", "progress.png", "progress_background.png", "note.obj", "hit.mp3"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "note.obj", "hit.mp3"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -59,6 +59,7 @@ public class Util
     };
 
     public static GodotObject DiscordRPC = (GodotObject)GD.Load<GDScript>("res://scripts/DiscordRPC.gd").New();
+    public static GodotObject OBJParser = (GodotObject)GD.Load<GDScript>("res://scripts/OBJParser.gd").New();
 
     public static void Setup()
     {
@@ -68,6 +69,9 @@ public class Util
         }
 
         Initialized = true;
+
+        DiscordRPC.Call("Set", "app_id", 1272588732834254878);
+		DiscordRPC.Call("Set", "large_image", "wizardry");
 
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))
         {
@@ -100,26 +104,23 @@ public class Util
             {
                 var source = ResourceLoader.Load($"res://skin/{skinFile}");
                 byte[] buffer = System.Array.Empty<byte>();
-                Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
                 
                 switch (source.GetType().Name)
                 {
                     case "CompressedTexture2D":
-                    {
                         buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
                         break;
-                    }
                     case "AudioStreamMP3":
-                    {
                         buffer = (source as AudioStreamMP3).Data;
                         break;
-                    }
-                    case "ArrayMesh":
-                    {
-                        //buffer = (source as ArrayMesh).
-                        break;
-                    }
                 }
+
+                if (buffer.Length == 0)
+                {
+                    continue;
+                }
+
+                Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
 
                 target.StoreBuffer(buffer);
                 target.Close();
@@ -133,12 +134,12 @@ public class Util
 
         if (!File.Exists($"{Constants.UserFolder}/profiles/default.json"))
         {
-            SaveSettings();
+            SaveSettings("default");
         }
 
         try
         {
-            LoadSettings(Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine());
+            LoadSettings();
         }
         catch
         {
@@ -146,9 +147,19 @@ public class Util
         }
     }
 
-    public static void SaveSettings(string profile = "default")
+    public static string GetProfile()
     {
-        Dictionary data = new Dictionary(){
+        return Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine();
+    }
+
+    public static void SaveSettings(string profile = null)
+    {
+        if (profile == null)
+        {
+            profile = GetProfile();
+        }
+
+        Dictionary data = new(){
             ["_Version"] = 1,
             ["VolumeMaster"] = Settings.VolumeMaster,
             ["VolumeMusic"] = Settings.VolumeMusic,
@@ -170,8 +181,13 @@ public class Util
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
     }
 
-    public static void LoadSettings(string profile = "default")
+    public static void LoadSettings(string profile = null)
     {
+        if (profile == null)
+        {
+            profile = GetProfile();
+        }
+
         try
         {
             Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/profiles/{profile}.json", Godot.FileAccess.ModeFlags.Read);
@@ -196,7 +212,7 @@ public class Util
             Settings.NoteSize = (float)data["NoteSize"];
             Settings.Colors = (string[])data["Colors"];
 
-            ToastNotification.Notify("Loaded settings successfully");
+            ToastNotification.Notify($"Loaded profile [{profile}]");
             ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
         }
         catch (Exception exception)

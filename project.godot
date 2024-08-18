@@ -15,7 +15,7 @@ config/version="0.4"
 run/main_scene="res://scenes/main_menu.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Phoenyx"
-config/features=PackedStringArray("4.2", "C#", "Forward Plus")
+config/features=PackedStringArray("4.3", "C#", "Forward Plus")
 boot_splash/bg_color=Color(0, 0, 0, 1)
 boot_splash/show_image=false
 config/icon="res://icon.svg"
@@ -23,6 +23,9 @@ config/icon="res://icon.svg"
 [autoload]
 
 DiscordRPCLoader="*res://addons/discord-rpc-gd/nodes/discord_autoload.gd"
+ServerManager="*res://scripts/multiplayer/ServerManager.cs"
+ClientManager="*res://scripts/multiplayer/ClientManager.cs"
+Keybinds="*res://scripts/Keybinds.cs"
 
 [debug]
 
@@ -42,6 +45,4 @@ common/physics_ticks_per_second=120
 
 [rendering]
 
-anti_aliasing/quality/msaa_2d=1
-anti_aliasing/quality/msaa_3d=3
-anti_aliasing/quality/use_taa=true
+anti_aliasing/quality/msaa_3d=1

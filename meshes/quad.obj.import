@@ -1,0 +1,22 @@
+[remap]
+
+importer="wavefront_obj"
+importer_version=1
+type="Mesh"
+uid="uid://dtk1s2e7jhpkb"
+path="res://.godot/imported/quad.obj-767403cd2c10b1feb973e03351a78eaf.mesh"
+
+[deps]
+
+files=["res://.godot/imported/quad.obj-767403cd2c10b1feb973e03351a78eaf.mesh"]
+
+source_file="res://meshes/quad.obj"
+dest_files=["res://.godot/imported/quad.obj-767403cd2c10b1feb973e03351a78eaf.mesh", "res://.godot/imported/quad.obj-767403cd2c10b1feb973e03351a78eaf.mesh"]
+
+[params]
+
+generate_tangents=true
+scale_mesh=Vector3(1, 1, 1)
+offset_mesh=Vector3(0, 0, 0)
+optimize_mesh=true
+force_disable_mesh_compression=false

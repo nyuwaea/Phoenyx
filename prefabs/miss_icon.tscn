@@ -1,0 +1,7 @@
+[gd_scene load_steps=2 format=3 uid="uid://cgajhovg50bpm"]
+
+[ext_resource type="Texture2D" uid="uid://bh68kecn6dn1c" path="res://skin/miss_feedback.png" id="1_kcwdm"]
+
+[node name="MissIcon" type="Sprite3D"]
+transform = Transform3D(0.025, 0, 0, 0, 0.025, 0, 0, 0, 0.025, 0, 0, 0)
+texture = ExtResource("1_kcwdm")

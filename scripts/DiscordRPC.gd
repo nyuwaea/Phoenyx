@@ -1,4 +1,4 @@
-func Set(property: String, value):
+static func Set(property, value):
 	match property:
 		"app_id": DiscordRPC.app_id = value
 		"details": DiscordRPC.details = value
@@ -8,9 +8,9 @@ func Set(property: String, value):
 		"small_image": DiscordRPC.small_image = value
 		"small_image_text": DiscordRPC.small_image_text = value
 		"start_timestamp": DiscordRPC.start_timestamp = value
-		"end_timestmap": DiscordRPC.end_timestamp = value
+		"end_timestamp": DiscordRPC.end_timestamp = value
 
 	Refresh()
 	
-func Refresh():
+static func Refresh():
 	DiscordRPC.refresh()

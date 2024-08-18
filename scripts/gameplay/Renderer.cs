@@ -13,13 +13,13 @@ public partial class Renderer : MultiMeshInstance3D
 
         Multimesh.InstanceCount = Game.ToProcess;
 
-        Transform3D transform = new Transform3D(new Vector3(Settings.NoteSize, 0, 0), new Vector3(0, Settings.NoteSize, 0), new Vector3(0, 0, Settings.NoteSize), Vector3.Zero);
+        Transform3D transform = new Transform3D(new Vector3(Settings.NoteSize / 2, 0, 0), new Vector3(0, Settings.NoteSize / 2, 0), new Vector3(0, 0, Settings.NoteSize / 2), Vector3.Zero);
 
         for (int i = 0; i < Game.ToProcess; i++)
         {
             Note note = Game.ProcessNotes[i];
 
-            float depth = (note.Millisecond - (float)Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance / Game.CurrentAttempt.Speed;
+            float depth = (note.Millisecond - (float)Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance / (float)Game.CurrentAttempt.Speed;
             float alpha = Math.Clamp((1 - depth / Settings.ApproachDistance) / Settings.FadeIn, 0, 1);
             
             if (Settings.FadeOut)

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Godot;
@@ -9,24 +10,38 @@ public partial class Game : Node3D
 {
 	private static Node3D Node3D;
 	private static readonly PackedScene PlayerScore = GD.Load<PackedScene>("res://prefabs/player_score.tscn");
+	private static readonly PackedScene MissFeedbackIcon = GD.Load<PackedScene>("res://prefabs/miss_icon.tscn");
 
 	private static Label FPSCounter;
 	private static Camera3D Camera;
-	private static Label3D Title;
-	private static Label3D Hits;
-	private static Label3D Accuracy;
-	private static Label3D Combo;
-	private static Label3D Speed;
-	private static Label3D Progress;
+	private static Label3D TitleLabel;
+	private static Label3D ComboLabel;
+	private static Label3D SpeedLabel;
+	private static Label3D SkipLabel;
+	private static Label3D ProgressLabel;
 	private static MeshInstance3D Cursor;
 	private static MeshInstance3D Grid;
-	private static MeshInstance3D Health;
-	private static MeshInstance3D ProgressBar;
-	private static MeshInstance3D Leaderboard;
+	private static MultiMeshInstance3D NotesMultimesh;
+	private static TextureRect Health;
+	private static TextureRect ProgressBar;
+	private static SubViewport PanelLeft;
+	private static SubViewport PanelRight;
+	private static Label AccuracyLabel;
+	private static Label HitsLabel;
+	private static Label MissesLabel;
+	private static Label SumLabel;
 	private static AudioStreamPlayer Audio;
 	private static AudioStreamPlayer HitSound;
-	double LastFrame = Time.GetTicksUsec(); // delta arg unreliable..
-	public static bool StopQueued = false;
+	private static Tween HitTween;
+	private static Tween MissTween;
+	private static bool StopQueued = false;
+	private static int MissIcons = 0;
+
+	private double LastFrame = Time.GetTicksUsec(); 	// delta arg unreliable..
+	private double LastSecond = Time.GetTicksUsec();	// better framerate calculation
+	private int FrameCount = 0;
+	private float SkipLabelAlpha = 0;
+	private float TargetSkipLabelAlpha = 0;
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
@@ -38,26 +53,29 @@ public partial class Game : Node3D
 	{
 		public double Progress = 0;	// ms
 		public Map Map = new Map();
-		public float Speed = 1;
-		public string[] Mods = Array.Empty<string>();
+		public double Speed = 1;
+		public Dictionary<string, bool> Mods;
 		public string[] Players = Array.Empty<string>();
 		public int Hits = 0;
 		public int Misses = 0;
 		public int Combo = 0;
 		public int PassedNotes = 0;
-		public float Accuracy = 100;
-		public float Health = 100;
-		public float HealthStep = 15;
+		public double Accuracy = 100;
+		public double Health = 100;
+		public double HealthStep = 15;
 		public Vector2 CursorPosition = Vector2.Zero;
 		public bool Skippable = false;
 
-		public Attempt(Map map, float speed, string[] mods, string[] players = null, bool replay = false)
+		public Attempt(Map map, double speed, string[] mods, string[] players = null, bool replay = false)
 		{
 			Map = map;
 			Speed = speed;
-			Mods = mods;
 			Players = players ?? Array.Empty<string>();
 			Progress = -1000;
+
+			Mods = new(){
+				["NoFail"] = mods.Contains("NoFail")
+			};
 		}
 
 		public void Hit(int index)
@@ -68,7 +86,22 @@ public partial class Game : Node3D
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
 
+			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
+			if (HitTween != null)
+			{
+				HitTween.Kill();
+			}
+
+			HitTween = HitsLabel.CreateTween();
+			HitTween.TweenProperty(HitsLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
+			HitTween.Play();
+
+			if (Lobby.PlayerCount > 1)
+			{
+				ServerManager.Node.Rpc("ValidateScore", Hits);
+			}
 		}
 
 		public void Miss(int index)
@@ -78,10 +111,42 @@ public partial class Game : Node3D
 			Health = Math.Max(0, Health - HealthStep);
 			HealthStep = Math.Min(HealthStep * 1.2f, 100);
 
-			if (Health <= 0 && !CurrentAttempt.Mods.Contains("NoFail"))
+			if (Health <= 0 && !CurrentAttempt.Mods["NoFail"])
 			{
 				QueueStop();
 			}
+
+			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+
+			if (MissTween != null)
+			{
+				MissTween.Kill();
+			}
+
+			MissTween = MissesLabel.CreateTween();
+			MissTween.TweenProperty(MissesLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
+			MissTween.Play();
+
+			if (MissIcons >= 64)
+			{
+				return;
+			}
+
+			MissIcons++;
+
+			Sprite3D icon = MissFeedbackIcon.Instantiate<Sprite3D>();
+			Node3D.AddChild(icon);
+			icon.GlobalPosition = new Vector3(Map.Notes[index].X, -1.4f, 0);
+
+			Tween tween = icon.CreateTween();
+			tween.TweenProperty(icon, "transparency", 1, 0.25f);
+			tween.Parallel().TweenProperty(icon, "position", icon.Position + Vector3.Up / 4f, 0.25f).SetTrans(Tween.TransitionType.Quint).SetEase(Tween.EaseType.Out);
+			tween.TweenCallback(Callable.From(() => {
+				MissIcons--;
+				icon.QueueFree();
+			}));
+			tween.Play();
 		}
 	}
 	
@@ -91,38 +156,61 @@ public partial class Game : Node3D
 
 		FPSCounter = GetNode<Label>("FPSCounter");
 		Camera = GetNode<Camera3D>("Camera3D");
-		Title = GetNode<Label3D>("Title");
-		Hits = GetNode<Label3D>("Hits");
-		Accuracy = GetNode<Label3D>("Accuracy");
-		Combo = GetNode<Label3D>("Combo");
-		Speed = GetNode<Label3D>("Speed");
-		Progress = GetNode<Label3D>("Progress");
+		TitleLabel = GetNode<Label3D>("Title");
+		ComboLabel = GetNode<Label3D>("Combo");
+		SpeedLabel = GetNode<Label3D>("Speed");
+		SkipLabel = GetNode<Label3D>("Skip");
+		ProgressLabel = GetNode<Label3D>("Progress");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
 		Grid = GetNode<MeshInstance3D>("Grid");
-		Health = GetNode<MeshInstance3D>("Health");
-		ProgressBar = GetNode<MeshInstance3D>("ProgressBar");
-		Leaderboard = GetNode<MeshInstance3D>("Leaderboard");
+		NotesMultimesh = GetNode<MultiMeshInstance3D>("Notes");
+		Health = GetNode("Health").GetNode("SubViewport").GetNode<TextureRect>("Main");
+		ProgressBar = GetNode("ProgressBar").GetNode("SubViewport").GetNode<TextureRect>("Main");
+		PanelLeft = GetNode("PanelLeft").GetNode<SubViewport>("SubViewport");
+		PanelRight = GetNode("PanelRight").GetNode<SubViewport>("SubViewport");
+		AccuracyLabel = PanelRight.GetNode<Label>("Accuracy");
+		HitsLabel = PanelRight.GetNode<Label>("Hits");
+		MissesLabel = PanelRight.GetNode<Label>("Misses");
+		SumLabel = PanelRight.GetNode<Label>("Sum");
 		Audio = Node3D.GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = Node3D.GetNode<AudioStreamPlayer>("HitSoundPlayer");
 
+		//foreach (KeyValuePair<string, Player> entry in Lobby.Players)
+		//{
+		//	ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
+		//	playerScore.GetNode<Label>("Name").Text = entry.Key;
+		//	playerScore.Name = entry.Key;
+		//	Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
+		//}
+
 		Camera.Fov = Settings.FoV;
-		Title.Text = CurrentAttempt.Map.PrettyTitle;
+		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
+
+		Util.DiscordRPC.Call("Set", "details", "Playing a map");
+		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
+		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000);
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		//DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		try
 		{
 			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
 			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
-			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
-			Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
-			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
-			ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
-			//NotesMultimesh.Multimesh.Mesh = 
+			Health.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
+			Health.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
+			ProgressBar.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
+			ProgressBar.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
 			
+			if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
+			{
+				NotesMultimesh.Multimesh.Mesh = (ArrayMesh)Util.OBJParser.Call("load_obj", $"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj");
+			}
+			else
+			{
+				NotesMultimesh.Multimesh.Mesh = GD.Load<ArrayMesh>($"res://skin/note.obj");
+			}
 		}
 		catch (Exception exception)
 		{
@@ -130,18 +218,10 @@ public partial class Game : Node3D
 			throw Logger.Error($"Could not load skin; {exception.Message}");
 		}
 
-		foreach (string player in CurrentAttempt.Players)
-		{
-			ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
-			playerScore.GetNode<Label>("Name").Text = player;
-			playerScore.Name = player;
-			Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
-		}
-
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
 			Audio.Stream = LoadAudioStream(CurrentAttempt.Map.AudioBuffer);
-			Audio.PitchScale = CurrentAttempt.Speed;
+			Audio.PitchScale = (float)CurrentAttempt.Speed;
 			MapLength = (float)Audio.Stream.GetLength() * 1000;
 		}
 		else
@@ -151,7 +231,7 @@ public partial class Game : Node3D
 
 		MapLength += Constants.HitWindow;
 
-		FileAccess hitSoundFile = FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", FileAccess.ModeFlags.Read);
+		Godot.FileAccess hitSoundFile = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
 		HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
 		hitSoundFile.Close();
 
@@ -160,10 +240,19 @@ public partial class Game : Node3D
 
 	public override void _Process(double delta)
 	{
-		delta = (Time.GetTicksUsec() - LastFrame) / 1000000;	// more reliable
-		LastFrame = Time.GetTicksUsec();
-		
-		FPSCounter.Text = $"{Mathf.Floor(1 / delta)} FPS";
+		double now = Time.GetTicksUsec();
+
+		delta = (now - LastFrame) / 1000000;	// more reliable
+		LastFrame = now;
+		FrameCount++;
+		SkipLabelAlpha = Mathf.Lerp(SkipLabelAlpha, TargetSkipLabelAlpha, (float)delta * 20);
+
+		if (LastSecond + 1000000 <= now)
+		{
+			FPSCounter.Text = $"{FrameCount} FPS";
+			FrameCount = 0;
+			LastSecond += 1000000;
+		}
 
 		if (!Playing)
 		{
@@ -262,14 +351,30 @@ public partial class Game : Node3D
 		int sum = CurrentAttempt.Hits + CurrentAttempt.Misses;
 		string accuracy = (Math.Floor((float)CurrentAttempt.Hits / sum * 10000) / 100).ToString().PadDecimals(2);
 
-		Hits.Text = $"{CurrentAttempt.Hits} / {sum}";
-		Accuracy.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
-		Combo.Text = CurrentAttempt.Combo.ToString();
-		Speed.Text = $"{(Math.Round(CurrentAttempt.Speed * 100) / 100).ToString().PadDecimals(2)}x";
-		Progress.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
-		Progress.Modulate = Color.FromHtml("ffffff" + (CurrentAttempt.Skippable ? "ff" : "40"));
-		Health.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(CurrentAttempt.Health * 10.88f, 80);
-		ProgressBar.GetNode<SubViewport>("SubViewport").GetNode<TextureRect>("Main").Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
+		HitsLabel.Text = $"{CurrentAttempt.Hits}";
+		MissesLabel.Text = $"{CurrentAttempt.Misses}";
+		SumLabel.Text = $"{sum}";
+		AccuracyLabel.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
+		ComboLabel.Text = CurrentAttempt.Combo.ToString();
+		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
+		SpeedLabel.Modulate = Color.FromHtml($"#ffffff{(CurrentAttempt.Speed == 1 ? "00" : "20")}");
+		ProgressLabel.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
+		Health.Size = new Vector2((float)CurrentAttempt.Health * 10.88f, 80);
+		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
+		SkipLabel.Modulate = Color.FromHtml("#ffffff" + ((int)(255 * SkipLabelAlpha)).ToString("X2"));
+
+		if (CurrentAttempt.Skippable)
+		{
+			int alpha = 64 + (int)(172 * (Math.Sin(now / 250000) / 2 + 0.5f));
+			TargetSkipLabelAlpha = 32f / 255f;
+			
+			ProgressLabel.Modulate = Color.FromHtml("ffffff" + alpha.ToString("X2"));
+		}
+		else
+		{
+			TargetSkipLabelAlpha = 0;
+			ProgressLabel.Modulate = Color.FromHtml("ffffff40");
+		}
 
 		if (StopQueued)
 		{
@@ -294,7 +399,7 @@ public partial class Game : Node3D
 			}
 			else
 			{
-				Camera.GlobalRotation += new Vector3(-eventMouseMotion.Relative.Y / 100 * Settings.Sensitivity / (float)Math.PI / 2, -eventMouseMotion.Relative.X / 100 * Settings.Sensitivity / (float)Math.PI / 2, 0);
+				Camera.GlobalRotation += new Vector3(-eventMouseMotion.Relative.Y / 120 * Settings.Sensitivity / (float)Math.PI, -eventMouseMotion.Relative.X / 120 * Settings.Sensitivity / (float)Math.PI, 0);
 				Camera.GlobalPosition = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
 				
 				float hypotenuse = 3.5f / Camera.Basis.Z.Z;
@@ -309,74 +414,74 @@ public partial class Game : Node3D
 			switch (eventKey.Keycode)
 			{
 				case Key.Escape:
-				{
 					Stop();
 					break;
-				}
 				case Key.Space:
-				{
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+					
 					Skip();
 					break;
-				}
 				case Key.F:
-				{
 					Settings.FadeOut = !Settings.FadeOut;
 					break;
-				}
 				case Key.P:
-				{
 					Settings.Pushback = !Settings.Pushback;
 					break;
-				}
 				case Key.C:
-				{
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+
 					Settings.CameraLock = !Settings.CameraLock;
-					Settings.ApproachRate *= Settings.CameraLock ? 2.5f : 0.4f;
-					Settings.ApproachDistance *= Settings.CameraLock ? 2.5f : 0.4f;
 					break;
-				}
 				case Key.Equal:
-				{
-					CurrentAttempt.Speed += 0.05f;
-					Audio.PitchScale = CurrentAttempt.Speed;
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+					
+					CurrentAttempt.Speed = Math.Round((CurrentAttempt.Speed + 0.05) * 100) / 100;
+					Audio.PitchScale = (float)CurrentAttempt.Speed;
 					break;
-				}
 				case Key.Minus:
-				{
-					CurrentAttempt.Speed = Math.Max(0.05f, CurrentAttempt.Speed - 0.05f);
-					Audio.PitchScale = CurrentAttempt.Speed;
+					if (Lobby.PlayerCount > 1)
+					{
+						break;
+					}
+					
+					CurrentAttempt.Speed = Math.Max(0.05, Math.Round((CurrentAttempt.Speed - 0.05) * 100) / 100);
+					Audio.PitchScale = (float)CurrentAttempt.Speed;
 					break;
-				}
 			}
 		}
 	}
 
 	public override void _UnhandledInput(InputEvent @event)
-    {
-        if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.Pressed)
+	{
+		if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.Pressed)
 		{
 			if (eventMouseButton.CtrlPressed)
 			{
 				switch (eventMouseButton.ButtonIndex)
 				{
 					case MouseButton.WheelUp:
-					{
 						Settings.VolumeMaster = Math.Min(1, Settings.VolumeMaster + 0.025f);
 						break;
-					}
 					case MouseButton.WheelDown:
-					{
 						Settings.VolumeMaster = Math.Max(0, Settings.VolumeMaster - 0.025f);
 						break;
-					}
 				}
 
 				UpdateVolume();
 			}
 		}
-    }
+	}
 
-	public static void Play(Map map, float speed = 1, string[] mods = null, string[] players = null)
+	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null)
 	{
 		CurrentAttempt = new Attempt(map, speed, mods, players);
 		Playing = true;
@@ -405,11 +510,6 @@ public partial class Game : Node3D
 		}
 	}
 
-	public static void SetPlayerScore(string player, int score)
-	{
-		Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode(player).GetNode<Label>("Score").Text = score.ToString();
-	}
-
 	public static void QueueStop()
 	{
 		StopQueued = true;
@@ -428,6 +528,14 @@ public partial class Game : Node3D
 	{
 		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
 		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
+	}
+
+	public static void UpdateScore(string player, int score)
+	{
+		//ColorRect playerScore = Leaderboard.GetNode("SubViewport").GetNode("Players").GetNode<ColorRect>(player);
+		//Label scoreLabel = playerScore.GetNode<Label>("Score");
+		//playerScore.Position = new Vector2(playerScore.Position.X, score);
+		//scoreLabel.Text = score.ToString();
 	}
 
 	private static string FormatTime(double seconds, bool padMinutes = false)
