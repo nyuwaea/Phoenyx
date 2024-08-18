@@ -6,7 +6,7 @@ public class Lobby
     public static int PlayerCount = 0;
     public static int PlayersReady = 0;
     public static Map Map;
-    public static float Speed = 1;
+    public static double Speed = 1;
     public static string[] Mods = new string[]{"NoFail"};
 
     public delegate void AllReadyEventHandler();

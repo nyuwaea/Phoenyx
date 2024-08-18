@@ -30,7 +30,6 @@ public partial class MainMenu : Control
 		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 		
 		Input.MouseMode = Input.MouseModeEnum.Visible;
-		DisplayServer.WindowSetMode(DisplayServer.WindowMode.Windowed);
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Adaptive);
 
 		// Map selection

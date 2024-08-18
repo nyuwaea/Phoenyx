@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://c3x2cp3tx4vqt"
-path.s3tc="res://.godot/imported/misses.png-3707265faa65c4bfca51bf153197deb7.s3tc.ctex"
+uid="uid://bh68kecn6dn1c"
+path.s3tc="res://.godot/imported/miss_feedback.png-354524fbd15fdb17397f357684501139.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://skin/misses.png"
-dest_files=["res://.godot/imported/misses.png-3707265faa65c4bfca51bf153197deb7.s3tc.ctex"]
+source_file="res://skin/miss_feedback.png"
+dest_files=["res://.godot/imported/miss_feedback.png-354524fbd15fdb17397f357684501139.s3tc.ctex"]
 
 [params]
 

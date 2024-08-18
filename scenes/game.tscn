@@ -108,18 +108,18 @@ albedo_texture = SubResource("ViewportTexture_crm1r")
 texture_repeat = false
 
 [sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
-font_size = 128
+font_size = 160
 
 [sub_resource type="LabelSettings" id="LabelSettings_5bid2"]
-font_size = 72
+font_size = 96
 font_color = Color(1, 1, 1, 0.627451)
 
 [sub_resource type="LabelSettings" id="LabelSettings_4qhw1"]
-font_size = 72
+font_size = 96
 font_color = Color(1, 1, 1, 0.627451)
 
 [sub_resource type="LabelSettings" id="LabelSettings_s1j5a"]
-font_size = 128
+font_size = 160
 
 [node name="Node3D" type="Node3D"]
 script = ExtResource("1_v5074")
@@ -223,7 +223,6 @@ mesh = SubResource("QuadMesh_ssyve")
 [node name="SubViewport" type="SubViewport" parent="PanelRight"]
 disable_3d = true
 transparent_bg = true
-msaa_2d = 1
 size = Vector2i(800, 2000)
 
 [node name="Background" type="TextureRect" parent="PanelRight/SubViewport"]
@@ -258,9 +257,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -555.0
-offset_top = 110.0
+offset_top = 96.0
 offset_right = -90.0
-offset_bottom = 261.0
+offset_bottom = 247.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -276,9 +275,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = 91.0
-offset_top = 110.0
+offset_top = 96.0
 offset_right = 556.0
-offset_bottom = 261.0
+offset_bottom = 247.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -305,7 +304,6 @@ label_settings = SubResource("LabelSettings_s1j5a")
 horizontal_alignment = 1
 
 [node name="HitsIcon" type="TextureRect" parent="PanelRight/SubViewport"]
-modulate = Color(0.627451, 1, 0.627451, 1)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -322,7 +320,6 @@ texture = ExtResource("13_6rhgc")
 expand_mode = 2
 
 [node name="MissesIcon" type="TextureRect" parent="PanelRight/SubViewport"]
-modulate = Color(1, 0.627451, 0.627451, 1)
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
@@ -384,6 +381,14 @@ pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0.12549)
 outline_modulate = Color(0, 0, 0, 0)
 text = "1.00x"
+font = ExtResource("5_pxgh4")
+
+[node name="Skip" type="Label3D" parent="."]
+transform = Transform3D(7, 0, 0, 0, 6.76148, 1.81173, 0, -1.81173, 6.76148, 0, -5, -10)
+pixel_size = 0.0025
+modulate = Color(1, 1, 1, 0)
+outline_modulate = Color(0, 0, 0, 0)
+text = "Press Space to skip"
 font = ExtResource("5_pxgh4")
 
 [node name="FPSCounter" type="Label" parent="."]

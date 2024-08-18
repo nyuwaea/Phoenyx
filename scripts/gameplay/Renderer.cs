@@ -19,7 +19,7 @@ public partial class Renderer : MultiMeshInstance3D
         {
             Note note = Game.ProcessNotes[i];
 
-            float depth = (note.Millisecond - (float)Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance / Game.CurrentAttempt.Speed;
+            float depth = (note.Millisecond - (float)Game.CurrentAttempt.Progress) / (1000 * Settings.ApproachTime) * Settings.ApproachDistance / (float)Game.CurrentAttempt.Speed;
             float alpha = Math.Clamp((1 - depth / Settings.ApproachDistance) / Settings.FadeIn, 0, 1);
             
             if (Settings.FadeOut)
