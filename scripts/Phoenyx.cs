@@ -59,6 +59,7 @@ public class Util
     };
 
     public static GodotObject DiscordRPC = (GodotObject)GD.Load<GDScript>("res://scripts/DiscordRPC.gd").New();
+    public static GodotObject OBJParser = (GodotObject)GD.Load<GDScript>("res://scripts/OBJParser.gd").New();
 
     public static void Setup()
     {
@@ -103,7 +104,6 @@ public class Util
             {
                 var source = ResourceLoader.Load($"res://skin/{skinFile}");
                 byte[] buffer = System.Array.Empty<byte>();
-                Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
                 
                 switch (source.GetType().Name)
                 {
@@ -119,10 +119,16 @@ public class Util
                     }
                     case "ArrayMesh":
                     {
-                        //buffer = (source as ArrayMesh).
                         break;
                     }
                 }
+
+                if (buffer.Length == 0)
+                {
+                    continue;
+                }
+
+                Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
 
                 target.StoreBuffer(buffer);
                 target.Close();

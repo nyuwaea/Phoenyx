@@ -13,7 +13,7 @@ public partial class Renderer : MultiMeshInstance3D
 
         Multimesh.InstanceCount = Game.ToProcess;
 
-        Transform3D transform = new Transform3D(new Vector3(Settings.NoteSize, 0, 0), new Vector3(0, Settings.NoteSize, 0), new Vector3(0, 0, Settings.NoteSize), Vector3.Zero);
+        Transform3D transform = new Transform3D(new Vector3(Settings.NoteSize / 2, 0, 0), new Vector3(0, Settings.NoteSize / 2, 0), new Vector3(0, 0, Settings.NoteSize / 2), Vector3.Zero);
 
         for (int i = 0; i < Game.ToProcess; i++)
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using Godot;
@@ -20,6 +21,7 @@ public partial class Game : Node3D
 	private static Label3D ProgressLabel;
 	private static MeshInstance3D Cursor;
 	private static MeshInstance3D Grid;
+	private static MultiMeshInstance3D NotesMultimesh;
 	private static TextureRect Health;
 	private static TextureRect ProgressBar;
 	private static SubViewport PanelLeft;
@@ -161,9 +163,9 @@ public partial class Game : Node3D
 		ProgressLabel = GetNode<Label3D>("Progress");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
 		Grid = GetNode<MeshInstance3D>("Grid");
+		NotesMultimesh = GetNode<MultiMeshInstance3D>("Notes");
 		Health = GetNode("Health").GetNode("SubViewport").GetNode<TextureRect>("Main");
 		ProgressBar = GetNode("ProgressBar").GetNode("SubViewport").GetNode<TextureRect>("Main");
-		//Leaderboard = GetNode<MeshInstance3D>("Leaderboard");
 		PanelLeft = GetNode("PanelLeft").GetNode<SubViewport>("SubViewport");
 		PanelRight = GetNode("PanelRight").GetNode<SubViewport>("SubViewport");
 		AccuracyLabel = PanelRight.GetNode<Label>("Accuracy");
@@ -200,8 +202,15 @@ public partial class Game : Node3D
 			Health.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
 			ProgressBar.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
 			ProgressBar.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
-			//NotesMultimesh.Multimesh.Mesh = 
 			
+			if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
+			{
+				NotesMultimesh.Multimesh.Mesh = (ArrayMesh)Util.OBJParser.Call("load_obj", $"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj");
+			}
+			else
+			{
+				NotesMultimesh.Multimesh.Mesh = GD.Load<ArrayMesh>($"res://skin/note.obj");
+			}
 		}
 		catch (Exception exception)
 		{
@@ -222,7 +231,7 @@ public partial class Game : Node3D
 
 		MapLength += Constants.HitWindow;
 
-		FileAccess hitSoundFile = FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", FileAccess.ModeFlags.Read);
+		Godot.FileAccess hitSoundFile = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
 		HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
 		hitSoundFile.Close();
 

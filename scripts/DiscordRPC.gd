@@ -1,4 +1,4 @@
-func Set(property, value):
+static func Set(property, value):
 	match property:
 		"app_id": DiscordRPC.app_id = value
 		"details": DiscordRPC.details = value
@@ -12,5 +12,5 @@ func Set(property, value):
 
 	Refresh()
 	
-func Refresh():
+static func Refresh():
 	DiscordRPC.refresh()
