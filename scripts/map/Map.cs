@@ -31,7 +31,7 @@ public struct Map
         Notes = data ?? Array.Empty<Note>();
         Length = length ?? Notes[Notes.Length - 1].Millisecond;
         ID = id ?? new Regex("[^a-zA-Z0-9_ -]").Replace($"{Mappers.Stringify()}_{PrettyTitle}".Replace(" ", "_"), "");
-
+        
         foreach (string mapper in Mappers)
         {
             PrettyMappers += $"{mapper}, ";

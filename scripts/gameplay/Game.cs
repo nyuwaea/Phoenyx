@@ -348,6 +348,17 @@ public partial class Game : Node3D
 			return;
 		}
 
+		if (CurrentAttempt.Skippable)
+		{
+			TargetSkipLabelAlpha = 32f / 255f;
+			ProgressLabel.Modulate = Color.FromHtml("ffffff" + (64 + (int)(172 * (Math.Sin(now / 250000) / 2 + 0.5f))).ToString("X2"));
+		}
+		else
+		{
+			TargetSkipLabelAlpha = 0;
+			ProgressLabel.Modulate = Color.FromHtml("ffffff40");
+		}
+
 		int sum = CurrentAttempt.Hits + CurrentAttempt.Misses;
 		string accuracy = (Math.Floor((float)CurrentAttempt.Hits / sum * 10000) / 100).ToString().PadDecimals(2);
 
@@ -361,20 +372,7 @@ public partial class Game : Node3D
 		ProgressLabel.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
 		Health.Size = new Vector2((float)CurrentAttempt.Health * 10.88f, 80);
 		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
-		SkipLabel.Modulate = Color.FromHtml("#ffffff" + ((int)(255 * SkipLabelAlpha)).ToString("X2"));
-
-		if (CurrentAttempt.Skippable)
-		{
-			int alpha = 64 + (int)(172 * (Math.Sin(now / 250000) / 2 + 0.5f));
-			TargetSkipLabelAlpha = 32f / 255f;
-			
-			ProgressLabel.Modulate = Color.FromHtml("ffffff" + alpha.ToString("X2"));
-		}
-		else
-		{
-			TargetSkipLabelAlpha = 0;
-			ProgressLabel.Modulate = Color.FromHtml("ffffff40");
-		}
+		SkipLabel.Modulate = Color.FromHtml("#ffffff" + Math.Min(255, (int)(255 * SkipLabelAlpha)).ToString("X2"));
 
 		if (StopQueued)
 		{

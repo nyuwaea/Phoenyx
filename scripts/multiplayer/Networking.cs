@@ -1,3 +1,4 @@
+using System;
 using Godot;
 
 public static class Networking
@@ -21,12 +22,12 @@ public static class Networking
 		{
 			if (port != "")
 			{
-				return port.ToInt();
+				return Math.Clamp(port.ToInt(), 0, 65535);
 			}
 		}
 		catch
 		{
-			ToastNotification.Notify($"Could not set port, defaulting to {DefaultPort}", 2);
+			ToastNotification.Notify($"Could not set port, defaulting to {DefaultPort}", 1);
 		}
 		
 		return DefaultPort;
