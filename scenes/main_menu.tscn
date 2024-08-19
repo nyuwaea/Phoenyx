@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=12 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -7,6 +7,7 @@
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
 [ext_resource type="StyleBox" uid="uid://bfimbyi3x5h0n" path="res://theme/line_edit_stylebox_normal.tres" id="6_6ryry"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="6_degwo"]
+[ext_resource type="Texture2D" uid="uid://hfxs1uxwtx36" path="res://textures/logo_full_transparent.png" id="7_jyap7"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46e4t"]
 bg_color = Color(1, 1, 1, 0.0627451)
@@ -174,6 +175,16 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_styles/focus = ExtResource("6_6ryry")
 placeholder_text = "Search"
 caret_blink = true
+
+[node name="Logo" type="TextureRect" parent="TopBar"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 134.0
+offset_bottom = 54.0
+texture = ExtResource("7_jyap7")
+expand_mode = 2
+stretch_mode = 5
 
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
 layout_mode = 1
