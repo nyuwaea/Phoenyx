@@ -17,6 +17,12 @@ public class FileParser
         file.Close();
     }
 
+    public FileParser(byte[] buffer)
+    {
+        Buffer = buffer;
+        Pointer = 0;
+    }
+
     public byte[] Get(int length)
     {
         Pointer += length;

@@ -113,7 +113,7 @@ public partial class ClientManager : Node
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
     public void ReceiveAllReady(string fileName, float speed = 1, string[] mods = null)
     {
-        SceneManager.Load(Node.GetTree(), "res://scenes/game.tscn");
+        SceneManager.Load("res://scenes/game.tscn");
 		Game.Play(MapParser.Decode($"{Constants.UserFolder}/maps/{fileName}"), speed, mods ?? Array.Empty<string>());
     }
 

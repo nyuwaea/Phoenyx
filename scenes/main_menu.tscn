@@ -1,10 +1,16 @@
-[gd_scene load_steps=8 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=12 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
 [ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="3_cp44m"]
 [ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="4_iqqm8"]
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
+[ext_resource type="StyleBox" uid="uid://bfimbyi3x5h0n" path="res://theme/line_edit_stylebox_normal.tres" id="6_6ryry"]
+[ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="6_degwo"]
+[ext_resource type="Texture2D" uid="uid://hfxs1uxwtx36" path="res://textures/logo_full_transparent.png" id="7_jyap7"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46e4t"]
+bg_color = Color(1, 1, 1, 0.0627451)
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -32,24 +38,6 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
-
-[node name="Browse" type="Button" parent="."]
-layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -52.0
-offset_top = -15.5
-offset_right = 52.0
-offset_bottom = 15.5
-grow_horizontal = 2
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Browse Map"
 
 [node name="Multiplayer" type="Panel" parent="."]
 visible = false
@@ -145,6 +133,59 @@ custom_minimum_size = Vector2(440.8, 100)
 layout_mode = 2
 size_flags_horizontal = 4
 
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = 64.0
+theme = ExtResource("2_46xtp")
+theme_override_styles/panel = SubResource("StyleBoxFlat_46e4t")
+
+[node name="Import" type="Button" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -82.0
+offset_top = 14.0
+offset_right = -8.0
+offset_bottom = 46.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Import"
+
+[node name="Search" type="LineEdit" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -340.0
+offset_top = 14.0
+offset_right = -90.0
+offset_bottom = 46.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = ExtResource("6_6ryry")
+placeholder_text = "Search"
+caret_blink = true
+
+[node name="Logo" type="TextureRect" parent="TopBar"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 134.0
+offset_bottom = 54.0
+texture = ExtResource("7_jyap7")
+expand_mode = 2
+stretch_mode = 5
+
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 3
@@ -160,14 +201,43 @@ grow_horizontal = 0
 grow_vertical = 0
 alignment = 2
 
+[node name="MapList" type="ScrollContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 80.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 0
+mouse_filter = 2
+theme = ExtResource("2_46xtp")
+horizontal_scroll_mode = 0
+
+[node name="Container" type="VBoxContainer" parent="MapList"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+theme = ExtResource("2_46xtp")
+
 [node name="FileDialog" type="FileDialog" parent="."]
-title = "Open a File"
+title = "Open File(s)"
 initial_position = 2
 size = Vector2i(454, 175)
 theme = SubResource("Theme_nlclj")
 ok_button_text = "Open"
-file_mode = 0
+file_mode = 1
 access = 2
 use_native_dialog = true
+
+[node name="Cursor" type="TextureRect" parent="."]
+layout_mode = 0
+offset_right = 24.0
+offset_bottom = 24.0
+mouse_filter = 2
+texture = ExtResource("6_degwo")
+expand_mode = 1
 
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]

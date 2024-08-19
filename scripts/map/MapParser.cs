@@ -16,7 +16,7 @@ public class NoteComparer : IComparer<Note>
 
 public partial class MapParser : Node
 {
-	public static void Encode(Map map)
+	public static void Encode(Map map, bool logBenchmark = true)
 	{
 		double start = Time.GetTicksUsec();
 
@@ -25,24 +25,14 @@ public partial class MapParser : Node
 			File.Delete($"{Constants.UserFolder}/maps/{map.ID}.phxm");
 		}
 
-		if (!Directory.Exists($"{Constants.UserFolder}/maps/_CONVERTING"))
+		if (!Directory.Exists($"{Constants.UserFolder}/cache/phxmencode"))
 		{
-			Directory.CreateDirectory($"{Constants.UserFolder}/maps/_CONVERTING");
+			Directory.CreateDirectory($"{Constants.UserFolder}/cache/phxmencode");
 		}
 		
-		string ext = (map.AudioBuffer != null && Encoding.UTF8.GetString(map.AudioBuffer[0..4]) == "OggS") ? "ogg" : "mp3";
-		Godot.FileAccess objects = Godot.FileAccess.Open($"{Constants.UserFolder}/maps/_CONVERTING/objects.phxmo", Godot.FileAccess.ModeFlags.Write);
+		File.WriteAllText($"{Constants.UserFolder}/cache/phxmencode/metadata.json", map.EncodeMeta());
 
-		File.WriteAllText($"{Constants.UserFolder}/maps/_CONVERTING/metadata.json", Json.Stringify(new Godot.Collections.Dictionary(){
-			["ID"] = map.ID,
-			["Artist"] = map.Artist,
-			["Title"] = map.Title,
-			["Mappers"] = map.Mappers,
-			["Difficulty"] = map.Difficulty,
-			["DifficultyName"] = map.DifficultyName,
-			["Length"] = map.Length,
-			["AudioExt"] = ext
-		}, "\t"));
+		Godot.FileAccess objects = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/objects.phxmo", Godot.FileAccess.ModeFlags.Write);
 
 		/*
 			uint32; ms
@@ -51,19 +41,20 @@ public partial class MapParser : Node
 			1 byte OR int32; y
 		*/
 
+		objects.Store32(12);	// type count
 		objects.Store32((uint)map.Notes.Length);	// note count
 
 		foreach (Note note in map.Notes)
 		{
-			bool quantum = (int)note.X != note.X || (int)note.Y != note.Y || note.X < -1 || note.Y < -1;
+			bool quantum = (int)note.X != note.X || (int)note.Y != note.Y || note.X < -1 || note.X > 1 || note.Y < -1 || note.Y > 1;
 			
 			objects.Store32((uint)note.Millisecond);
 			objects.Store8(Convert.ToByte(quantum));
-
+			
 			if (quantum)
 			{
-				objects.Store32((uint)note.X);
-				objects.Store32((uint)note.Y);
+				objects.Store32(BitConverter.SingleToUInt32Bits(note.X));
+				objects.Store32(BitConverter.SingleToUInt32Bits(note.Y));
 			}
 			else
 			{
@@ -86,33 +77,36 @@ public partial class MapParser : Node
 
 		if (map.AudioBuffer != null)
 		{
-			Godot.FileAccess audio = Godot.FileAccess.Open($"{Constants.UserFolder}/maps/_CONVERTING/audio.{ext}", Godot.FileAccess.ModeFlags.Write);
+			Godot.FileAccess audio = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/audio.{map.AudioExt}", Godot.FileAccess.ModeFlags.Write);
 			audio.StoreBuffer(map.AudioBuffer);
 			audio.Close();
 		}
 
 		if (map.CoverBuffer != null)
 		{
-			Godot.FileAccess cover = Godot.FileAccess.Open($"{Constants.UserFolder}/maps/_CONVERTING/cover.png", Godot.FileAccess.ModeFlags.Write);
+			Godot.FileAccess cover = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/cover.png", Godot.FileAccess.ModeFlags.Write);
 			cover.StoreBuffer(map.CoverBuffer);
 			cover.Close();
 		}
 
 		objects.Close();
 
-		ZipFile.CreateFromDirectory($"{Constants.UserFolder}/maps/_CONVERTING", $"{Constants.UserFolder}/maps/{map.ID}.phxm");
+		ZipFile.CreateFromDirectory($"{Constants.UserFolder}/cache/phxmencode", $"{Constants.UserFolder}/maps/{map.ID}.phxm", CompressionLevel.NoCompression, false);
 
-		foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/maps/_CONVERTING"))
+		foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/cache/phxmencode"))
 		{
 			File.Delete(filePath);
 		}
 
-		Directory.Delete($"{Constants.UserFolder}/maps/_CONVERTING");
+		Directory.Delete($"{Constants.UserFolder}/cache/phxmencode");
 
-		Logger.Log($"Encoding: {(Time.GetTicksUsec() - start) / 1000}ms");
+		if (logBenchmark)
+		{
+			Logger.Log($"Encoding PHXM: {(Time.GetTicksUsec() - start) / 1000}ms");
+		}
 	}
 
-	public static Map Decode(string path)
+	public static Map Decode(string path, bool logBenchmark = true)
 	{
 		if (!File.Exists(path))
 		{
@@ -140,11 +134,14 @@ public partial class MapParser : Node
 				throw Logger.Error("File extension not supported");
 		}
 
-		Logger.Log($"Decoding: {(Time.GetTicksUsec() - start) / 1000}ms");
+		if (logBenchmark)
+		{
+			Logger.Log($"Decoding {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
+		}
 
 		if (ext != "phxm" && !File.Exists($"{Constants.UserFolder}/maps/{map.ID}.phxm"))
 		{
-			Encode(map);
+			Encode(map, logBenchmark);
 		}
 
 		return map;
@@ -257,7 +254,7 @@ public partial class MapParser : Node
 			
 			uint mapperCount = file.GetUInt16();
 			string[] mappers = new string[mapperCount];
-
+			
 			for (int i = 0; i < mapperCount; i++)
 			{
 				uint mapperNameLength = file.GetUInt16();
@@ -274,10 +271,21 @@ public partial class MapParser : Node
 			
 			if (file.GetString(file.GetUInt16()) == "difficulty_name")
 			{
-				file.Skip(1);	// dnc
-				difficultyName = file.GetString((int)file.GetUInt32());
-			}
+				int length = 0;
 
+				switch (file.Get(1)[0])
+				{
+					case 9:
+						length = file.GetUInt16();
+						break;
+					case 11:
+						length = (int)file.GetUInt32();
+						break;
+				}
+				
+				difficultyName = file.GetString(length);
+			}
+			
 			if (hasAudio)
 			{
 				file.Seek((int)audioByteOffset);
@@ -296,7 +304,7 @@ public partial class MapParser : Node
 			
 			for (int i = 0; i < noteCount; i++)
 			{
-				uint millisecond = file.GetUInt32();
+				int millisecond = (int)file.GetUInt32();
 
 				file.Skip(1);	// marker type, always note
 
@@ -315,7 +323,7 @@ public partial class MapParser : Node
 					y = file.Get(1)[0];
 				}
 
-				notes[i] = new Note(0, (int)millisecond, x - 1, -y + 1);
+				notes[i] = new Note(0, millisecond, x - 1, -y + 1);
 			}
 			
 			Array.Sort(notes, new NoteComparer());
@@ -324,8 +332,8 @@ public partial class MapParser : Node
 			{
 				notes[i].Index = i;
 			}
-
-			map = new Map(notes, id, artist, song, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
+			
+			map = new Map(notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -347,38 +355,46 @@ public partial class MapParser : Node
 
 			Directory.Delete($"{Constants.UserFolder}/cache/phxmdecode");
 		}
-
-		ZipFile.ExtractToDirectory(path, $"{Constants.UserFolder}/cache/phxmdecode");
+		
 		Map map;
 
 		try
 		{
-			Godot.FileAccess meta = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmdecode/metadata.json", Godot.FileAccess.ModeFlags.Read);
-            Godot.Collections.Dictionary metadata = (Godot.Collections.Dictionary)Json.ParseString(meta.GetAsText());
-			FileParser objects = new($"{Constants.UserFolder}/cache/phxmdecode/objects.phxmo");
+			ZipArchive file = ZipFile.OpenRead(path);
+			Stream metaStream = file.GetEntry("metadata.json").Open();
+			Stream objectsStream = file.GetEntry("objects.phxmo").Open();
 
+			byte[] metaBuffer = new byte[metaStream.Length];
+			byte[] objectsBuffer = new byte[objectsStream.Length];
 			byte[] audioBuffer = null;
 			byte[] coverBuffer = null;
+			metaStream.Read(metaBuffer, 0, (int)metaStream.Length);
+			objectsStream.Read(objectsBuffer, 0, (int)objectsStream.Length);
+			metaStream.Close();
+			objectsStream.Close();
 
-			if (File.Exists($"{Constants.UserFolder}/cache/phxmdecode/audio.{metadata["AudioExt"]}"))
+			Godot.Collections.Dictionary metadata = (Godot.Collections.Dictionary)Json.ParseString(Encoding.UTF8.GetString(metaBuffer));
+			FileParser objects = new(objectsBuffer);
+
+			if ((bool)metadata["HasAudio"])
 			{
-				Godot.FileAccess audio = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmdecode/audio.{metadata["AudioExt"]}", Godot.FileAccess.ModeFlags.Read);
-
-				audioBuffer = audio.GetBuffer((long)audio.GetLength());
-				audio.Close();
+				Stream audioStream = file.GetEntry($"audio.{metadata["AudioExt"]}").Open();
+				audioBuffer = new byte[audioStream.Length];
+				audioStream.Read(audioBuffer, 0, (int)audioStream.Length);
+				audioStream.Close();
 			}
 
-			if (File.Exists($"{Constants.UserFolder}/cache/phxmdecode/cover.png"))
+			if ((bool)metadata["HasCover"])
 			{
-				Godot.FileAccess cover = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmdecode/cover.png", Godot.FileAccess.ModeFlags.Read);
-
-				coverBuffer = cover.GetBuffer((long)cover.GetLength());
-				cover.Close();
+				Stream coverStream = file.GetEntry($"cover.png").Open();
+				coverBuffer = new byte[coverStream.Length];
+				coverStream.Read(coverBuffer, 0, (int)coverStream.Length);
+				coverStream.Close();
 			}
 
-			meta.Close();
-
+			uint typeCount = objects.GetUInt32();
 			uint noteCount = objects.GetUInt32();
+			
 			Note[] notes = new Note[noteCount];
 			
 			for (int i = 0; i < noteCount; i++)
@@ -387,7 +403,7 @@ public partial class MapParser : Node
 				bool quantum = objects.GetBool();
 				float x;
 				float y;
-
+				
 				if (quantum)
 				{
 					x = objects.GetFloat();
@@ -402,7 +418,7 @@ public partial class MapParser : Node
 				notes[i] = new(i, ms, x, y);
 			}
 			
-			map = new(notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer);
+			map = new(notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{
