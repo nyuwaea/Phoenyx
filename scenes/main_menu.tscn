@@ -1,10 +1,11 @@
-[gd_scene load_steps=10 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=11 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
 [ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="3_cp44m"]
 [ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="4_iqqm8"]
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
+[ext_resource type="StyleBox" uid="uid://bfimbyi3x5h0n" path="res://theme/line_edit_stylebox_normal.tres" id="6_6ryry"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="6_degwo"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46e4t"]
@@ -156,6 +157,23 @@ focus_mode = 0
 theme = ExtResource("2_46xtp")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Import"
+
+[node name="Search" type="LineEdit" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -340.0
+offset_top = 14.0
+offset_right = -90.0
+offset_bottom = 46.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = ExtResource("6_6ryry")
+placeholder_text = "Search"
+caret_blink = true
 
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
 layout_mode = 1

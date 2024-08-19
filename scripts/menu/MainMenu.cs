@@ -16,6 +16,7 @@ public partial class MainMenu : Control
 	private static TextureRect Cursor;
 	private static Panel TopBar;
 	private static Button Import;
+	private static LineEdit Search;
 	private static FileDialog FileDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
@@ -74,11 +75,23 @@ public partial class MainMenu : Control
 
 		TopBar = GetNode<Panel>("TopBar");
 		Import = TopBar.GetNode<Button>("Import");
+		Search = TopBar.GetNode<LineEdit>("Search");
 		FileDialog = GetNode<FileDialog>("FileDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
 		
 		Import.Pressed += FileDialog.Show;
+		Search.TextChanged += (string text) => {
+			if (text == "")
+			{
+				Search.ReleaseFocus();
+			}
+
+			foreach (Panel map in MapListContainer.GetChildren())
+			{
+				map.Visible = map.Name.ToString().Contains(text);
+			}
+		};
 		FileDialog.FilesSelected += (string[] files) => {
 			//if (Lobby.PlayerCount > 0)
 			//{
@@ -190,11 +203,8 @@ public partial class MainMenu : Control
 				case Key.Escape:
 					Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
 					break;
-				case Key.Enter:
-					SendMessage();
-					break;
-				case Key.KpEnter:
-					SendMessage();
+				default:
+					Search.GrabFocus();
 					break;
 			}
 		}
