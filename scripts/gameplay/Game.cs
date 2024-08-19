@@ -519,7 +519,7 @@ public partial class Game : Node3D
 		ProcessNotes = null;
 		CurrentAttempt = new Attempt();
 
-		SceneManager.Load(Node3D.GetTree(), "res://scenes/main_menu.tscn");
+		SceneManager.Load( "res://scenes/main_menu.tscn");
 	}
 
 	private static void UpdateVolume()

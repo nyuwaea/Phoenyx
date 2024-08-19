@@ -1,13 +1,19 @@
 using Godot;
 
-public class SceneManager
+public partial class SceneManager : Node
 {
+    private static Node Node;
     public static Node Scene;
 
-    public static void Load(SceneTree tree, string path)
+    public override void _Ready()
     {
-        tree.ChangeSceneToFile(path);
-        tree.Connect("node_added", Callable.From((Node child) => {
+        Node = this;
+    }
+
+    public static void Load(string path)
+    {
+        Node.GetTree().ChangeSceneToFile(path);
+        Node.GetTree().Connect("node_added", Callable.From((Node child) => {
             Scene = child;
         }), 4);
     }

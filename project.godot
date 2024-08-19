@@ -26,6 +26,7 @@ DiscordRPCLoader="*res://addons/discord-rpc-gd/nodes/discord_autoload.gd"
 ServerManager="*res://scripts/multiplayer/ServerManager.cs"
 ClientManager="*res://scripts/multiplayer/ClientManager.cs"
 Keybinds="*res://scripts/Keybinds.cs"
+SceneManager="*res://scripts/SceneManager.cs"
 
 [debug]
 
