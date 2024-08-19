@@ -16,6 +16,7 @@ public struct Constants
     public static float HitBoxSize {get;} = 0.07f;
     public static float HitWindow {get;} = 55f;
     public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
+    public static string[] Difficulties = new string[6]{"N/A", "Easy", "Medium", "Hard", "Expert", "Insane"};
 }
 
 public struct Settings
@@ -76,6 +77,11 @@ public class Util
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))
         {
             Directory.CreateDirectory($"{Constants.UserFolder}/cache");
+        }
+
+        if (!Directory.Exists($"{Constants.UserFolder}/cache/maps"))
+        {
+            Directory.CreateDirectory($"{Constants.UserFolder}/cache/maps");
         }
 
         foreach (string cacheFile in Directory.GetFiles($"{Constants.UserFolder}/cache"))
