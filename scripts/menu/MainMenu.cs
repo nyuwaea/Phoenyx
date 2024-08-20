@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -15,11 +16,16 @@ public partial class MainMenu : Control
 
 	private static TextureRect Cursor;
 	private static Panel TopBar;
+
 	private static Button Import;
+	private static Button UserFolder;
 	private static LineEdit Search;
 	private static FileDialog FileDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
+
+	private static ColorRect SettingsHolder;
+
 	private static Panel MultiplayerHolder;
 	private static LineEdit IPLine;
 	private static LineEdit PortLine;
@@ -38,6 +44,7 @@ public partial class MainMenu : Control
 	private static bool RightMouseHeld = false;
 	private static List<string> LoadedMaps = new();
 	private static Panel SelectedMap = null;
+	private static bool SettingsShown = false;
 
 	public override void _Ready()
 	{
@@ -63,11 +70,16 @@ public partial class MainMenu : Control
 				UpdateMaxScroll();
 				TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
 			};
+			GetViewport().Connect("files_dropped", Callable.From((string[] files) => {
+				MapParser.Import(files);
+				UpdateMapList();
+			}));
 		}
 
 		// General
 
 		Cursor = GetNode<TextureRect>("Cursor");
+		TopBar = GetNode<Panel>("TopBar");
 		LoadedMaps = new();
 		SelectedMap = null;
 
@@ -75,15 +87,18 @@ public partial class MainMenu : Control
 
 		// Map selection
 
-		TopBar = GetNode<Panel>("TopBar");
 		Import = TopBar.GetNode<Button>("Import");
+		UserFolder = TopBar.GetNode<Button>("UserFolder");
 		Search = TopBar.GetNode<LineEdit>("Search");
 		FileDialog = GetNode<FileDialog>("FileDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
 		
 		Import.Pressed += FileDialog.Show;
-		Search.TextChanged += (string text) => {
+		UserFolder.Pressed += () => {
+			OS.ShellOpen($"{Constants.UserFolder}");
+		};
+ 		Search.TextChanged += (string text) => {
 			text = text.ToLower();
 
 			if (text == "")
@@ -113,25 +128,7 @@ public partial class MainMenu : Control
 			//else
 			//{
 
-			double start = Time.GetTicksUsec();
-			int good = 0;
-			int corrupted = 0;
-			
-			foreach (string file in files)
-			{
-				try
-				{
-					MapParser.Decode(file, false);
-					good++;
-				}
-				catch
-				{
-					corrupted++;
-					continue;
-				}
-			}
-
-			Logger.Log($"BULK IMPORT: {(Time.GetTicksUsec() - start) / 1000}ms; TOTAL: {good + corrupted}; CORRUPT: {corrupted}");
+			MapParser.Import(files);
 
 			UpdateMapList();
 			
@@ -145,7 +142,16 @@ public partial class MainMenu : Control
 
 		UpdateMapList();
 
+		// Settings
+
+		SettingsHolder = GetNode<ColorRect>("Settings");
+
+		SettingsHolder.GetNode<Button>("Deselect").Pressed += () => {
+			HideSettings();
+		};
+
 		// Multiplayer
+
 		MultiplayerHolder = GetNode<Panel>("Multiplayer");
 		IPLine = MultiplayerHolder.GetNode<LineEdit>("IP");
 		PortLine = MultiplayerHolder.GetNode<LineEdit>("Port");
@@ -202,14 +208,26 @@ public partial class MainMenu : Control
     {
         if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
-			switch (eventKey.Keycode)
+			if (eventKey.CtrlPressed)
 			{
-				case Key.Escape:
-					Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
-					break;
-				default:
-					Search.GrabFocus();
-					break;
+				switch (eventKey.Keycode)
+				{
+					case Key.O:
+						ShowSettings(!SettingsShown);
+						break;
+				}
+			}
+			else
+			{
+				switch (eventKey.Keycode)
+				{
+					case Key.Escape:
+						Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+						break;
+					default:
+						Search.GrabFocus();
+						break;
+				}
 			}
 		}
 		else if (@event is InputEventMouseButton eventMouseButton)
@@ -246,6 +264,22 @@ public partial class MainMenu : Control
 			Quit();
 		}
     }
+
+	public static void ShowSettings(bool show = true)
+	{
+		SettingsShown = show;
+
+		SettingsHolder.GetNode<Button>("Deselect").MouseFilter = SettingsShown ? MouseFilterEnum.Stop : MouseFilterEnum.Ignore;
+
+		Tween tween = SettingsHolder.CreateTween();
+		tween.TweenProperty(SettingsHolder, "modulate", Color.FromHtml($"#ffffff{(SettingsShown ? "ff" : "00")}"), 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+		tween.Play();
+	}
+
+	public static void HideSettings()
+	{
+		ShowSettings(false);
+	}
 
     public static void UpdateMapList()
 	{
@@ -340,7 +374,7 @@ public partial class MainMenu : Control
 					if (SelectedMap == mapButton)
 					{
 						Map map = MapParser.Decode(mapFile);
-						
+
 						SceneManager.Load("res://scenes/game.tscn");
 						Game.Play(map, Lobby.Speed, Lobby.Mods);
 					}

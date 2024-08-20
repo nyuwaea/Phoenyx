@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=15 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -11,6 +11,15 @@
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46e4t"]
 bg_color = Color(1, 1, 1, 0.0627451)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4xjus"]
+bg_color = Color(0.051971, 0.051971, 0.0519709, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wntef"]
+bg_color = Color(0.0295065, 0.0295066, 0.0295065, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_txd3p"]
+font_size = 26
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -149,9 +158,9 @@ layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -82.0
+offset_left = -340.0
 offset_top = 14.0
-offset_right = -8.0
+offset_right = -266.0
 offset_bottom = 46.0
 grow_horizontal = 0
 focus_mode = 0
@@ -159,14 +168,29 @@ theme = ExtResource("2_46xtp")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "Import"
 
+[node name="UserFolder" type="Button" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -448.0
+offset_top = 14.0
+offset_right = -348.0
+offset_bottom = 46.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "User Folder"
+
 [node name="Search" type="LineEdit" parent="TopBar"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -340.0
+offset_left = -258.0
 offset_top = 14.0
-offset_right = -90.0
+offset_right = -8.0
 offset_bottom = 46.0
 grow_horizontal = 0
 mouse_default_cursor_shape = 0
@@ -221,6 +245,61 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
 theme = ExtResource("2_46xtp")
+
+[node name="Settings" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.501961)
+
+[node name="Deselect" type="Button" parent="Settings"]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+action_mode = 0
+button_mask = 3
+
+[node name="Holder" type="Panel" parent="Settings"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.15
+anchor_top = 0.2
+anchor_right = 0.85
+anchor_bottom = 0.8
+theme = ExtResource("2_46xtp")
+theme_override_styles/panel = SubResource("StyleBoxFlat_4xjus")
+
+[node name="Header" type="Panel" parent="Settings/Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 40.0
+theme = ExtResource("2_46xtp")
+theme_override_styles/panel = SubResource("StyleBoxFlat_wntef")
+
+[node name="Label" type="Label" parent="Settings/Holder/Header"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_46xtp")
+text = "SETTINGS"
+label_settings = SubResource("LabelSettings_txd3p")
+vertical_alignment = 1
 
 [node name="FileDialog" type="FileDialog" parent="."]
 title = "Open File(s)"

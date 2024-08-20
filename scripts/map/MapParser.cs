@@ -16,6 +16,29 @@ public class NoteComparer : IComparer<Note>
 
 public partial class MapParser : Node
 {
+	public static void Import(string[] files)
+	{
+		double start = Time.GetTicksUsec();
+		int good = 0;
+		int corrupted = 0;
+		
+		foreach (string file in files)
+		{
+			try
+			{
+				Decode(file, false);
+				good++;
+			}
+			catch
+			{
+				corrupted++;
+				continue;
+			}
+		}
+
+		Logger.Log($"BULK IMPORT: {(Time.GetTicksUsec() - start) / 1000}ms; TOTAL: {good + corrupted}; CORRUPT: {corrupted}");
+	}
+
 	public static void Encode(Map map, bool logBenchmark = true)
 	{
 		double start = Time.GetTicksUsec();
@@ -111,7 +134,7 @@ public partial class MapParser : Node
 		if (!File.Exists(path))
 		{
 			ToastNotification.Notify("Invalid file path", 2);
-			throw Logger.Error("Invalid file path");
+			throw Logger.Error($"Invalid file path: {path}");
 		}
 
 		Map map;
