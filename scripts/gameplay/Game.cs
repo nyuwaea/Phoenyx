@@ -87,7 +87,6 @@ public partial class Game : Node3D
 			Map.Notes[index].Hit = true;
 
 			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
-			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
 			if (HitTween != null)
 			{
@@ -117,7 +116,6 @@ public partial class Game : Node3D
 			}
 
 			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
-			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
 			if (MissTween != null)
 			{
@@ -185,10 +183,12 @@ public partial class Game : Node3D
 
 		Camera.Fov = Settings.FoV;
 		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
+		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
+		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 
 		Util.DiscordRPC.Call("Set", "details", "Playing a map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
-		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000);
+		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000 / CurrentAttempt.Speed);
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
@@ -428,14 +428,6 @@ public partial class Game : Node3D
 				case Key.P:
 					Settings.Pushback = !Settings.Pushback;
 					break;
-				case Key.C:
-					if (Lobby.PlayerCount > 1)
-					{
-						break;
-					}
-
-					Settings.CameraLock = !Settings.CameraLock;
-					break;
 				case Key.Equal:
 					if (Lobby.PlayerCount > 1)
 					{
@@ -497,13 +489,18 @@ public partial class Game : Node3D
 			else
 			{
 				CurrentAttempt.Progress = CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond - Settings.ApproachTime * 1250 * CurrentAttempt.Speed; // turn AT to ms and multiply by 1.25x
+
+				Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + (CurrentAttempt.Map.Length - CurrentAttempt.Progress) / 1000 / CurrentAttempt.Speed);
 		
-				if (!Audio.Playing)
+				if (CurrentAttempt.Map.AudioBuffer != null)
 				{
-					Audio.Play();
+					if (!Audio.Playing)
+					{
+						Audio.Play();
+					}
+
+					Audio.Seek((float)CurrentAttempt.Progress / 1000);
 				}
-				
-				Audio.Seek((float)CurrentAttempt.Progress / 1000);
 			}
 		}
 	}

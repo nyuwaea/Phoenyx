@@ -71,6 +71,8 @@ public partial class MainMenu : Control
 		LoadedMaps = new();
 		SelectedMap = null;
 
+		Cursor.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+
 		// Map selection
 
 		TopBar = GetNode<Panel>("TopBar");
@@ -82,6 +84,8 @@ public partial class MainMenu : Control
 		
 		Import.Pressed += FileDialog.Show;
 		Search.TextChanged += (string text) => {
+			text = text.ToLower();
+
 			if (text == "")
 			{
 				Search.ReleaseFocus();
@@ -89,7 +93,7 @@ public partial class MainMenu : Control
 
 			foreach (Panel map in MapListContainer.GetChildren())
 			{
-				map.Visible = map.Name.ToString().Contains(text);
+				map.Visible = map.GetNode<Label>("Title").Text.ToLower().Contains(text);
 			}
 		};
 		FileDialog.FilesSelected += (string[] files) => {
@@ -372,7 +376,7 @@ public partial class MainMenu : Control
 		{
 			return;
 		}
-	
+
 		ServerManager.Node.Rpc("ValidateChat", ChatLine.Text);
 		ChatLine.Text = "";
 	}
@@ -380,6 +384,7 @@ public partial class MainMenu : Control
     private static void Quit()
 	{
 		Util.SaveSettings();
+		Util.DiscordRPC.Call("Clear");
 		Control.GetTree().Quit();
 	}
 }

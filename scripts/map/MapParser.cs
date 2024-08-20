@@ -139,7 +139,7 @@ public partial class MapParser : Node
 			Logger.Log($"Decoding {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
 		}
 
-		if (ext != "phxm" && !File.Exists($"{Constants.UserFolder}/maps/{map.ID}.phxm"))
+		if (!File.Exists($"{Constants.UserFolder}/maps/{map.ID}.phxm"))
 		{
 			Encode(map, logBenchmark);
 		}
