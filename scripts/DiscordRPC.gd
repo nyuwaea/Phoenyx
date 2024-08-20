@@ -14,3 +14,6 @@ static func Set(property, value):
 	
 static func Refresh():
 	DiscordRPC.refresh()
+
+static func Clear():
+	DiscordRPC.clear(false)

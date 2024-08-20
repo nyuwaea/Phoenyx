@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -15,11 +16,17 @@ public partial class MainMenu : Control
 
 	private static TextureRect Cursor;
 	private static Panel TopBar;
-	private static Button Import;
+
+	private static Button ImportButton;
+	private static Button UserFolderButton;
+	private static Button SettingsButton;
 	private static LineEdit Search;
 	private static FileDialog FileDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
+
+	private static Panel SettingsHolder;
+
 	private static Panel MultiplayerHolder;
 	private static LineEdit IPLine;
 	private static LineEdit PortLine;
@@ -38,6 +45,7 @@ public partial class MainMenu : Control
 	private static bool RightMouseHeld = false;
 	private static List<string> LoadedMaps = new();
 	private static Panel SelectedMap = null;
+	private static bool SettingsShown = false;
 
 	public override void _Ready()
 	{
@@ -63,25 +71,41 @@ public partial class MainMenu : Control
 				UpdateMaxScroll();
 				TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
 			};
+			GetViewport().Connect("files_dropped", Callable.From((string[] files) => {
+				MapParser.Import(files);
+				UpdateMapList();
+			}));
 		}
 
 		// General
 
 		Cursor = GetNode<TextureRect>("Cursor");
+		TopBar = GetNode<Panel>("TopBar");
 		LoadedMaps = new();
 		SelectedMap = null;
 
+		Cursor.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+
 		// Map selection
 
-		TopBar = GetNode<Panel>("TopBar");
-		Import = TopBar.GetNode<Button>("Import");
+		ImportButton = TopBar.GetNode<Button>("Import");
+		UserFolderButton = TopBar.GetNode<Button>("UserFolder");
+		SettingsButton = TopBar.GetNode<Button>("Settings");
 		Search = TopBar.GetNode<LineEdit>("Search");
 		FileDialog = GetNode<FileDialog>("FileDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
 		
-		Import.Pressed += FileDialog.Show;
-		Search.TextChanged += (string text) => {
+		ImportButton.Pressed += FileDialog.Show;
+		UserFolderButton.Pressed += () => {
+			OS.ShellOpen($"{Constants.UserFolder}");
+		};
+		SettingsButton.Pressed += () => {
+			ShowSettings();
+		};
+ 		Search.TextChanged += (string text) => {
+			text = text.ToLower();
+
 			if (text == "")
 			{
 				Search.ReleaseFocus();
@@ -89,7 +113,7 @@ public partial class MainMenu : Control
 
 			foreach (Panel map in MapListContainer.GetChildren())
 			{
-				map.Visible = map.Name.ToString().Contains(text);
+				map.Visible = map.GetNode<Label>("Title").Text.ToLower().Contains(text);
 			}
 		};
 		FileDialog.FilesSelected += (string[] files) => {
@@ -109,25 +133,7 @@ public partial class MainMenu : Control
 			//else
 			//{
 
-			double start = Time.GetTicksUsec();
-			int good = 0;
-			int corrupted = 0;
-			
-			foreach (string file in files)
-			{
-				try
-				{
-					MapParser.Decode(file, false);
-					good++;
-				}
-				catch
-				{
-					corrupted++;
-					continue;
-				}
-			}
-
-			Logger.Log($"BULK IMPORT: {(Time.GetTicksUsec() - start) / 1000}ms; TOTAL: {good + corrupted}; CORRUPT: {corrupted}");
+			MapParser.Import(files);
 
 			UpdateMapList();
 			
@@ -141,7 +147,98 @@ public partial class MainMenu : Control
 
 		UpdateMapList();
 
+		// Settings
+
+		SettingsHolder = GetNode("Settings").GetNode<Panel>("Holder");
+		SettingsHolder.GetParent().GetNode<Button>("Deselect").Pressed += () => {
+			HideSettings();
+		};
+
+		HideSettings();
+
+		foreach (Node holder in SettingsHolder.GetNode("Sidebar").GetNode("Container").GetChildren())
+		{
+			holder.GetNode<Button>("Button").Pressed += () => {
+				foreach (ColorRect otherHolder in SettingsHolder.GetNode("Sidebar").GetNode("Container").GetChildren())
+				{
+					otherHolder.Color = Color.FromHtml($"#ffffff{(holder.Name == otherHolder.Name ? "08" : "00")}");
+				}
+
+				foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
+				{
+					category.Visible = category.Name == holder.Name;
+				}
+			};
+		}
+
+		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
+		{
+			foreach (Panel option in category.GetNode("Container").GetChildren())
+			{
+				var property = new Settings().GetType().GetProperty(option.Name);
+				
+				if (option.FindChild("HSlider") != null)
+				{
+					HSlider slider = option.GetNode<HSlider>("HSlider");
+					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
+
+					slider.Value = (double)property.GetValue(new());
+					lineEdit.Text = slider.Value.ToString();
+
+					slider.ValueChanged += (double value) => {
+						lineEdit.Text = value.ToString();
+
+						UpdateSetting(option.Name, value);
+					};
+					lineEdit.TextSubmitted += (string text) => {
+						try
+						{
+							if (text == "")
+							{
+								text = lineEdit.PlaceholderText;
+								lineEdit.Text = text;
+							}
+
+							double value = text.ToFloat();
+
+							slider.Value = value;
+
+							UpdateSetting(option.Name, value);
+						}
+						catch (Exception exception)
+						{
+							ToastNotification.Notify($"Incorrect format; {exception.Message}", 2);
+						}
+					};
+				}
+				else if (option.FindChild("CheckButton") != null)
+				{
+					CheckButton checkButton = option.GetNode<CheckButton>("CheckButton");
+					
+					checkButton.ButtonPressed = (bool)property.GetValue(new());
+					checkButton.Toggled += (bool value) => {
+						switch (option.Name)
+						{
+							case "CameraLock":
+								Settings.CameraLock = value;
+								break;
+							case "FadeOut":
+								Settings.FadeOut = value;
+								break;
+							case "Pushback":
+								Settings.Pushback = value;
+								break;
+							case "Fullscreen":
+								DisplayServer.WindowSetMode(value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
+								break;
+						}
+					};
+				}
+			}
+		}
+
 		// Multiplayer
+
 		MultiplayerHolder = GetNode<Panel>("Multiplayer");
 		IPLine = MultiplayerHolder.GetNode<LineEdit>("IP");
 		PortLine = MultiplayerHolder.GetNode<LineEdit>("Port");
@@ -178,7 +275,6 @@ public partial class MainMenu : Control
 
 			Host.Disabled = true;
 			Join.Disabled = true;
-			Import.Disabled = true;
 		};
 	}
 
@@ -196,32 +292,23 @@ public partial class MainMenu : Control
 
     public override void _Input(InputEvent @event)
     {
-        if (@event is InputEventKey eventKey && eventKey.Pressed)
+		if (@event is InputEventMouseButton eventMouseButton)
 		{
-			switch (eventKey.Keycode)
+			if (!SettingsShown)
 			{
-				case Key.Escape:
-					Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
-					break;
-				default:
-					Search.GrabFocus();
-					break;
-			}
-		}
-		else if (@event is InputEventMouseButton eventMouseButton)
-		{
-			switch (eventMouseButton.ButtonIndex)
-			{
-				case MouseButton.Right:
-					TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
-					RightMouseHeld = eventMouseButton.Pressed;
-					break;
-				case MouseButton.WheelUp:
-					TargetScroll = Math.Max(0, TargetScroll - 80);
-					break;
-				case MouseButton.WheelDown:
-					TargetScroll = Math.Min(MaxScroll, TargetScroll + 80);
-					break;
+				switch (eventMouseButton.ButtonIndex)
+				{
+					case MouseButton.Right:
+						TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
+						RightMouseHeld = eventMouseButton.Pressed;
+						break;
+					case MouseButton.WheelUp:
+						TargetScroll = Math.Max(0, TargetScroll - 80);
+						break;
+					case MouseButton.WheelDown:
+						TargetScroll = Math.Min(MaxScroll, TargetScroll + 80);
+						break;
+				}
 			}
 		}
 		else if (@event is InputEventMouseMotion eventMouseMotion)
@@ -235,6 +322,44 @@ public partial class MainMenu : Control
 		}
     }
 
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventKey eventKey && eventKey.Pressed)
+		{
+			if (eventKey.CtrlPressed)
+			{
+				switch (eventKey.Keycode)
+				{
+					case Key.O:
+						ShowSettings(!SettingsShown);
+						break;
+				}
+			}
+			else
+			{
+				switch (eventKey.Keycode)
+				{
+					case Key.Escape:
+						if (SettingsShown)
+						{
+							HideSettings();
+						}
+						else
+						{
+							Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+						}
+						break;
+					default:
+						if (eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt)
+						{
+							Search.GrabFocus();
+						}
+						break;
+				}
+			}
+		}
+    }
+
     public override void _Notification(int what)
     {
         if (what == NotificationWMCloseRequest)
@@ -242,6 +367,70 @@ public partial class MainMenu : Control
 			Quit();
 		}
     }
+
+	public static void ShowSettings(bool show = true)
+	{
+		SettingsShown = show;
+
+		ColorRect parent = SettingsHolder.GetParent<ColorRect>();
+		parent.GetNode<Button>("Deselect").MouseFilter = SettingsShown ? MouseFilterEnum.Stop : MouseFilterEnum.Ignore;
+
+		if (SettingsShown)
+		{
+			parent.Visible = true;
+		}
+
+		Tween tween = parent.CreateTween();
+		tween.TweenProperty(parent, "modulate", Color.FromHtml($"#ffffff{(SettingsShown ? "ff" : "00")}"), 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+		tween.TweenCallback(Callable.From(() => {
+			parent.Visible = SettingsShown;
+		}));
+		tween.Play();
+	}
+
+	public static void HideSettings()
+	{
+		ShowSettings(false);
+	}
+
+	public static void UpdateSetting(string setting, double value)
+	{
+		switch (setting)
+		{
+			case "Sensitivity":
+				Settings.Sensitivity = value;
+				break;
+			case "ApproachRate":
+				Settings.ApproachRate = value;
+				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+				break;
+			case "ApproachDistance":
+				Settings.ApproachDistance = value;
+				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+				break;
+			case "FadeIn":
+				Settings.FadeIn = value;
+				break;
+			case "Parallax":
+				Settings.Parallax = value;
+				break;
+			case "FoV":
+				Settings.FoV = value;
+				break;
+			case "VolumeMaster":
+				Settings.VolumeMaster = value;
+				break;
+			case "VolumeMusic":
+				Settings.VolumeMusic = value;
+				break;
+			case "VolumeSFX":
+				Settings.VolumeSFX = value;
+				break;
+			case "NoteSize":
+				Settings.NoteSize = value;
+				break;
+		}
+	}
 
     public static void UpdateMapList()
 	{
@@ -336,7 +525,7 @@ public partial class MainMenu : Control
 					if (SelectedMap == mapButton)
 					{
 						Map map = MapParser.Decode(mapFile);
-						
+
 						SceneManager.Load("res://scenes/game.tscn");
 						Game.Play(map, Lobby.Speed, Lobby.Mods);
 					}
@@ -372,7 +561,7 @@ public partial class MainMenu : Control
 		{
 			return;
 		}
-	
+
 		ServerManager.Node.Rpc("ValidateChat", ChatLine.Text);
 		ChatLine.Text = "";
 	}
@@ -380,6 +569,7 @@ public partial class MainMenu : Control
     private static void Quit()
 	{
 		Util.SaveSettings();
+		Util.DiscordRPC.Call("Clear");
 		Control.GetTree().Quit();
 	}
 }

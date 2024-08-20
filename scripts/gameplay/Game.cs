@@ -47,7 +47,7 @@ public partial class Game : Node3D
 	public static int ToProcess = 0;
 	public static List<Note> ProcessNotes;
 	public static Attempt CurrentAttempt;
-	public static float MapLength;
+	public static double MapLength;
 
 	public struct Attempt
 	{
@@ -87,7 +87,6 @@ public partial class Game : Node3D
 			Map.Notes[index].Hit = true;
 
 			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
-			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
 			if (HitTween != null)
 			{
@@ -117,7 +116,6 @@ public partial class Game : Node3D
 			}
 
 			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
-			SumLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
 			if (MissTween != null)
 			{
@@ -183,12 +181,14 @@ public partial class Game : Node3D
 		//	Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
 		//}
 
-		Camera.Fov = Settings.FoV;
+		Camera.Fov = (float)Settings.FoV;
 		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
+		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
+		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 
 		Util.DiscordRPC.Call("Set", "details", "Playing a map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
-		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000);
+		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000 / CurrentAttempt.Speed);
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
@@ -388,16 +388,16 @@ public partial class Game : Node3D
 		{
 			if (Settings.CameraLock)
 			{
-				CurrentAttempt.CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * Settings.Sensitivity;
+				CurrentAttempt.CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * (float)Settings.Sensitivity;
 				CurrentAttempt.CursorPosition = CurrentAttempt.CursorPosition.Clamp(-Constants.Bounds, Constants.Bounds);
 
 				Cursor.GlobalPosition = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
-				Camera.GlobalPosition = new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * Settings.Parallax;
+				Camera.GlobalPosition = new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * (float)Settings.Parallax;
 				Camera.GlobalRotation = Vector3.Zero;
 			}
 			else
 			{
-				Camera.GlobalRotation += new Vector3(-eventMouseMotion.Relative.Y / 120 * Settings.Sensitivity / (float)Math.PI, -eventMouseMotion.Relative.X / 120 * Settings.Sensitivity / (float)Math.PI, 0);
+				Camera.GlobalRotation += new Vector3(-eventMouseMotion.Relative.Y / 120 * (float)Settings.Sensitivity / (float)Math.PI, -eventMouseMotion.Relative.X / 120 * (float)Settings.Sensitivity / (float)Math.PI, 0);
 				Camera.GlobalPosition = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
 				
 				float hypotenuse = 3.5f / Camera.Basis.Z.Z;
@@ -427,14 +427,6 @@ public partial class Game : Node3D
 					break;
 				case Key.P:
 					Settings.Pushback = !Settings.Pushback;
-					break;
-				case Key.C:
-					if (Lobby.PlayerCount > 1)
-					{
-						break;
-					}
-
-					Settings.CameraLock = !Settings.CameraLock;
 					break;
 				case Key.Equal:
 					if (Lobby.PlayerCount > 1)
@@ -467,10 +459,10 @@ public partial class Game : Node3D
 				switch (eventMouseButton.ButtonIndex)
 				{
 					case MouseButton.WheelUp:
-						Settings.VolumeMaster = Math.Min(1, Settings.VolumeMaster + 0.025f);
+						Settings.VolumeMaster = Math.Min(100, Settings.VolumeMaster + 2.5f);
 						break;
 					case MouseButton.WheelDown:
-						Settings.VolumeMaster = Math.Max(0, Settings.VolumeMaster - 0.025f);
+						Settings.VolumeMaster = Math.Max(0, Settings.VolumeMaster - 2.5f);
 						break;
 				}
 
@@ -497,13 +489,18 @@ public partial class Game : Node3D
 			else
 			{
 				CurrentAttempt.Progress = CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond - Settings.ApproachTime * 1250 * CurrentAttempt.Speed; // turn AT to ms and multiply by 1.25x
+
+				Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + (CurrentAttempt.Map.Length - CurrentAttempt.Progress) / 1000 / CurrentAttempt.Speed);
 		
-				if (!Audio.Playing)
+				if (CurrentAttempt.Map.AudioBuffer != null)
 				{
-					Audio.Play();
+					if (!Audio.Playing)
+					{
+						Audio.Play();
+					}
+
+					Audio.Seek((float)CurrentAttempt.Progress / 1000);
 				}
-				
-				Audio.Seek((float)CurrentAttempt.Progress / 1000);
 			}
 		}
 	}
@@ -524,8 +521,8 @@ public partial class Game : Node3D
 
 	private static void UpdateVolume()
 	{
-		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
-		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX, 0.1) * (float)Math.Pow(Settings.VolumeMaster, 0.5);
+		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.5);
+		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.5);
 	}
 
 	public static void UpdateScore(string player, int score)
