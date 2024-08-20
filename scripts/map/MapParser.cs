@@ -134,7 +134,7 @@ public partial class MapParser : Node
 		if (!File.Exists(path))
 		{
 			ToastNotification.Notify("Invalid file path", 2);
-			throw Logger.Error($"Invalid file path: {path}");
+			throw Logger.Error($"Invalid file path; {path}");
 		}
 
 		Map map;

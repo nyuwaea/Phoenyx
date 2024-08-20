@@ -17,14 +17,15 @@ public partial class MainMenu : Control
 	private static TextureRect Cursor;
 	private static Panel TopBar;
 
-	private static Button Import;
-	private static Button UserFolder;
+	private static Button ImportButton;
+	private static Button UserFolderButton;
+	private static Button SettingsButton;
 	private static LineEdit Search;
 	private static FileDialog FileDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
 
-	private static ColorRect SettingsHolder;
+	private static Panel SettingsHolder;
 
 	private static Panel MultiplayerHolder;
 	private static LineEdit IPLine;
@@ -87,16 +88,20 @@ public partial class MainMenu : Control
 
 		// Map selection
 
-		Import = TopBar.GetNode<Button>("Import");
-		UserFolder = TopBar.GetNode<Button>("UserFolder");
+		ImportButton = TopBar.GetNode<Button>("Import");
+		UserFolderButton = TopBar.GetNode<Button>("UserFolder");
+		SettingsButton = TopBar.GetNode<Button>("Settings");
 		Search = TopBar.GetNode<LineEdit>("Search");
 		FileDialog = GetNode<FileDialog>("FileDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
 		
-		Import.Pressed += FileDialog.Show;
-		UserFolder.Pressed += () => {
+		ImportButton.Pressed += FileDialog.Show;
+		UserFolderButton.Pressed += () => {
 			OS.ShellOpen($"{Constants.UserFolder}");
+		};
+		SettingsButton.Pressed += () => {
+			ShowSettings();
 		};
  		Search.TextChanged += (string text) => {
 			text = text.ToLower();
@@ -144,11 +149,93 @@ public partial class MainMenu : Control
 
 		// Settings
 
-		SettingsHolder = GetNode<ColorRect>("Settings");
-
-		SettingsHolder.GetNode<Button>("Deselect").Pressed += () => {
+		SettingsHolder = GetNode("Settings").GetNode<Panel>("Holder");
+		SettingsHolder.GetParent().GetNode<Button>("Deselect").Pressed += () => {
 			HideSettings();
 		};
+
+		HideSettings();
+
+		foreach (Node holder in SettingsHolder.GetNode("Sidebar").GetNode("Container").GetChildren())
+		{
+			holder.GetNode<Button>("Button").Pressed += () => {
+				foreach (ColorRect otherHolder in SettingsHolder.GetNode("Sidebar").GetNode("Container").GetChildren())
+				{
+					otherHolder.Color = Color.FromHtml($"#ffffff{(holder.Name == otherHolder.Name ? "08" : "00")}");
+				}
+
+				foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
+				{
+					category.Visible = category.Name == holder.Name;
+				}
+			};
+		}
+
+		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
+		{
+			foreach (Panel option in category.GetNode("Container").GetChildren())
+			{
+				var property = new Settings().GetType().GetProperty(option.Name);
+				
+				if (option.FindChild("HSlider") != null)
+				{
+					HSlider slider = option.GetNode<HSlider>("HSlider");
+					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
+
+					slider.Value = (double)property.GetValue(new());
+					lineEdit.Text = slider.Value.ToString();
+
+					slider.ValueChanged += (double value) => {
+						lineEdit.Text = value.ToString();
+
+						UpdateSetting(option.Name, value);
+					};
+					lineEdit.TextSubmitted += (string text) => {
+						try
+						{
+							if (text == "")
+							{
+								text = lineEdit.PlaceholderText;
+								lineEdit.Text = text;
+							}
+
+							double value = text.ToFloat();
+
+							slider.Value = value;
+
+							UpdateSetting(option.Name, value);
+						}
+						catch (Exception exception)
+						{
+							ToastNotification.Notify($"Incorrect format; {exception.Message}", 2);
+						}
+					};
+				}
+				else if (option.FindChild("CheckButton") != null)
+				{
+					CheckButton checkButton = option.GetNode<CheckButton>("CheckButton");
+					
+					checkButton.ButtonPressed = (bool)property.GetValue(new());
+					checkButton.Toggled += (bool value) => {
+						switch (option.Name)
+						{
+							case "CameraLock":
+								Settings.CameraLock = value;
+								break;
+							case "FadeOut":
+								Settings.FadeOut = value;
+								break;
+							case "Pushback":
+								Settings.Pushback = value;
+								break;
+							case "Fullscreen":
+								DisplayServer.WindowSetMode(value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
+								break;
+						}
+					};
+				}
+			}
+		}
 
 		// Multiplayer
 
@@ -188,7 +275,6 @@ public partial class MainMenu : Control
 
 			Host.Disabled = true;
 			Join.Disabled = true;
-			Import.Disabled = true;
 		};
 	}
 
@@ -206,6 +292,38 @@ public partial class MainMenu : Control
 
     public override void _Input(InputEvent @event)
     {
+		if (@event is InputEventMouseButton eventMouseButton)
+		{
+			if (!SettingsShown)
+			{
+				switch (eventMouseButton.ButtonIndex)
+				{
+					case MouseButton.Right:
+						TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
+						RightMouseHeld = eventMouseButton.Pressed;
+						break;
+					case MouseButton.WheelUp:
+						TargetScroll = Math.Max(0, TargetScroll - 80);
+						break;
+					case MouseButton.WheelDown:
+						TargetScroll = Math.Min(MaxScroll, TargetScroll + 80);
+						break;
+				}
+			}
+		}
+		else if (@event is InputEventMouseMotion eventMouseMotion)
+		{
+			MousePosition = eventMouseMotion.Position;
+
+			if (RightMouseHeld)
+			{
+				TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
+			}
+		}
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
         if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
 			if (eventKey.CtrlPressed)
@@ -222,37 +340,22 @@ public partial class MainMenu : Control
 				switch (eventKey.Keycode)
 				{
 					case Key.Escape:
-						Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+						if (SettingsShown)
+						{
+							HideSettings();
+						}
+						else
+						{
+							Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+						}
 						break;
 					default:
-						Search.GrabFocus();
+						if (eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt)
+						{
+							Search.GrabFocus();
+						}
 						break;
 				}
-			}
-		}
-		else if (@event is InputEventMouseButton eventMouseButton)
-		{
-			switch (eventMouseButton.ButtonIndex)
-			{
-				case MouseButton.Right:
-					TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
-					RightMouseHeld = eventMouseButton.Pressed;
-					break;
-				case MouseButton.WheelUp:
-					TargetScroll = Math.Max(0, TargetScroll - 80);
-					break;
-				case MouseButton.WheelDown:
-					TargetScroll = Math.Min(MaxScroll, TargetScroll + 80);
-					break;
-			}
-		}
-		else if (@event is InputEventMouseMotion eventMouseMotion)
-		{
-			MousePosition = eventMouseMotion.Position;
-
-			if (RightMouseHeld)
-			{
-				TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
 			}
 		}
     }
@@ -269,16 +372,64 @@ public partial class MainMenu : Control
 	{
 		SettingsShown = show;
 
-		SettingsHolder.GetNode<Button>("Deselect").MouseFilter = SettingsShown ? MouseFilterEnum.Stop : MouseFilterEnum.Ignore;
+		ColorRect parent = SettingsHolder.GetParent<ColorRect>();
+		parent.GetNode<Button>("Deselect").MouseFilter = SettingsShown ? MouseFilterEnum.Stop : MouseFilterEnum.Ignore;
 
-		Tween tween = SettingsHolder.CreateTween();
-		tween.TweenProperty(SettingsHolder, "modulate", Color.FromHtml($"#ffffff{(SettingsShown ? "ff" : "00")}"), 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+		if (SettingsShown)
+		{
+			parent.Visible = true;
+		}
+
+		Tween tween = parent.CreateTween();
+		tween.TweenProperty(parent, "modulate", Color.FromHtml($"#ffffff{(SettingsShown ? "ff" : "00")}"), 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+		tween.TweenCallback(Callable.From(() => {
+			parent.Visible = SettingsShown;
+		}));
 		tween.Play();
 	}
 
 	public static void HideSettings()
 	{
 		ShowSettings(false);
+	}
+
+	public static void UpdateSetting(string setting, double value)
+	{
+		switch (setting)
+		{
+			case "Sensitivity":
+				Settings.Sensitivity = value;
+				break;
+			case "ApproachRate":
+				Settings.ApproachRate = value;
+				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+				break;
+			case "ApproachDistance":
+				Settings.ApproachDistance = value;
+				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+				break;
+			case "FadeIn":
+				Settings.FadeIn = value;
+				break;
+			case "Parallax":
+				Settings.Parallax = value;
+				break;
+			case "FoV":
+				Settings.FoV = value;
+				break;
+			case "VolumeMaster":
+				Settings.VolumeMaster = value;
+				break;
+			case "VolumeMusic":
+				Settings.VolumeMusic = value;
+				break;
+			case "VolumeSFX":
+				Settings.VolumeSFX = value;
+				break;
+			case "NoteSize":
+				Settings.NoteSize = value;
+				break;
+		}
 	}
 
     public static void UpdateMapList()

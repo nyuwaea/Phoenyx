@@ -10,32 +10,33 @@ public struct Constants
 {
     public static string RootFolder {get;} = Directory.GetCurrentDirectory();
     public static string UserFolder {get;} = OS.GetUserDataDir();
-    public static float CursorSize {get;} = 0.2625f;
-    public static float GridSize {get;} = 3.0f;
-    public static Vector2 Bounds {get;} = new Vector2(GridSize / 2 - CursorSize / 2, GridSize / 2 - CursorSize / 2);
-    public static float HitBoxSize {get;} = 0.07f;
-    public static float HitWindow {get;} = 55f;
+    public static double CursorSize {get;} = 0.2625;
+    public static double GridSize {get;} = 3.0;
+    public static Vector2 Bounds {get;} = new Vector2((float)(GridSize / 2 - CursorSize / 2), (float)(GridSize / 2 - CursorSize / 2));
+    public static double HitBoxSize {get;} = 0.07;
+    public static double HitWindow {get;} = 55;
     public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
     public static string[] Difficulties = new string[6]{"N/A", "Easy", "Medium", "Hard", "Expert", "Insane"};
 }
 
 public struct Settings
 {
-    public static float VolumeMaster {get; set;} = 1;
-    public static float VolumeMusic {get; set;} = 0.5f;
-    public static float VolumeSFX {get; set;} = 0.5f;
+    public static bool Fullscreen {get; set;} = false;
+    public static double VolumeMaster {get; set;} = 100;
+    public static double VolumeMusic {get; set;} = 50;
+    public static double VolumeSFX {get; set;} = 50;
     public static string Skin {get; set;} = "default";
     public static bool CameraLock {get; set;} = true;
-    public static int FoV {get; set;} = 70;
-    public static float Sensitivity {get; set;} = 0.66f;
-    public static float Parallax {get; set;} = 0.1f;
-    public static float ApproachRate {get; set;} = 35.0f;
-    public static float ApproachDistance {get; set;} = 16.0f;
-    public static float ApproachTime {get; set;} = ApproachDistance / ApproachRate;
-    public static float FadeIn {get; set;} = 0;
+    public static double FoV {get; set;} = 70;
+    public static double Sensitivity {get; set;} = 0.66;
+    public static double Parallax {get; set;} = 0.1;
+    public static double ApproachRate {get; set;} = 35;
+    public static double ApproachDistance {get; set;} = 16;
+    public static double ApproachTime {get; set;} = ApproachDistance / ApproachRate;
+    public static double FadeIn {get; set;} = 0;
     public static bool FadeOut {get; set;} = true;
     public static bool Pushback {get; set;} = true;
-    public static float NoteSize {get; set;} = 0.875f;
+    public static double NoteSize {get; set;} = 0.875;
     public static string[] Colors {get; set;} = {"#00ffed", "#ff8ff9"};
     
     public Settings() {}
@@ -167,6 +168,7 @@ public class Util
 
         Dictionary data = new(){
             ["_Version"] = 1,
+            ["Fullscreen"] = Settings.Fullscreen,
             ["VolumeMaster"] = Settings.VolumeMaster,
             ["VolumeMusic"] = Settings.VolumeMusic,
             ["VolumeSFX"] = Settings.VolumeSFX,
@@ -201,21 +203,22 @@ public class Util
 
             file.Close();
             
-            Settings.VolumeMaster = (float)data["VolumeMaster"];            
-            Settings.VolumeMusic = (float)data["VolumeMusic"];
-            Settings.VolumeSFX = (float)data["VolumeSFX"];
+            Settings.Fullscreen = (bool)data["Fullscreen"];
+            Settings.VolumeMaster = (double)data["VolumeMaster"];            
+            Settings.VolumeMusic = (double)data["VolumeMusic"];
+            Settings.VolumeSFX = (double)data["VolumeSFX"];
             Settings.Skin = (string)data["Skin"];
             Settings.CameraLock = (bool)data["CameraLock"];
             Settings.FoV = (int)data["FoV"];
-            Settings.Sensitivity = (float)data["Sensitivity"];
-            Settings.Parallax = (float)data["Parallax"];
-            Settings.ApproachRate = (float)data["ApproachRate"];
-            Settings.ApproachDistance = (float)data["ApproachDistance"];
+            Settings.Sensitivity = (double)data["Sensitivity"];
+            Settings.Parallax = (double)data["Parallax"];
+            Settings.ApproachRate = (double)data["ApproachRate"];
+            Settings.ApproachDistance = (double)data["ApproachDistance"];
             Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
-            Settings.FadeIn = (float)data["FadeIn"];
+            Settings.FadeIn = (double)data["FadeIn"];
             Settings.FadeOut = (bool)data["FadeOut"];
             Settings.Pushback = (bool)data["Pushback"];
-            Settings.NoteSize = (float)data["NoteSize"];
+            Settings.NoteSize = (double)data["NoteSize"];
             Settings.Colors = (string[])data["Colors"];
 
             ToastNotification.Notify($"Loaded profile [{profile}]");
