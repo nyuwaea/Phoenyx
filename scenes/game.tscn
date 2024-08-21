@@ -112,6 +112,10 @@ texture_repeat = false
 [sub_resource type="QuadMesh" id="QuadMesh_ssyve"]
 size = Vector2(4, 10)
 
+[sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
+font = ExtResource("5_pxgh4")
+font_size = 160
+
 [sub_resource type="ViewportTexture" id="ViewportTexture_crm1r"]
 viewport_path = NodePath("PanelRight/SubViewport")
 
@@ -121,9 +125,6 @@ transparency = 1
 shading_mode = 0
 albedo_texture = SubResource("ViewportTexture_crm1r")
 texture_repeat = false
-
-[sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
-font_size = 160
 
 [sub_resource type="LabelSettings" id="LabelSettings_5bid2"]
 font_size = 96
@@ -216,16 +217,6 @@ disable_3d = true
 transparent_bg = true
 size = Vector2i(800, 2000)
 
-[node name="Players" type="VBoxContainer" parent="PanelLeft/SubViewport"]
-visible = false
-y_sort_enabled = true
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("4_rvp5o")
-
 [node name="Background" type="TextureRect" parent="PanelLeft/SubViewport"]
 anchors_preset = 15
 anchor_right = 1.0
@@ -233,6 +224,40 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 texture = ExtResource("11_sdncv")
+
+[node name="Score" type="Label" parent="PanelLeft/SubViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -300.0
+offset_right = 247.0
+offset_bottom = -149.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+text = "0"
+label_settings = SubResource("LabelSettings_usmyc")
+horizontal_alignment = 1
+
+[node name="Multiplier" type="Label" parent="PanelLeft/SubViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = 100.0
+offset_right = 247.0
+offset_bottom = 289.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+text = "1x"
+label_settings = SubResource("LabelSettings_usmyc")
+horizontal_alignment = 1
 
 [node name="PanelRight" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 7.5, 0, -9)

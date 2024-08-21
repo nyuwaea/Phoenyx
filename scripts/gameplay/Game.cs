@@ -32,6 +32,8 @@ public partial class Game : Node3D
 	private static Label HitsLabel;
 	private static Label MissesLabel;
 	private static Label SumLabel;
+	private static Label ScoreLabel;
+	private static Label MultiplierLabel;
 	private static AudioStreamPlayer Audio;
 	private static AudioStreamPlayer HitSound;
 	private static Tween HitTween;
@@ -62,6 +64,11 @@ public partial class Game : Node3D
 		public int Hits = 0;
 		public int Misses = 0;
 		public int Combo = 0;
+		public int ComboMultiplier = 1;
+		public int ComboMultiplierProgress = 0;
+		public int ComboMultiplierIncrement = 0;
+		public double ModsMultiplier = 1;
+		public int Score = 0;
 		public int PassedNotes = 0;
 		public double Accuracy = 100;
 		public double Health = 100;
@@ -76,20 +83,40 @@ public partial class Game : Node3D
 			Speed = speed;
 			Players = players ?? Array.Empty<string>();
 			Progress = -1000;
-
+			ComboMultiplierIncrement = Map.Notes.Length / 100;
 			Mods = new(){
-				["NoFail"] = mods.Contains("NoFail")
+				["NoFail"] = mods.Contains("NoFail"),
+				["Ghost"] = mods.Contains("Ghost")
 			};
+
+			foreach (KeyValuePair<string, bool> entry in Mods)
+			{
+				if (entry.Value)
+				{
+					ModsMultiplier += Constants.ModsMultipliers[entry.Key];
+				}
+			}
 		}
 
 		public void Hit(int index)
 		{
 			Hits++;
 			Combo++;
+			ComboMultiplierProgress++;
+
+			if (ComboMultiplierProgress >= ComboMultiplierIncrement && ComboMultiplier < 8)
+			{
+				ComboMultiplierProgress = 0;
+				ComboMultiplier = Math.Min(8, ComboMultiplier + 1);
+			}
+
+			Score += (int)(100 * ComboMultiplier * ModsMultiplier);
 			HealthStep = Math.Max(HealthStep / 1.45f, 15);
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
 
+			ScoreLabel.Text = Util.PadMagnitude(Score.ToString());
+			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
 			if (HitTween != null)
@@ -111,6 +138,8 @@ public partial class Game : Node3D
 		{
 			Misses++;
 			Combo = 0;
+			ComboMultiplierProgress = 0;
+			ComboMultiplier = Math.Max(1, ComboMultiplier - 1);
 			Health = Math.Max(0, Health - HealthStep);
 			HealthStep = Math.Min(HealthStep * 1.2f, 100);
 
@@ -119,6 +148,7 @@ public partial class Game : Node3D
 				QueueStop();
 			}
 
+			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
 			if (MissTween != null)
@@ -175,6 +205,8 @@ public partial class Game : Node3D
 		HitsLabel = PanelRight.GetNode<Label>("Hits");
 		MissesLabel = PanelRight.GetNode<Label>("Misses");
 		SumLabel = PanelRight.GetNode<Label>("Sum");
+		ScoreLabel = PanelLeft.GetNode<Label>("Score");
+		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
 		Audio = Node3D.GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = Node3D.GetNode<AudioStreamPlayer>("HitSoundPlayer");
 
@@ -348,7 +380,7 @@ public partial class Game : Node3D
 		if (CurrentAttempt.Skippable)
 		{
 			TargetSkipLabelAlpha = 32f / 255f;
-			ProgressLabel.Modulate = Color.FromHtml("ffffff" + (64 + (int)(172 * (Math.Sin(now / 250000) / 2 + 0.5f))).ToString("X2"));
+			ProgressLabel.Modulate = Color.FromHtml("ffffff" + (64 + (int)(172 * (Math.Sin(Math.PI * now / 750000) / 2 + 0.5f))).ToString("X2"));
 		}
 		else
 		{
@@ -361,7 +393,7 @@ public partial class Game : Node3D
 
 		HitsLabel.Text = $"{CurrentAttempt.Hits}";
 		MissesLabel.Text = $"{CurrentAttempt.Misses}";
-		SumLabel.Text = $"{sum}";
+		SumLabel.Text = Util.PadMagnitude(sum.ToString());
 		AccuracyLabel.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
 		ComboLabel.Text = CurrentAttempt.Combo.ToString();
 		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";

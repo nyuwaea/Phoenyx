@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 public class Lobby
@@ -7,7 +8,7 @@ public class Lobby
     public static int PlayersReady = 0;
     public static Map Map;
     public static double Speed = 1;
-    public static string[] Mods = new string[]{"NoFail"};
+    public static string[] Mods = new string[]{"NoFail"};//Array.Empty<string>();
 
     public delegate void AllReadyEventHandler();
     public static event AllReadyEventHandler AllReady;

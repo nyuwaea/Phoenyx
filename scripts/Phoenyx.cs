@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Godot;
@@ -18,6 +19,10 @@ public struct Constants
     public static double HitWindow {get;} = 55;
     public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
     public static string[] Difficulties = new string[6]{"N/A", "Easy", "Medium", "Hard", "Expert", "Insane"};
+    public static Dictionary<string, double> ModsMultipliers = new(){
+        ["NoFail"] = 0,
+        ["Ghost"] = 0.0675
+    };
 }
 
 public struct Settings
@@ -45,6 +50,101 @@ public struct Settings
     public static bool CursorDrift {get; set;} = true;
     
     public Settings() {}
+
+    public static void Save(string profile = null)
+    {
+        if (profile == null)
+        {
+            profile = Util.GetProfile();
+        }
+
+        Dictionary data = new(){
+            ["_Version"] = 1,
+            ["Fullscreen"] = Fullscreen,
+            ["VolumeMaster"] = VolumeMaster,
+            ["VolumeMusic"] = VolumeMusic,
+            ["VolumeSFX"] = VolumeSFX,
+            ["Skin"] = Skin,
+            ["CameraLock"] = CameraLock,
+            ["FoV"] = FoV,
+            ["Sensitivity"] = Sensitivity,
+            ["Parallax"] = Parallax,
+            ["ApproachRate"] = ApproachRate,
+            ["ApproachDistance"] = ApproachDistance,
+            ["FadeIn"] = FadeIn,
+            ["FadeOut"] = FadeOut,
+            ["Pushback"] = Pushback,
+            ["NoteSize"] = NoteSize,
+            ["CursorScale"] = CursorScale,
+            ["CursorTrail"] = CursorTrail,
+            ["TrailTime"] = TrailTime,
+            ["TrailDetail"] = TrailDetail,
+            ["CursorDrift"] = CursorDrift
+        };
+
+        File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
+
+        Phoenyx.Skin.Save();
+    }
+
+    public static void Load(string profile = null)
+    {
+        if (profile == null)
+        {
+            profile = Util.GetProfile();
+        }
+
+        try
+        {
+            Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/profiles/{profile}.json", Godot.FileAccess.ModeFlags.Read);
+            Dictionary data = (Dictionary)Json.ParseString(file.GetAsText());
+
+            file.Close();
+            
+            Fullscreen = (bool)data["Fullscreen"];
+            VolumeMaster = (double)data["VolumeMaster"];            
+            VolumeMusic = (double)data["VolumeMusic"];
+            VolumeSFX = (double)data["VolumeSFX"];
+            Skin = (string)data["Skin"];
+            CameraLock = (bool)data["CameraLock"];
+            FoV = (int)data["FoV"];
+            Sensitivity = (double)data["Sensitivity"];
+            Parallax = (double)data["Parallax"];
+            ApproachRate = (double)data["ApproachRate"];
+            ApproachDistance = (double)data["ApproachDistance"];
+            ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+            FadeIn = (double)data["FadeIn"];
+            FadeOut = (bool)data["FadeOut"];
+            Pushback = (bool)data["Pushback"];
+            NoteSize = (double)data["NoteSize"];
+            CursorScale = (double)data["CursorScale"];
+            CursorTrail = (bool)data["CursorTrail"];
+            TrailTime = (double)data["TrailTime"];
+            TrailDetail = (double)data["TrailDetail"];
+            CursorDrift = (bool)data["CursorDrift"];
+
+            if (Fullscreen)
+		    {
+		    	DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+		    }
+
+            ToastNotification.Notify($"Loaded profile [{profile}]");
+            ToastNotification.Notify($"Loaded skin [{Skin}]");
+        }
+        catch (Exception exception)
+        {
+            ToastNotification.Notify("Settings file corrupted", 2);
+            throw Logger.Error($"Settings file corrupted; {exception.Message}");
+        }
+
+        if (!Directory.Exists($"{Constants.UserFolder}/skins/{Skin}"))
+        {
+            Skin = "default";
+            ToastNotification.Notify($"Could not find skin {Skin}", 1);
+        }
+
+        Phoenyx.Skin.Load();
+    }
 }
 
 public struct Skin
@@ -60,6 +160,55 @@ public struct Skin
     public static ArrayMesh NoteMesh {get; set;} = new();
 
     public Skin() {}
+
+    public static void Save()
+    {
+        string data = "";
+
+        foreach (string color in Colors)
+        {
+            data += color + ",";
+        }
+        
+        data = data.TrimSuffix(",");
+
+        File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", data);
+    }
+
+    public static void Load()
+    {
+        string[] split = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt").Split(",");
+
+        for (int i = 0; i < split.Length; i++)
+        {
+            split[i] = split[i].TrimPrefix("#").Substr(0, 6);
+            split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
+        }
+
+        Colors = split;
+        CursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+        GridImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
+        HealthImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
+        HealthBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
+        ProgressImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
+        ProgressBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
+
+        if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
+        {
+        	NoteMesh = (ArrayMesh)Util.OBJParser.Call("load_obj", $"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj");
+        }
+        else
+        {
+        	NoteMesh = GD.Load<ArrayMesh>($"res://skin/note.obj");
+        }
+
+        if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3"))
+        {
+        	Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
+        	HitSoundBuffer = file.GetBuffer((long)file.GetLength());
+        	file.Close();
+        }
+    }
 }
 
 public class Util
@@ -169,16 +318,16 @@ public class Util
 
         if (!File.Exists($"{Constants.UserFolder}/profiles/default.json"))
         {
-            SaveSettings("default");
+            Settings.Save("default");
         }
 
         try
         {
-            LoadSettings();
+            Settings.Load();
         }
         catch
         {
-            SaveSettings();
+            Settings.Save();
         }
     }
 
@@ -187,148 +336,21 @@ public class Util
         return Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine();
     }
 
-    public static void SaveSettings(string profile = null)
+    public static string PadMagnitude(string str, string pad = ",")
     {
-        if (profile == null)
+        string formatted = "";
+
+        for (int i = 0; i < str.Length; i++)
         {
-            profile = GetProfile();
+            formatted += str[i];
+
+            if ((str.Length - i - 1) % 3 == 0)
+            {
+                formatted += pad;
+            }
         }
 
-        Dictionary data = new(){
-            ["_Version"] = 1,
-            ["Fullscreen"] = Settings.Fullscreen,
-            ["VolumeMaster"] = Settings.VolumeMaster,
-            ["VolumeMusic"] = Settings.VolumeMusic,
-            ["VolumeSFX"] = Settings.VolumeSFX,
-            ["Skin"] = Settings.Skin,
-            ["CameraLock"] = Settings.CameraLock,
-            ["FoV"] = Settings.FoV,
-            ["Sensitivity"] = Settings.Sensitivity,
-            ["Parallax"] = Settings.Parallax,
-            ["ApproachRate"] = Settings.ApproachRate,
-            ["ApproachDistance"] = Settings.ApproachDistance,
-            ["FadeIn"] = Settings.FadeIn,
-            ["FadeOut"] = Settings.FadeOut,
-            ["Pushback"] = Settings.Pushback,
-            ["NoteSize"] = Settings.NoteSize,
-            ["CursorScale"] = Settings.CursorScale,
-            ["CursorTrail"] = Settings.CursorTrail,
-            ["TrailTime"] = Settings.TrailTime,
-            ["TrailDetail"] = Settings.TrailDetail,
-            ["CursorDrift"] = Settings.CursorDrift
-        };
-
-        File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
-
-        SaveSkin();
-    }
-
-    public static void LoadSettings(string profile = null)
-    {
-        if (profile == null)
-        {
-            profile = GetProfile();
-        }
-
-        try
-        {
-            Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/profiles/{profile}.json", Godot.FileAccess.ModeFlags.Read);
-            Dictionary data = (Dictionary)Json.ParseString(file.GetAsText());
-
-            file.Close();
-            
-            Settings.Fullscreen = (bool)data["Fullscreen"];
-            Settings.VolumeMaster = (double)data["VolumeMaster"];            
-            Settings.VolumeMusic = (double)data["VolumeMusic"];
-            Settings.VolumeSFX = (double)data["VolumeSFX"];
-            Settings.Skin = (string)data["Skin"];
-            Settings.CameraLock = (bool)data["CameraLock"];
-            Settings.FoV = (int)data["FoV"];
-            Settings.Sensitivity = (double)data["Sensitivity"];
-            Settings.Parallax = (double)data["Parallax"];
-            Settings.ApproachRate = (double)data["ApproachRate"];
-            Settings.ApproachDistance = (double)data["ApproachDistance"];
-            Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
-            Settings.FadeIn = (double)data["FadeIn"];
-            Settings.FadeOut = (bool)data["FadeOut"];
-            Settings.Pushback = (bool)data["Pushback"];
-            Settings.NoteSize = (double)data["NoteSize"];
-            Settings.CursorScale = (double)data["CursorScale"];
-            Settings.CursorTrail = (bool)data["CursorTrail"];
-            Settings.TrailTime = (double)data["TrailTime"];
-            Settings.TrailDetail = (double)data["TrailDetail"];
-            Settings.CursorDrift = (bool)data["CursorDrift"];
-
-            if (Settings.Fullscreen)
-		    {
-		    	DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
-		    }
-
-            ToastNotification.Notify($"Loaded profile [{profile}]");
-            ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
-        }
-        catch (Exception exception)
-        {
-            ToastNotification.Notify("Settings file corrupted", 2);
-            throw Logger.Error($"Settings file corrupted; {exception.Message}");
-        }
-
-        if (!Directory.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}"))
-        {
-            Settings.Skin = "default";
-            ToastNotification.Notify($"Could not find skin {Settings.Skin}", 1);
-        }
-
-        LoadSkin();
-    }
-
-    public static void SaveSkin()
-    {
-        string data = "";
-
-        foreach (string color in Skin.Colors)
-        {
-            data += color + ",";
-        }
-        
-        data = data.TrimSuffix(",");
-
-        File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", data);
-    }
-
-    public static void LoadSkin()
-    {
-        string[] split = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt").Split(",");
-
-        for (int i = 0; i < split.Length; i++)
-        {
-            split[i] = split[i].TrimPrefix("#").Substr(0, 6);
-            split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
-        }
-
-        Skin.Colors = split;
-        Skin.CursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
-        Skin.GridImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
-        Skin.HealthImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
-        Skin.HealthBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
-        Skin.ProgressImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
-        Skin.ProgressBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
-
-        if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
-        {
-        	Skin.NoteMesh = (ArrayMesh)OBJParser.Call("load_obj", $"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj");
-        }
-        else
-        {
-        	Skin.NoteMesh = GD.Load<ArrayMesh>($"res://skin/note.obj");
-        }
-
-        if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3"))
-        {
-        	Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
-        	Skin.HitSoundBuffer = file.GetBuffer((long)file.GetLength());
-        	file.Close();
-        }
+        return formatted.TrimSuffix(pad);
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()

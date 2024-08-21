@@ -221,7 +221,19 @@ public partial class MainMenu : Control
 
     public override void _Input(InputEvent @event)
     {
-		if (@event is InputEventMouseButton eventMouseButton)
+		if (@event is InputEventKey eventKey && eventKey.Pressed)
+		{
+			switch (eventKey.Keycode)
+			{
+				default:
+					if (!eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape)
+					{
+						Search.GrabFocus();
+					}
+					break;
+			}
+		}
+		else if (@event is InputEventMouseButton eventMouseButton)
 		{
 			if (!SettingsShown)
 			{
@@ -278,12 +290,6 @@ public partial class MainMenu : Control
 							Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
 						}
 						break;
-					default:
-						if (eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt)
-						{
-							Search.GrabFocus();
-						}
-						break;
 				}
 			}
 		}
@@ -311,6 +317,8 @@ public partial class MainMenu : Control
 
 		Tween tween = parent.CreateTween();
 		tween.TweenProperty(parent, "modulate", Color.FromHtml($"#ffffff{(SettingsShown ? "ff" : "00")}"), 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+		tween.Parallel().TweenProperty(SettingsHolder, "offset_top", SettingsShown ? 0 : 25, 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+		tween.Parallel().TweenProperty(SettingsHolder, "offset_bottom", SettingsShown ? 0 : 25, 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
 		tween.TweenCallback(Callable.From(() => {
 			parent.Visible = SettingsShown;
 		}));
@@ -322,7 +330,7 @@ public partial class MainMenu : Control
 		ShowSettings(false);
 	}
 
-	public static void SetSetting(string setting, object value)
+	public static void ApplySetting(string setting, object value)
 	{
 		switch (setting)
 		{
@@ -419,7 +427,7 @@ public partial class MainMenu : Control
 		{
 			skinOptions.ItemSelected += (long item) => {
 				Settings.Skin = skinOptions.GetItemText((int)item);
-				Util.LoadSkin();
+				Phoenyx.Skin.Load();
 				Cursor.Texture = Phoenyx.Skin.CursorImage;
 			};
 		}
@@ -443,7 +451,7 @@ public partial class MainMenu : Control
 						slider.ValueChanged += (double value) => {
 							lineEdit.Text = value.ToString();
 
-							SetSetting(option.Name, value);
+							ApplySetting(option.Name, value);
 						};
 						lineEdit.TextSubmitted += (string text) => {
 							try
@@ -458,7 +466,7 @@ public partial class MainMenu : Control
 
 								slider.Value = value;
 
-								SetSetting(option.Name, value);
+								ApplySetting(option.Name, value);
 							}
 							catch (Exception exception)
 							{
@@ -478,7 +486,7 @@ public partial class MainMenu : Control
 					if (connections)
 					{
 						checkButton.Toggled += (bool value) => {
-							SetSetting(option.Name, value);
+							ApplySetting(option.Name, value);
 						};
 					}
 				}
@@ -525,7 +533,7 @@ public partial class MainMenu : Control
     public static void UpdateMapList()
 	{
 		double start = Time.GetTicksUsec();
-		
+
 		foreach (string mapFile in Directory.GetFiles($"{Constants.UserFolder}/maps"))
 		{
 			string[] split = mapFile.Split("\\");
@@ -597,30 +605,31 @@ public partial class MainMenu : Control
 			mapButton.Name = fileName;
 			mapButton.GetNode<Label>("Title").Text = title;
 			mapButton.GetNode<Label>("Extra").Text = extra;
+
 			MapListContainer.AddChild(mapButton);
 
 			mapButton.GetNode<Button>("Button").MouseEntered += () => {
 				mapButton.GetNode<ColorRect>("Select").Color = Color.FromHtml("#ffffff10");
 			};
-
+			
 			mapButton.GetNode<Button>("Button").MouseExited += () => {
 				mapButton.GetNode<ColorRect>("Select").Color = Color.FromHtml("#ffffff00");
 			};
-
+			
 			mapButton.GetNode<Button>("Button").Pressed += () => {
 				if (SelectedMap != null)
 				{
 					SelectedMap.SelfModulate = Color.FromHtml("#ffffff");
-
+			
 					if (SelectedMap == mapButton)
 					{
 						Map map = MapParser.Decode(mapFile);
-
+			
 						SceneManager.Load("res://scenes/game.tscn");
 						Game.Play(map, Lobby.Speed, Lobby.Mods);
 					}
 				}
-
+			
 				SelectedMap = mapButton;
 				SelectedMap.SelfModulate = Color.FromHtml("#ffb29b");
 			};
@@ -658,7 +667,7 @@ public partial class MainMenu : Control
 
     private static void Quit()
 	{
-		Util.SaveSettings();
+		Settings.Save();
 		Util.DiscordRPC.Call("Clear");
 		Control.GetTree().Quit();
 	}
