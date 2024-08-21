@@ -1,6 +1,32 @@
-[gd_scene load_steps=4 format=3 uid="uid://vgvjvbvu0qsc"]
+[gd_scene load_steps=6 format=3 uid="uid://vgvjvbvu0qsc"]
 
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="1_rhnis"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jhkog"]
+bg_color = Color(0.0383972, 0.0383972, 0.0383972, 0.768627)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 1, 1, 0.12549)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b6lsb"]
+bg_color = Color(0.0605303, 0.0605304, 0.0605303, 0.768627)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(1, 0.427451, 0, 1)
+border_blend = true
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
 
 [sub_resource type="LabelSettings" id="LabelSettings_fpw8h"]
 
@@ -11,16 +37,18 @@ font_color = Color(0.501961, 0.501961, 0.501961, 1)
 clip_children = 2
 clip_contents = true
 custom_minimum_size = Vector2(0, 80)
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -1152.0
-offset_right = -606.0
+offset_right = 546.0
 offset_bottom = 80.0
-grow_horizontal = 0
 theme = ExtResource("1_rhnis")
 
-[node name="Select" type="ColorRect" parent="."]
+[node name="Holder" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 60.0
+
+[node name="Hover" type="ColorRect" parent="Holder"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -30,7 +58,26 @@ grow_vertical = 2
 mouse_filter = 1
 color = Color(1, 1, 1, 0)
 
-[node name="Cover" type="TextureRect" parent="."]
+[node name="Normal" type="Panel" parent="Holder"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_jhkog")
+
+[node name="Selected" type="Panel" parent="Holder"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_b6lsb")
+
+[node name="Cover" type="TextureRect" parent="Holder"]
 self_modulate = Color(1, 1, 1, 0.25098)
 layout_mode = 1
 anchors_preset = -1
@@ -40,14 +87,14 @@ anchor_bottom = 1.0
 expand_mode = 2
 stretch_mode = 6
 
-[node name="Title" type="Label" parent="."]
+[node name="Title" type="Label" parent="Holder"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = 12.0
+offset_left = 8.0
 offset_top = 12.0
-offset_right = -12.0
+offset_right = -8.0
 grow_vertical = 0
 theme = ExtResource("1_rhnis")
 text = "hello hi"
@@ -56,14 +103,14 @@ vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="Extra" type="Label" parent="."]
+[node name="Extra" type="Label" parent="Holder"]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 12.0
-offset_right = -12.0
+offset_left = 8.0
+offset_right = -8.0
 offset_bottom = -12.0
 theme = ExtResource("1_rhnis")
 text = "hello hi"
@@ -72,11 +119,12 @@ vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="Button" type="Button" parent="."]
+[node name="Button" type="Button" parent="Holder"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+focus_mode = 0
 flat = true

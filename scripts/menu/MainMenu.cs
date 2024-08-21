@@ -19,7 +19,7 @@ public partial class MainMenu : Control
 	private static Button ImportButton;
 	private static Button UserFolderButton;
 	private static Button SettingsButton;
-	private static LineEdit Search;
+	private static LineEdit SearchEdit;
 	private static FileDialog FileDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
@@ -36,6 +36,7 @@ public partial class MainMenu : Control
 	private static VBoxContainer ChatHolder;
 
 	private static bool Initialized = false;
+	private static Vector2I WindowSize = DisplayServer.WindowGetSize();
 	private static double LastFrame = Time.GetTicksUsec();
 	private static float Scroll = 0;
 	private static float TargetScroll = 0;
@@ -43,8 +44,10 @@ public partial class MainMenu : Control
 	private static Vector2 MousePosition = Vector2.Zero;
 	private static bool RightMouseHeld = false;
 	private static List<string> LoadedMaps = new();
-	private static Panel SelectedMap = null;
+	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
+	private static LineEdit FocusedLineEdit = null;
+	private static string Search = "";
 
 	public override void _Ready()
 	{
@@ -61,16 +64,19 @@ public partial class MainMenu : Control
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		GetTree().AutoAcceptQuit = false;
+		WindowSize = DisplayServer.WindowGetSize();
 		
 		if (!Initialized)
 		{
 			Initialized = true;
+			Viewport viewport = GetViewport();
 
-			GetViewport().SizeChanged += () => {
+			viewport.SizeChanged += () => {
+				WindowSize = DisplayServer.WindowGetSize();
 				UpdateMaxScroll();
 				TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
 			};
-			GetViewport().Connect("files_dropped", Callable.From((string[] files) => {
+			viewport.Connect("files_dropped", Callable.From((string[] files) => {
 				MapParser.Import(files);
 				UpdateMapList();
 			}));
@@ -81,7 +87,6 @@ public partial class MainMenu : Control
 		Cursor = GetNode<TextureRect>("Cursor");
 		TopBar = GetNode<Panel>("TopBar");
 		LoadedMaps = new();
-		SelectedMap = null;
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
@@ -91,7 +96,7 @@ public partial class MainMenu : Control
 		ImportButton = TopBar.GetNode<Button>("Import");
 		UserFolderButton = TopBar.GetNode<Button>("UserFolder");
 		SettingsButton = TopBar.GetNode<Button>("Settings");
-		Search = TopBar.GetNode<LineEdit>("Search");
+		SearchEdit = TopBar.GetNode<LineEdit>("Search");
 		FileDialog = GetNode<FileDialog>("FileDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
@@ -103,17 +108,17 @@ public partial class MainMenu : Control
 		SettingsButton.Pressed += () => {
 			ShowSettings();
 		};
- 		Search.TextChanged += (string text) => {
-			text = text.ToLower();
+ 		SearchEdit.TextChanged += (string text) => {
+			Search = text.ToLower();
 
-			if (text == "")
+			if (Search == "")
 			{
-				Search.ReleaseFocus();
+				SearchEdit.ReleaseFocus();
 			}
 
 			foreach (Panel map in MapListContainer.GetChildren())
 			{
-				map.Visible = map.GetNode<Label>("Title").Text.ToLower().Contains(text);
+				map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
 			}
 		};
 		FileDialog.FilesSelected += (string[] files) => {
@@ -139,6 +144,25 @@ public partial class MainMenu : Control
 		};
 
 		UpdateMapList();
+
+		if (SelectedMap != null)
+		{
+			Panel selectedMapHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+			selectedMapHolder.GetNode<Panel>("Normal").Visible = false;
+			selectedMapHolder.GetNode<Panel>("Selected").Visible = true;
+
+			Tween selectTween = selectedMapHolder.CreateTween();
+			selectTween.TweenProperty(selectedMapHolder, "size", new Vector2(MapListContainer.Size.X, selectedMapHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+			selectTween.Parallel().TweenProperty(selectedMapHolder, "position", new Vector2(0, selectedMapHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+			selectTween.Play();
+		}
+
+		SearchEdit.Text = Search;
+
+		foreach (Panel map in MapListContainer.GetChildren())
+		{
+			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
+		}
 
 		// Settings
 
@@ -226,9 +250,9 @@ public partial class MainMenu : Control
 			switch (eventKey.Keycode)
 			{
 				default:
-					if (!eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape)
+					if (FocusedLineEdit == null && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter)
 					{
-						Search.GrabFocus();
+						SearchEdit.GrabFocus();
 					}
 					break;
 			}
@@ -453,6 +477,12 @@ public partial class MainMenu : Control
 
 							ApplySetting(option.Name, value);
 						};
+						lineEdit.FocusEntered += () => {
+							FocusedLineEdit = lineEdit;
+						};
+						lineEdit.FocusExited += () => {
+							FocusedLineEdit = null;
+						};
 						lineEdit.TextSubmitted += (string text) => {
 							try
 							{
@@ -496,6 +526,12 @@ public partial class MainMenu : Control
 
 					if (connections)
 					{
+						lineEdit.FocusEntered += () => {
+							FocusedLineEdit = lineEdit;
+						};
+						lineEdit.FocusExited += () => {
+							FocusedLineEdit = null;
+						};
 						lineEdit.TextSubmitted += (string text) => {
 							if (text == "")
 							{
@@ -596,32 +632,40 @@ public partial class MainMenu : Control
 			LoadedMaps.Add(fileName);
 
 			Panel mapButton = MapButton.Instantiate<Panel>();
+			Panel holder = mapButton.GetNode<Panel>("Holder");
 
 			if (coverFile != null)
 			{
-				mapButton.GetNode<TextureRect>("Cover").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile(coverFile));
+				holder.GetNode<TextureRect>("Cover").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile(coverFile));
 			}
 
 			mapButton.Name = fileName;
-			mapButton.GetNode<Label>("Title").Text = title;
-			mapButton.GetNode<Label>("Extra").Text = extra;
+			holder.GetNode<Label>("Title").Text = title;
+			holder.GetNode<Label>("Extra").Text = extra;
 
 			MapListContainer.AddChild(mapButton);
 
-			mapButton.GetNode<Button>("Button").MouseEntered += () => {
-				mapButton.GetNode<ColorRect>("Select").Color = Color.FromHtml("#ffffff10");
+			holder.GetNode<Button>("Button").MouseEntered += () => {
+				holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff10");
 			};
 			
-			mapButton.GetNode<Button>("Button").MouseExited += () => {
-				mapButton.GetNode<ColorRect>("Select").Color = Color.FromHtml("#ffffff00");
+			holder.GetNode<Button>("Button").MouseExited += () => {
+				holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff00");
 			};
 			
-			mapButton.GetNode<Button>("Button").Pressed += () => {
+			holder.GetNode<Button>("Button").Pressed += () => {
 				if (SelectedMap != null)
 				{
-					SelectedMap.SelfModulate = Color.FromHtml("#ffffff");
+					Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+					selectedHolder.GetNode<Panel>("Normal").Visible = true;
+					selectedHolder.GetNode<Panel>("Selected").Visible = false;
+
+					Tween deselectTween = selectedHolder.CreateTween();
+					deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+					deselectTween.Parallel().TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+					deselectTween.Play();
 			
-					if (SelectedMap == mapButton)
+					if (MapListContainer.GetNode(SelectedMap) == mapButton)
 					{
 						Map map = MapParser.Decode(mapFile);
 			
@@ -629,9 +673,17 @@ public partial class MainMenu : Control
 						Game.Play(map, Lobby.Speed, Lobby.Mods);
 					}
 				}
-			
-				SelectedMap = mapButton;
-				SelectedMap.SelfModulate = Color.FromHtml("#ffb29b");
+
+				holder.GetNode<Panel>("Normal").Visible = false;
+				holder.GetNode<Panel>("Selected").Visible = true;
+				
+				Tween selectTween = holder.CreateTween();
+				selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+				selectTween.Parallel().TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+				selectTween.Play();
+
+				TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
+				SelectedMap = mapButton.Name;
 			};
 		}
 
