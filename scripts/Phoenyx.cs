@@ -40,6 +40,9 @@ public struct Settings
     public static double NoteSize {get; set;} = 0.875;
     public static double CursorScale {get; set;} = 1;
     public static bool CursorTrail {get; set;} = false;
+    public static double TrailTime {get; set;} = 0.05;
+    public static double TrailDetail {get; set;} = 1;
+    public static bool CursorDrift {get; set;} = true;
     
     public Settings() {}
 }
@@ -47,7 +50,7 @@ public struct Settings
 public struct Skin
 {
     public static string[] Colors {get; set;} = new string[]{"#00ffed", "#ff8ff9"};
-    
+
 
     public Skin() {}
 }
@@ -202,7 +205,10 @@ public class Util
             ["Pushback"] = Settings.Pushback,
             ["NoteSize"] = Settings.NoteSize,
             ["CursorScale"] = Settings.CursorScale,
-            ["CursorTrail"] = Settings.CursorTrail
+            ["CursorTrail"] = Settings.CursorTrail,
+            ["TrailTime"] = Settings.TrailTime,
+            ["TrailDetail"] = Settings.TrailDetail,
+            ["CursorDrift"] = Settings.CursorDrift
         };
 
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
@@ -242,6 +248,9 @@ public class Util
             Settings.NoteSize = (double)data["NoteSize"];
             Settings.CursorScale = (double)data["CursorScale"];
             Settings.CursorTrail = (bool)data["CursorTrail"];
+            Settings.TrailTime = (double)data["TrailTime"];
+            Settings.TrailDetail = (double)data["TrailDetail"];
+            Settings.CursorDrift = (bool)data["CursorDrift"];
 
             if (Settings.Fullscreen)
 		    {

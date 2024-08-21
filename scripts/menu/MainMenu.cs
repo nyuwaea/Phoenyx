@@ -1,10 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Godot;
-using Godot.NativeInterop;
 using Phoenyx;
 
 namespace Menu;
@@ -379,6 +377,15 @@ public partial class MainMenu : Control
 				break;
 			case "CursorTrail":
 				Settings.CursorTrail = (bool)value;
+				break;
+			case "TrailTime":
+				Settings.TrailTime = (double)value;
+				break;
+			case "TrailDetail":
+				Settings.TrailDetail = (double)value;
+				break;
+			case "CursorDrift":
+				Settings.CursorDrift = (bool)value;
 				break;
 		}
 

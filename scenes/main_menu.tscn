@@ -373,6 +373,7 @@ theme = ExtResource("2_46xtp")
 max_value = 3.0
 step = 0.01
 value = 0.66
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/Sensitivity"]
 clip_contents = true
@@ -419,6 +420,37 @@ theme = ExtResource("2_46xtp")
 button_pressed = true
 flat = true
 
+[node name="CursorDrift" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "A.K.A. \"Buffer cursor\""
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/CursorDrift"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Drift"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Gameplay/Container/CursorDrift"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+button_pressed = true
+flat = true
+
 [node name="ApproachRate" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
@@ -446,6 +478,7 @@ min_value = 1.0
 max_value = 60.0
 step = 0.5
 value = 35.0
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/ApproachRate"]
 clip_contents = true
@@ -490,6 +523,7 @@ min_value = 1.0
 max_value = 60.0
 step = 0.5
 value = 16.0
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/ApproachDistance"]
 clip_contents = true
@@ -531,6 +565,7 @@ anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
 rounded = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/FadeIn"]
 clip_contents = true
@@ -550,7 +585,7 @@ caret_blink = true
 [node name="FadeOut" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-tooltip_text = "A.K.A. Half-ghost"
+tooltip_text = "A.K.A. \"Half-ghost\""
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
 [node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/FadeOut"]
@@ -634,6 +669,7 @@ theme = ExtResource("2_46xtp")
 max_value = 1.0
 step = 0.025
 value = 1.0
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/Parallax"]
 clip_contents = true
@@ -677,6 +713,7 @@ theme = ExtResource("2_46xtp")
 min_value = 40.0
 value = 70.0
 rounded = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/FoV"]
 clip_contents = true
@@ -777,7 +814,7 @@ anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
 value = 100.0
-rounded = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeMaster"]
 clip_contents = true
@@ -818,7 +855,7 @@ anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
 value = 50.0
-rounded = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeMusic"]
 clip_contents = true
@@ -859,7 +896,7 @@ anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
 value = 50.0
-rounded = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeSFX"]
 clip_contents = true
@@ -983,6 +1020,7 @@ theme = ExtResource("2_46xtp")
 max_value = 2.0
 step = 0.025
 value = 0.875
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
 clip_contents = true
@@ -1025,6 +1063,7 @@ theme = ExtResource("2_46xtp")
 max_value = 4.0
 step = 0.025
 value = 1.0
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
 clip_contents = true
@@ -1044,6 +1083,7 @@ caret_blink = true
 [node name="CursorTrail" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+tooltip_text = "Does not apply in menu"
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
 [node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/CursorTrail"]
@@ -1069,6 +1109,93 @@ grow_vertical = 2
 focus_mode = 0
 theme = ExtResource("2_46xtp")
 flat = true
+
+[node name="TrailTime" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Trail Time"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 1.0
+step = 0.01
+value = 0.05
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+theme_override_font_sizes/font_size = 16
+text = "0.05"
+placeholder_text = "0.05"
+max_length = 16
+flat = true
+caret_blink = true
+
+[node name="TrailDetail" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Not yet implemented"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Trail Detail"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 10.0
+step = 0.05
+value = 1.0
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+theme_override_font_sizes/font_size = 16
+text = "1"
+placeholder_text = "1"
+max_length = 16
+flat = true
+caret_blink = true
 
 [node name="Sidebar" type="ScrollContainer" parent="Settings/Holder"]
 layout_mode = 1

@@ -22,6 +22,7 @@ public partial class Game : Node3D
 	private static MeshInstance3D Cursor;
 	private static MeshInstance3D Grid;
 	private static MultiMeshInstance3D NotesMultimesh;
+	private static MultiMeshInstance3D CursorTrailMultimesh;
 	private static TextureRect Health;
 	private static TextureRect ProgressBar;
 	private static SubViewport PanelLeft;
@@ -39,6 +40,7 @@ public partial class Game : Node3D
 
 	private double LastFrame = Time.GetTicksUsec(); 	// delta arg unreliable..
 	private double LastSecond = Time.GetTicksUsec();	// better framerate calculation
+	private List<Dictionary<string, object>> LastCursorPositions = new();	// trail
 	private int FrameCount = 0;
 	private float SkipLabelAlpha = 0;
 	private float TargetSkipLabelAlpha = 0;
@@ -64,6 +66,7 @@ public partial class Game : Node3D
 		public double Health = 100;
 		public double HealthStep = 15;
 		public Vector2 CursorPosition = Vector2.Zero;
+		public Vector2 RawCursorPosition = Vector2.Zero;
 		public bool Skippable = false;
 
 		public Attempt(Map map, double speed, string[] mods, string[] players = null, bool replay = false)
@@ -162,6 +165,7 @@ public partial class Game : Node3D
 		Cursor = GetNode<MeshInstance3D>("Cursor");
 		Grid = GetNode<MeshInstance3D>("Grid");
 		NotesMultimesh = GetNode<MultiMeshInstance3D>("Notes");
+		CursorTrailMultimesh = GetNode<MultiMeshInstance3D>("CursorTrail");
 		Health = GetNode("Health").GetNode("SubViewport").GetNode<TextureRect>("Main");
 		ProgressBar = GetNode("ProgressBar").GetNode("SubViewport").GetNode<TextureRect>("Main");
 		PanelLeft = GetNode("PanelLeft").GetNode<SubViewport>("SubViewport");
@@ -192,13 +196,16 @@ public partial class Game : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
+		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Enabled);
 
 		Cursor.Mesh.Set("size", new Vector2((float)(Constants.CursorSize * Settings.CursorScale), (float)(Constants.CursorSize * Settings.CursorScale)));
 
 		try
 		{
-			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+			ImageTexture cursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+
+			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = cursorImage;
+			(CursorTrailMultimesh.MaterialOverride as StandardMaterial3D).AlbedoTexture = cursorImage;
 			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
 			Health.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
 			Health.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
@@ -245,7 +252,7 @@ public partial class Game : Node3D
 
 	public override void _Process(double delta)
 	{
-		double now = Time.GetTicksUsec();
+		ulong now = Time.GetTicksUsec();
 
 		delta = (now - LastFrame) / 1000000;	// more reliable
 		LastFrame = now;
@@ -385,6 +392,53 @@ public partial class Game : Node3D
 			Stop();
 			return;
 		}
+
+		// trail stuff
+		
+		if (Settings.CursorTrail)
+		{
+			List<Dictionary<string, object>> newList = new();
+
+			LastCursorPositions.Add(new(){
+				["Time"] = now,
+				["Position"] = CurrentAttempt.CursorPosition
+			});
+
+			foreach (Dictionary<string, object> entry in LastCursorPositions)
+			{
+				if (now - (ulong)entry["Time"] >= (Settings.TrailTime * 1000000))
+				{
+					continue;
+				}
+
+				newList.Add(entry);
+			}
+
+			LastCursorPositions = newList;
+			
+			int count = LastCursorPositions.Count;
+			float size = ((Vector2)Cursor.Mesh.Get("size")).X;
+			Transform3D transform = new Transform3D(new Vector3(size, 0, 0), new Vector3(0, size, 0), new Vector3(0, 0, size), Vector3.Zero);
+			int j = 0;
+
+			CursorTrailMultimesh.Multimesh.InstanceCount = count;
+
+			foreach (Dictionary<string, object> entry in LastCursorPositions)
+			{
+				ulong difference = now - (ulong)entry["Time"];
+				uint alpha = (uint)((float)(difference) / (Settings.TrailTime * 1000000) * 255);
+
+				transform.Origin = new Vector3(((Vector2)entry["Position"]).X, ((Vector2)entry["Position"]).Y, 0);
+
+				CursorTrailMultimesh.Multimesh.SetInstanceTransform(j, transform);
+				CursorTrailMultimesh.Multimesh.SetInstanceColor(j, Color.FromHtml($"ffffff{255 - alpha:X2}"));
+				j++;
+			}
+		}
+		else
+		{
+			CursorTrailMultimesh.Multimesh.InstanceCount = 0;
+		}
 	}
 
 	public override void _Input(InputEvent @event)
@@ -393,8 +447,15 @@ public partial class Game : Node3D
 		{
 			if (Settings.CameraLock)
 			{
-				CurrentAttempt.CursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * (float)Settings.Sensitivity;
-				CurrentAttempt.CursorPosition = CurrentAttempt.CursorPosition.Clamp(-Constants.Bounds, Constants.Bounds);
+				if (Settings.CursorDrift)
+				{
+					CurrentAttempt.CursorPosition = (CurrentAttempt.CursorPosition + new Vector2(1, -1) * eventMouseMotion.Relative / 100 * (float)Settings.Sensitivity).Clamp(-Constants.Bounds, Constants.Bounds);
+				}
+				else
+				{
+					CurrentAttempt.RawCursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * (float)Settings.Sensitivity;
+					CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Constants.Bounds, Constants.Bounds);
+				}
 
 				Cursor.GlobalPosition = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
 				Camera.GlobalPosition = new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * (float)Settings.Parallax;
@@ -408,7 +469,8 @@ public partial class Game : Node3D
 				float hypotenuse = 3.5f / Camera.Basis.Z.Z;
 				float distance = (float)Math.Sqrt(Math.Pow(hypotenuse, 2) - Math.Pow(3.5f, 2));
 				
-				CurrentAttempt.CursorPosition = (new Vector2(Camera.Basis.Z.X, Camera.Basis.Z.Y).Normalized() * -distance).Clamp(-Constants.Bounds, Constants.Bounds);
+				CurrentAttempt.RawCursorPosition = new Vector2(Camera.Basis.Z.X, Camera.Basis.Z.Y).Normalized() * -distance;
+				CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Constants.Bounds, Constants.Bounds);
 				Cursor.GlobalPosition = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
 			}
 		}

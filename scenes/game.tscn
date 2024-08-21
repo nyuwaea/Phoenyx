@@ -1,4 +1,4 @@
-[gd_scene load_steps=38 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=41 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/gameplay/Game.cs" id="1_v5074"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -44,6 +44,21 @@ texture_repeat = false
 [sub_resource type="QuadMesh" id="QuadMesh_aih2q"]
 material = SubResource("StandardMaterial3D_a6jk1")
 size = Vector2(4, 4)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ssr8x"]
+transparency = 1
+cull_mode = 2
+shading_mode = 0
+vertex_color_use_as_albedo = true
+vertex_color_is_srgb = true
+albedo_texture = ExtResource("13_6rhgc")
+
+[sub_resource type="QuadMesh" id="QuadMesh_5p2n8"]
+
+[sub_resource type="MultiMesh" id="MultiMesh_e28va"]
+transform_format = 1
+use_colors = true
+mesh = SubResource("QuadMesh_5p2n8")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lvhmj"]
 transparency = 1
@@ -138,10 +153,12 @@ script = ExtResource("2_rnyvc")
 [node name="Grid" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_aih2q")
 
+[node name="CursorTrail" type="MultiMeshInstance3D" parent="."]
+material_override = SubResource("StandardMaterial3D_ssr8x")
+multimesh = SubResource("MultiMesh_e28va")
+
 [node name="Cursor" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_xij4d")
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
 
 [node name="Health" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -6.2, -10)
