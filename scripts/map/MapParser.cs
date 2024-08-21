@@ -112,6 +112,13 @@ public partial class MapParser : Node
 			cover.Close();
 		}
 
+		if (map.VideoBuffer != null)
+		{
+			Godot.FileAccess video = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/video.mp4", Godot.FileAccess.ModeFlags.Write);
+			video.StoreBuffer(map.VideoBuffer);
+			video.Close();
+		}
+
 		objects.Close();
 
 		ZipFile.CreateFromDirectory($"{Constants.UserFolder}/cache/phxmencode", $"{Constants.UserFolder}/maps/{map.ID}.phxm", CompressionLevel.NoCompression, false);
@@ -391,6 +398,7 @@ public partial class MapParser : Node
 			byte[] objectsBuffer = new byte[objectsStream.Length];
 			byte[] audioBuffer = null;
 			byte[] coverBuffer = null;
+			byte[] videoBuffer = null;
 			metaStream.Read(metaBuffer, 0, (int)metaStream.Length);
 			objectsStream.Read(objectsBuffer, 0, (int)objectsStream.Length);
 			metaStream.Close();
@@ -441,7 +449,7 @@ public partial class MapParser : Node
 				notes[i] = new(i, ms, x, y);
 			}
 			
-			map = new(notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer);
+			map = new(notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer, videoBuffer);
 		}
 		catch (Exception exception)
 		{

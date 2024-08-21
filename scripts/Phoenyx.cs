@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Godot;
 using Godot.Collections;
 
@@ -37,16 +38,22 @@ public struct Settings
     public static bool FadeOut {get; set;} = true;
     public static bool Pushback {get; set;} = true;
     public static double NoteSize {get; set;} = 0.875;
-    public static string[] Colors {get; set;} = {"#00ffed", "#ff8ff9"};
     
     public Settings() {}
+}
+
+public struct Skin
+{
+    public static string[] Colors {get; set;} = new string[]{"#00ffed", "#ff8ff9"};
+
+    public Skin() {}
 }
 
 public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "note.obj", "hit.mp3"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "note.obj", "hit.mp3", "colors.txt"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -109,17 +116,26 @@ public class Util
         {
             if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
             {
-                var source = ResourceLoader.Load($"res://skin/{skinFile}");
                 byte[] buffer = System.Array.Empty<byte>();
-                
-                switch (source.GetType().Name)
+
+                if (skinFile.GetExtension() == "txt")
                 {
-                    case "CompressedTexture2D":
-                        buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
-                        break;
-                    case "AudioStreamMP3":
-                        buffer = (source as AudioStreamMP3).Data;
-                        break;
+                    Godot.FileAccess file = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
+                    buffer = file.GetBuffer((long)file.GetLength());
+                }
+                else
+                {
+                    var source = ResourceLoader.Load($"res://skin/{skinFile}");
+
+                    switch (source.GetType().Name)
+                    {
+                        case "CompressedTexture2D":
+                            buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
+                            break;
+                        case "AudioStreamMP3":
+                            buffer = (source as AudioStreamMP3).Data;
+                            break;
+                    }
                 }
 
                 if (buffer.Length == 0)
@@ -128,7 +144,6 @@ public class Util
                 }
 
                 Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
-
                 target.StoreBuffer(buffer);
                 target.Close();
             }
@@ -182,11 +197,12 @@ public class Util
             ["FadeIn"] = Settings.FadeIn,
             ["FadeOut"] = Settings.FadeOut,
             ["Pushback"] = Settings.Pushback,
-            ["NoteSize"] = Settings.NoteSize,
-            ["Colors"] = Settings.Colors
+            ["NoteSize"] = Settings.NoteSize
         };
 
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
+
+        SaveSkin();
     }
 
     public static void LoadSettings(string profile = null)
@@ -219,7 +235,11 @@ public class Util
             Settings.FadeOut = (bool)data["FadeOut"];
             Settings.Pushback = (bool)data["Pushback"];
             Settings.NoteSize = (double)data["NoteSize"];
-            Settings.Colors = (string[])data["Colors"];
+
+            if (Settings.Fullscreen)
+		    {
+		    	DisplayServer.WindowSetMode(DisplayServer.WindowMode.ExclusiveFullscreen);
+		    }
 
             ToastNotification.Notify($"Loaded profile [{profile}]");
             ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
@@ -229,6 +249,41 @@ public class Util
             ToastNotification.Notify("Settings file corrupted", 2);
             throw Logger.Error($"Settings file corrupted; {exception.Message}");
         }
+
+        if (!Directory.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}"))
+        {
+            Settings.Skin = "default";
+            ToastNotification.Notify($"Could not find skin {Settings.Skin}", 1);
+        }
+
+        LoadSkin();
+    }
+
+    public static void SaveSkin()
+    {
+        string data = "";
+
+        foreach (string color in Skin.Colors)
+        {
+            data += color + ",";
+        }
+        
+        data = data.TrimSuffix(",");
+
+        File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", data);
+    }
+
+    public static void LoadSkin()
+    {
+        string[] split = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt").Split(",");
+
+        for (int i = 0; i < split.Length; i++)
+        {
+            split[i] = split[i].TrimPrefix("#").Substr(0, 6);
+            split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
+        }
+
+        Skin.Colors = split;
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()

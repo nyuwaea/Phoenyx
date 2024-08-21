@@ -18,9 +18,10 @@ public struct Map
     public byte[] AudioBuffer;
     public string AudioExt;
     public byte[] CoverBuffer;
+    public byte[] VideoBuffer;
     public Note[] Notes;
 
-    public Map(Note[] data = null, string id = null, string artist = "", string title = "", float rating = 0, string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null)
+    public Map(Note[] data = null, string id = null, string artist = "", string title = "", float rating = 0, string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null, byte[] videoBuffer = null)
     {
         Artist = artist;
         Title = title;
@@ -32,6 +33,8 @@ public struct Map
         DifficultyName = difficultyName ?? "N/A";
         AudioBuffer = audioBuffer;
         CoverBuffer = coverBuffer;
+        VideoBuffer = videoBuffer;
+
         Notes = data ?? Array.Empty<Note>();
         Length = length ?? Notes[Notes.Length - 1].Millisecond;
         ID = id ?? new Regex("[^a-zA-Z0-9_ -]").Replace($"{Mappers.Stringify()}_{PrettyTitle}".Replace(" ", "_"), "");
@@ -58,6 +61,7 @@ public struct Map
 			["Length"] = Length,
 			["HasAudio"] = AudioBuffer != null,
 			["HasCover"] = CoverBuffer != null,
+            ["HasVideo"] = VideoBuffer != null,
 			["AudioExt"] = AudioExt
 		}, "\t");
     }

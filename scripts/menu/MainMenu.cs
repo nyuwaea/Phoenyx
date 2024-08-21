@@ -136,13 +136,6 @@ public partial class MainMenu : Control
 			MapParser.Import(files);
 
 			UpdateMapList();
-			
-			//Map map = MapParser.Decode(path);
-			//
-			//SceneManager.Load("res://scenes/game.tscn");
-			//Game.Play(map, Lobby.Speed, Lobby.Mods);
-
-			//}
 		};
 
 		UpdateMapList();
@@ -171,71 +164,7 @@ public partial class MainMenu : Control
 			};
 		}
 
-		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
-		{
-			foreach (Panel option in category.GetNode("Container").GetChildren())
-			{
-				var property = new Settings().GetType().GetProperty(option.Name);
-				
-				if (option.FindChild("HSlider") != null)
-				{
-					HSlider slider = option.GetNode<HSlider>("HSlider");
-					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
-
-					slider.Value = (double)property.GetValue(new());
-					lineEdit.Text = slider.Value.ToString();
-
-					slider.ValueChanged += (double value) => {
-						lineEdit.Text = value.ToString();
-
-						UpdateSetting(option.Name, value);
-					};
-					lineEdit.TextSubmitted += (string text) => {
-						try
-						{
-							if (text == "")
-							{
-								text = lineEdit.PlaceholderText;
-								lineEdit.Text = text;
-							}
-
-							double value = text.ToFloat();
-
-							slider.Value = value;
-
-							UpdateSetting(option.Name, value);
-						}
-						catch (Exception exception)
-						{
-							ToastNotification.Notify($"Incorrect format; {exception.Message}", 2);
-						}
-					};
-				}
-				else if (option.FindChild("CheckButton") != null)
-				{
-					CheckButton checkButton = option.GetNode<CheckButton>("CheckButton");
-					
-					checkButton.ButtonPressed = (bool)property.GetValue(new());
-					checkButton.Toggled += (bool value) => {
-						switch (option.Name)
-						{
-							case "CameraLock":
-								Settings.CameraLock = value;
-								break;
-							case "FadeOut":
-								Settings.FadeOut = value;
-								break;
-							case "Pushback":
-								Settings.Pushback = value;
-								break;
-							case "Fullscreen":
-								DisplayServer.WindowSetMode(value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
-								break;
-						}
-					};
-				}
-			}
-		}
+		UpdateSettings(true);
 
 		// Multiplayer
 
@@ -393,42 +322,149 @@ public partial class MainMenu : Control
 		ShowSettings(false);
 	}
 
-	public static void UpdateSetting(string setting, double value)
+	public static void SetSetting(string setting, object value)
 	{
 		switch (setting)
 		{
 			case "Sensitivity":
-				Settings.Sensitivity = value;
+				Settings.Sensitivity = (double)value;
 				break;
 			case "ApproachRate":
-				Settings.ApproachRate = value;
+				Settings.ApproachRate = (double)value;
 				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
 				break;
 			case "ApproachDistance":
-				Settings.ApproachDistance = value;
+				Settings.ApproachDistance = (double)value;
 				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
 				break;
 			case "FadeIn":
-				Settings.FadeIn = value;
+				Settings.FadeIn = (double)value;
 				break;
 			case "Parallax":
-				Settings.Parallax = value;
+				Settings.Parallax = (double)value;
 				break;
 			case "FoV":
-				Settings.FoV = value;
+				Settings.FoV = (double)value;
 				break;
 			case "VolumeMaster":
-				Settings.VolumeMaster = value;
+				Settings.VolumeMaster = (double)value;
 				break;
 			case "VolumeMusic":
-				Settings.VolumeMusic = value;
+				Settings.VolumeMusic = (double)value;
 				break;
 			case "VolumeSFX":
-				Settings.VolumeSFX = value;
+				Settings.VolumeSFX = (double)value;
 				break;
 			case "NoteSize":
-				Settings.NoteSize = value;
+				Settings.NoteSize = (double)value;
 				break;
+			case "CameraLock":
+				Settings.CameraLock = (bool)value;
+				break;
+			case "FadeOut":
+				Settings.FadeOut = (bool)value;
+				break;
+			case "Pushback":
+				Settings.Pushback = (bool)value;
+				break;
+			case "Fullscreen":
+				Settings.Fullscreen = (bool)value;
+				DisplayServer.WindowSetMode((bool)value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
+				break;
+		}
+
+		UpdateSettings();
+	}
+
+	public static void UpdateSettings(bool connections = false)
+	{
+		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
+		{
+			foreach (Panel option in category.GetNode("Container").GetChildren())
+			{
+				var property = new Settings().GetType().GetProperty(option.Name);
+				
+				if (option.FindChild("HSlider") != null)
+				{
+					HSlider slider = option.GetNode<HSlider>("HSlider");
+					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
+
+					slider.Value = (double)property.GetValue(new());
+					lineEdit.Text = slider.Value.ToString();
+
+					if (connections)
+					{
+						slider.ValueChanged += (double value) => {
+							lineEdit.Text = value.ToString();
+
+							SetSetting(option.Name, value);
+						};
+						lineEdit.TextSubmitted += (string text) => {
+							try
+							{
+								if (text == "")
+								{
+									text = lineEdit.PlaceholderText;
+									lineEdit.Text = text;
+								}
+
+								double value = text.ToFloat();
+
+								slider.Value = value;
+
+								SetSetting(option.Name, value);
+							}
+							catch (Exception exception)
+							{
+								ToastNotification.Notify($"Incorrect format; {exception.Message}", 2);
+							}
+						};
+					}
+				}
+				else if (option.FindChild("CheckButton") != null)
+				{
+					CheckButton checkButton = option.GetNode<CheckButton>("CheckButton");
+					
+					checkButton.ButtonPressed = (bool)property.GetValue(new());
+					
+					if (connections)
+					{
+						checkButton.Toggled += (bool value) => {
+							SetSetting(option.Name, value);
+						};
+					}
+				}
+				else if (option.FindChild("LineEdit") != null)
+				{
+					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
+
+					lineEdit.TextSubmitted += (string text) => {
+						if (text == "")
+						{
+							text = lineEdit.PlaceholderText;
+						}
+
+						switch (option.Name)
+						{
+							case "Colors":
+								string[] split = text.Split(",");
+
+								for (int i = 0; i < split.Length; i++)
+								{
+									split[i] = split[i].TrimPrefix("#").Substr(0, 6);
+								}
+
+								if (split.Length == 0)
+								{
+									split = lineEdit.PlaceholderText.Split(",");
+								}
+
+								Phoenyx.Skin.Colors = split;
+								break;
+						}
+					};
+				}
+			}
 		}
 	}
 

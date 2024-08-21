@@ -141,6 +141,8 @@ mesh = SubResource("QuadMesh_aih2q")
 [node name="Cursor" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_xij4d")
 
+[node name="MeshInstance3D" type="MeshInstance3D" parent="."]
+
 [node name="Health" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -6.2, -10)
 cast_shadow = 0

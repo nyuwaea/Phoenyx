@@ -1,4 +1,6 @@
 using Godot;
+using Menu;
+using Phoenyx;
 
 public partial class Keybinds : Node
 {
@@ -8,7 +10,11 @@ public partial class Keybinds : Node
 		{
             if (eventKey.Keycode == Key.F11 || (eventKey.AltPressed && (eventKey.Keycode == Key.Enter || eventKey.Keycode == Key.KpEnter)))
             {
-                DisplayServer.WindowSetMode(DisplayServer.WindowGetMode() == DisplayServer.WindowMode.ExclusiveFullscreen ? DisplayServer.WindowMode.Windowed : DisplayServer.WindowMode.ExclusiveFullscreen);
+                bool value = DisplayServer.WindowGetMode() == DisplayServer.WindowMode.Windowed;
+
+                Settings.Fullscreen = value;
+                DisplayServer.WindowSetMode(value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
+                MainMenu.UpdateSettings();
             }
         }
     }

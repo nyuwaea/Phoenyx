@@ -231,9 +231,12 @@ public partial class Game : Node3D
 
 		MapLength += Constants.HitWindow;
 
-		Godot.FileAccess hitSoundFile = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
-		HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
-		hitSoundFile.Close();
+		if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3"))
+		{
+			Godot.FileAccess hitSoundFile = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
+			HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
+			hitSoundFile.Close();
+		}
 
 		UpdateVolume();
 	}
@@ -488,7 +491,7 @@ public partial class Game : Node3D
 			}
 			else
 			{
-				CurrentAttempt.Progress = CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond - Settings.ApproachTime * 1250 * CurrentAttempt.Speed; // turn AT to ms and multiply by 1.25x
+				CurrentAttempt.Progress = CurrentAttempt.Map.Notes[CurrentAttempt.PassedNotes].Millisecond - Settings.ApproachTime * 1500 * CurrentAttempt.Speed; // turn AT to ms and multiply by 1.5x
 
 				Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + (CurrentAttempt.Map.Length - CurrentAttempt.Progress) / 1000 / CurrentAttempt.Speed);
 		

@@ -279,7 +279,6 @@ size_flags_stretch_ratio = 0.0
 theme = ExtResource("2_46xtp")
 
 [node name="Settings" type="ColorRect" parent="."]
-modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -334,6 +333,7 @@ offset_bottom = -8.0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_13m77")
 
 [node name="Gameplay" type="ScrollContainer" parent="Settings/Holder/Categories"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -385,7 +385,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "0.66"
 placeholder_text = "0.66"
-max_length = 4
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -458,7 +458,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "35"
 placeholder_text = "35"
-max_length = 4
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -502,7 +502,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "16"
 placeholder_text = "16"
-max_length = 4
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -543,7 +543,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "0"
 placeholder_text = "0"
-max_length = 3
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -646,7 +646,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "0.1"
 placeholder_text = "0.1"
-max_length = 4
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -689,7 +689,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "70"
 placeholder_text = "70"
-max_length = 3
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -790,7 +790,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "100"
 placeholder_text = "100"
-max_length = 3
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -831,7 +831,7 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "50"
 placeholder_text = "50"
-max_length = 3
+max_length = 16
 flat = true
 caret_blink = true
 
@@ -872,12 +872,11 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "50"
 placeholder_text = "50"
-max_length = 3
+max_length = 16
 flat = true
 caret_blink = true
 
 [node name="Skin" type="ScrollContainer" parent="Settings/Holder/Categories"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -966,14 +965,14 @@ offset_left = 8.0
 theme_override_font_sizes/font_size = 16
 text = "0.875"
 placeholder_text = "700.875"
-max_length = 5
+max_length = 16
 flat = true
 caret_blink = true
 
 [node name="Colors" type="Panel" parent="Settings/Holder/Categories/Skin/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-tooltip_text = "Not supported yet - Edit your settings profile in AppData/Roaming/Phoenyx/profiles/xxxx.json"
+tooltip_text = "Hexadecimal format only, separated by a comma"
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
 [node name="Label" type="Label" parent="Settings/Holder/Categories/Skin/Container/Colors"]
@@ -986,6 +985,19 @@ label_settings = SubResource("LabelSettings_15nul")
 vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Skin/Container/Colors"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 1.0
+anchor_bottom = 1.0
+theme_override_font_sizes/font_size = 16
+text = "00ffed,ff8ff9"
+placeholder_text = "00ffed,ff8ff9"
+flat = true
+caret_blink = true
 
 [node name="Sidebar" type="ScrollContainer" parent="Settings/Holder"]
 layout_mode = 1
