@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Godot;
+using Godot.NativeInterop;
 using Phoenyx;
 
 namespace Menu;
@@ -85,6 +86,7 @@ public partial class MainMenu : Control
 		SelectedMap = null;
 
 		Cursor.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
 
 		// Map selection
 
@@ -214,7 +216,7 @@ public partial class MainMenu : Control
 
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
-		Cursor.Position = MousePosition - new Vector2(12, 12);
+		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
 
 		LastFrame = now;
     }
@@ -358,6 +360,10 @@ public partial class MainMenu : Control
 			case "NoteSize":
 				Settings.NoteSize = (double)value;
 				break;
+			case "CursorScale":
+				Settings.CursorScale = (double)value;
+				Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
+				break;
 			case "CameraLock":
 				Settings.CameraLock = (bool)value;
 				break;
@@ -370,6 +376,9 @@ public partial class MainMenu : Control
 			case "Fullscreen":
 				Settings.Fullscreen = (bool)value;
 				DisplayServer.WindowSetMode((bool)value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
+				break;
+			case "CursorTrail":
+				Settings.CursorTrail = (bool)value;
 				break;
 		}
 
@@ -418,6 +427,8 @@ public partial class MainMenu : Control
 							{
 								ToastNotification.Notify($"Incorrect format; {exception.Message}", 2);
 							}
+
+							lineEdit.ReleaseFocus();
 						};
 					}
 				}
@@ -438,31 +449,37 @@ public partial class MainMenu : Control
 				{
 					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
 
-					lineEdit.TextSubmitted += (string text) => {
-						if (text == "")
-						{
-							text = lineEdit.PlaceholderText;
-						}
+					if (connections)
+					{
+						lineEdit.TextSubmitted += (string text) => {
+							if (text == "")
+							{
+								text = lineEdit.PlaceholderText;
+								lineEdit.Text = text;
+							}
 
-						switch (option.Name)
-						{
-							case "Colors":
-								string[] split = text.Split(",");
+							switch (option.Name)
+							{
+								case "Colors":
+									string[] split = text.Split(",");
 
-								for (int i = 0; i < split.Length; i++)
-								{
-									split[i] = split[i].TrimPrefix("#").Substr(0, 6);
-								}
+									for (int i = 0; i < split.Length; i++)
+									{
+										split[i] = split[i].TrimPrefix("#").Substr(0, 6);
+									}
 
-								if (split.Length == 0)
-								{
-									split = lineEdit.PlaceholderText.Split(",");
-								}
+									if (split.Length == 0)
+									{
+										split = lineEdit.PlaceholderText.Split(",");
+									}
 
-								Phoenyx.Skin.Colors = split;
-								break;
-						}
-					};
+									Phoenyx.Skin.Colors = split;
+									break;
+							}
+
+							lineEdit.ReleaseFocus();
+						};
+					}
 				}
 			}
 		}

@@ -194,6 +194,8 @@ public partial class Game : Node3D
 		Input.UseAccumulatedInput = false;
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
+		Cursor.Mesh.Set("size", new Vector2((float)(Constants.CursorSize * Settings.CursorScale), (float)(Constants.CursorSize * Settings.CursorScale)));
+
 		try
 		{
 			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));

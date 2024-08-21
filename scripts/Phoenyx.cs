@@ -38,6 +38,8 @@ public struct Settings
     public static bool FadeOut {get; set;} = true;
     public static bool Pushback {get; set;} = true;
     public static double NoteSize {get; set;} = 0.875;
+    public static double CursorScale {get; set;} = 1;
+    public static bool CursorTrail {get; set;} = false;
     
     public Settings() {}
 }
@@ -45,6 +47,7 @@ public struct Settings
 public struct Skin
 {
     public static string[] Colors {get; set;} = new string[]{"#00ffed", "#ff8ff9"};
+    
 
     public Skin() {}
 }
@@ -197,7 +200,9 @@ public class Util
             ["FadeIn"] = Settings.FadeIn,
             ["FadeOut"] = Settings.FadeOut,
             ["Pushback"] = Settings.Pushback,
-            ["NoteSize"] = Settings.NoteSize
+            ["NoteSize"] = Settings.NoteSize,
+            ["CursorScale"] = Settings.CursorScale,
+            ["CursorTrail"] = Settings.CursorTrail
         };
 
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
@@ -235,6 +240,8 @@ public class Util
             Settings.FadeOut = (bool)data["FadeOut"];
             Settings.Pushback = (bool)data["Pushback"];
             Settings.NoteSize = (double)data["NoteSize"];
+            Settings.CursorScale = (double)data["CursorScale"];
+            Settings.CursorTrail = (bool)data["CursorTrail"];
 
             if (Settings.Fullscreen)
 		    {
@@ -284,6 +291,7 @@ public class Util
         }
 
         Skin.Colors = split;
+
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()

@@ -279,6 +279,7 @@ size_flags_stretch_ratio = 0.0
 theme = ExtResource("2_46xtp")
 
 [node name="Settings" type="ColorRect" parent="."]
+modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -333,7 +334,6 @@ offset_bottom = -8.0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_13m77")
 
 [node name="Gameplay" type="ScrollContainer" parent="Settings/Holder/Categories"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -711,6 +711,7 @@ theme_override_constants/separation = 2
 [node name="Fullscreen" type="Panel" parent="Settings/Holder/Categories/Video/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+tooltip_text = "F11 or ALT + ENTER"
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
 [node name="Label" type="Label" parent="Settings/Holder/Categories/Video/Container/Fullscreen"]
@@ -718,7 +719,6 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.3
 anchor_bottom = 1.0
-tooltip_text = "F11 or ALT + ENTER"
 text = "Fullscreen"
 label_settings = SubResource("LabelSettings_15nul")
 vertical_alignment = 1
@@ -876,7 +876,8 @@ max_length = 16
 flat = true
 caret_blink = true
 
-[node name="Skin" type="ScrollContainer" parent="Settings/Holder/Categories"]
+[node name="Visuals" type="ScrollContainer" parent="Settings/Holder/Categories"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -884,18 +885,18 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Skin"]
+[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Visuals"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 2
 
-[node name="Skin" type="Panel" parent="Settings/Holder/Categories/Skin/Container"]
+[node name="Skin" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Skin/Container/Skin"]
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.3
@@ -906,7 +907,7 @@ vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="OptionsButton" type="OptionButton" parent="Settings/Holder/Categories/Skin/Container/Skin"]
+[node name="OptionsButton" type="OptionButton" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = -1
@@ -925,57 +926,13 @@ fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "default"
 
-[node name="NoteSize" type="Panel" parent="Settings/Holder/Categories/Skin/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Default: 0.875"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Skin/Container/NoteSize"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-tooltip_text = "Visual only"
-text = "Note Size"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Skin/Container/NoteSize"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 2.0
-step = 0.025
-value = 0.875
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Skin/Container/NoteSize"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-theme_override_font_sizes/font_size = 16
-text = "0.875"
-placeholder_text = "700.875"
-max_length = 16
-flat = true
-caret_blink = true
-
-[node name="Colors" type="Panel" parent="Settings/Holder/Categories/Skin/Container"]
+[node name="Colors" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 tooltip_text = "Hexadecimal format only, separated by a comma"
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Skin/Container/Colors"]
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/Colors"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.3
@@ -986,7 +943,7 @@ vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Skin/Container/Colors"]
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/Colors"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = -1
@@ -998,6 +955,120 @@ text = "00ffed,ff8ff9"
 placeholder_text = "00ffed,ff8ff9"
 flat = true
 caret_blink = true
+
+[node name="NoteSize" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "This does not affect the hit box size"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Note Size"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 2.0
+step = 0.025
+value = 0.875
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+theme_override_font_sizes/font_size = 16
+text = "0.875"
+placeholder_text = "0.875"
+max_length = 16
+flat = true
+caret_blink = true
+
+[node name="CursorScale" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Scale"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 4.0
+step = 0.025
+value = 1.0
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+theme_override_font_sizes/font_size = 16
+text = "1"
+placeholder_text = "1"
+max_length = 16
+flat = true
+caret_blink = true
+
+[node name="CursorTrail" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/CursorTrail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Trail"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Visuals/Container/CursorTrail"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+flat = true
 
 [node name="Sidebar" type="ScrollContainer" parent="Settings/Holder"]
 layout_mode = 1
@@ -1028,6 +1099,21 @@ theme = ExtResource("8_ygdpt")
 text = "  GAMEPLAY"
 alignment = 0
 
+[node name="Visuals" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 50.0
+focus_mode = 0
+theme = ExtResource("8_ygdpt")
+text = "  VISUALS"
+alignment = 0
+
 [node name="Video" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
@@ -1056,21 +1142,6 @@ offset_bottom = 50.0
 focus_mode = 0
 theme = ExtResource("8_ygdpt")
 text = "  AUDIO"
-alignment = 0
-
-[node name="Skin" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-color = Color(1, 1, 1, 0)
-
-[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Skin"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_bottom = 50.0
-focus_mode = 0
-theme = ExtResource("8_ygdpt")
-text = "  SKIN"
 alignment = 0
 
 [node name="Header" type="Panel" parent="Settings/Holder"]
