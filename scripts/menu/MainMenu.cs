@@ -394,6 +394,36 @@ public partial class MainMenu : Control
 
 	public static void UpdateSettings(bool connections = false)
 	{
+		OptionButton skinOptions = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+
+		skinOptions.Clear();
+
+		int i = 0;
+
+		foreach (string path in Directory.GetDirectories($"{Constants.UserFolder}/skins"))
+		{
+			string[] split = path.Split("\\");
+			string name = split[split.Length - 1];
+			
+			skinOptions.AddItem(name, i);
+
+			if (Settings.Skin == name)
+			{
+				skinOptions.Selected = i;
+			}
+
+			i++;
+		}
+
+		if (connections)
+		{
+			skinOptions.ItemSelected += (long item) => {
+				Settings.Skin = skinOptions.GetItemText((int)item);
+				Util.LoadSkin();
+				Cursor.Texture = Phoenyx.Skin.CursorImage;
+			};
+		}
+
 		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
 		{
 			foreach (Panel option in category.GetNode("Container").GetChildren())
