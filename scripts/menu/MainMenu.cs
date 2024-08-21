@@ -83,7 +83,7 @@ public partial class MainMenu : Control
 		LoadedMaps = new();
 		SelectedMap = null;
 
-		Cursor.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
 
 		// Map selection

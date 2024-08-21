@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -196,30 +197,21 @@ public partial class Game : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
-		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Enabled);
+		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
 		Cursor.Mesh.Set("size", new Vector2((float)(Constants.CursorSize * Settings.CursorScale), (float)(Constants.CursorSize * Settings.CursorScale)));
 
 		try
 		{
-			ImageTexture cursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
-
-			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = cursorImage;
-			(CursorTrailMultimesh.MaterialOverride as StandardMaterial3D).AlbedoTexture = cursorImage;
-			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
-			Health.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
-			Health.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
-			ProgressBar.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
-			ProgressBar.GetParent().GetNode<TextureRect>("Background").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
-			
-			if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
-			{
-				NotesMultimesh.Multimesh.Mesh = (ArrayMesh)Util.OBJParser.Call("load_obj", $"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj");
-			}
-			else
-			{
-				NotesMultimesh.Multimesh.Mesh = GD.Load<ArrayMesh>($"res://skin/note.obj");
-			}
+			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = Phoenyx.Skin.CursorImage;
+			(CursorTrailMultimesh.MaterialOverride as StandardMaterial3D).AlbedoTexture = Phoenyx.Skin.CursorImage;
+			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = Phoenyx.Skin.GridImage;
+			Health.Texture = Phoenyx.Skin.HealthImage;
+			Health.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.HealthBackgroundImage;
+			ProgressBar.Texture = Phoenyx.Skin.ProgressImage;
+			ProgressBar.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.ProgressBackgroundImage;
+			NotesMultimesh.Multimesh.Mesh = Phoenyx.Skin.NoteMesh;
+			HitSound.Stream = LoadAudioStream(Phoenyx.Skin.HitSoundBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -239,13 +231,6 @@ public partial class Game : Node3D
 		}
 
 		MapLength += Constants.HitWindow;
-
-		if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3"))
-		{
-			Godot.FileAccess hitSoundFile = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
-			HitSound.Stream = LoadAudioStream(hitSoundFile.GetBuffer((long)hitSoundFile.GetLength()));
-			hitSoundFile.Close();
-		}
 
 		UpdateVolume();
 	}
@@ -613,6 +598,16 @@ public partial class Game : Node3D
 	private static AudioStream LoadAudioStream(byte[] buffer)
 	{
 		AudioStream stream;
+
+		if (buffer.Length <= 4)
+		{
+			Godot.FileAccess file = Godot.FileAccess.Open("res://sounds/quiet.mp3", Godot.FileAccess.ModeFlags.Read);
+			byte[] quietBuffer = file.GetBuffer((long)file.GetLength());
+
+			file.Close();
+
+			return new AudioStreamMP3(){Data = quietBuffer};
+		}
 
 		if (Encoding.UTF8.GetString(buffer[0..4]) == "OggS")
 		{

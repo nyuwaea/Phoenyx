@@ -50,7 +50,14 @@ public struct Settings
 public struct Skin
 {
     public static string[] Colors {get; set;} = new string[]{"#00ffed", "#ff8ff9"};
-
+    public static ImageTexture CursorImage {get; set;} = new();
+    public static ImageTexture GridImage {get; set;} = new();
+    public static ImageTexture HealthImage {get; set;} = new();
+    public static ImageTexture HealthBackgroundImage {get; set;} = new();
+    public static ImageTexture ProgressImage {get; set;} = new();
+    public static ImageTexture ProgressBackgroundImage {get; set;} = new();
+    public static byte[] HitSoundBuffer {get; set;} = System.Array.Empty<byte>();
+    public static ArrayMesh NoteMesh {get; set;} = new();
 
     public Skin() {}
 }
@@ -300,7 +307,28 @@ public class Util
         }
 
         Skin.Colors = split;
+        Skin.CursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
+        Skin.GridImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
+        Skin.HealthImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
+        Skin.HealthBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
+        Skin.ProgressImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
+        Skin.ProgressBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
 
+        if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
+        {
+        	Skin.NoteMesh = (ArrayMesh)OBJParser.Call("load_obj", $"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj");
+        }
+        else
+        {
+        	Skin.NoteMesh = GD.Load<ArrayMesh>($"res://skin/note.obj");
+        }
+
+        if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3"))
+        {
+        	Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/hit.mp3", Godot.FileAccess.ModeFlags.Read);
+        	Skin.HitSoundBuffer = file.GetBuffer((long)file.GetLength());
+        	file.Close();
+        }
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()
