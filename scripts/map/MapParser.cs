@@ -393,7 +393,7 @@ public partial class MapParser : Node
 			ZipArchive file = ZipFile.OpenRead(path);
 			Stream metaStream = file.GetEntry("metadata.json").Open();
 			Stream objectsStream = file.GetEntry("objects.phxmo").Open();
-
+			
 			byte[] metaBuffer = new byte[metaStream.Length];
 			byte[] objectsBuffer = new byte[objectsStream.Length];
 			byte[] audioBuffer = null;
@@ -417,10 +417,18 @@ public partial class MapParser : Node
 
 			if ((bool)metadata["HasCover"])
 			{
-				Stream coverStream = file.GetEntry($"cover.png").Open();
+				Stream coverStream = file.GetEntry("cover.png").Open();
 				coverBuffer = new byte[coverStream.Length];
 				coverStream.Read(coverBuffer, 0, (int)coverStream.Length);
 				coverStream.Close();
+			}
+
+			if ((bool)metadata["HasVideo"])
+			{
+				Stream videoStream = file.GetEntry("video.mp4").Open();
+				videoBuffer = new byte[videoStream.Length];
+				videoStream.Read(videoBuffer, 0, (int)videoStream.Length);
+				videoStream.Close();
 			}
 
 			uint typeCount = objects.GetUInt32();

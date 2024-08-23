@@ -114,12 +114,12 @@ public partial class ClientManager : Node
     public void ReceiveAllReady(string fileName, float speed = 1, string[] mods = null)
     {
         SceneManager.Load("res://scenes/game.tscn");
-		Game.Play(MapParser.Decode($"{Constants.UserFolder}/maps/{fileName}"), speed, mods ?? Array.Empty<string>());
+		Runner.Play(MapParser.Decode($"{Constants.UserFolder}/maps/{fileName}"), speed, mods ?? Array.Empty<string>());
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
     public void ReceiveScore(string name, int score)
     {
-        Game.UpdateScore(name, score);
+        Runner.UpdateScore(name, score);
     }
 }

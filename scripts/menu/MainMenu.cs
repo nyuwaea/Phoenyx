@@ -419,6 +419,9 @@ public partial class MainMenu : Control
 			case "CursorDrift":
 				Settings.CursorDrift = (bool)value;
 				break;
+			case "VideoDim":
+				Settings.VideoDim = (double)value;
+				break;
 		}
 
 		UpdateSettings();
@@ -572,119 +575,126 @@ public partial class MainMenu : Control
 
 		foreach (string mapFile in Directory.GetFiles($"{Constants.UserFolder}/maps"))
 		{
-			string[] split = mapFile.Split("\\");
-			string fileName = split[split.Length - 1].Replace(".phxm", "");
-			
-			if (mapFile.GetExtension() != "phxm" || LoadedMaps.Contains(fileName))
+			try
+			{
+				string[] split = mapFile.Split("\\");
+				string fileName = split[split.Length - 1].Replace(".phxm", "");
+				
+				if (mapFile.GetExtension() != "phxm" || LoadedMaps.Contains(fileName))
+				{
+					continue;
+				}
+
+				string title;
+				string extra;
+				string coverFile = null;
+
+				if (!Directory.Exists($"{Constants.UserFolder}/cache/maps/{fileName}"))
+				{
+					Directory.CreateDirectory($"{Constants.UserFolder}/cache/maps/{fileName}");
+					Map map = MapParser.Decode(mapFile, false);
+
+					File.WriteAllText($"{Constants.UserFolder}/cache/maps/{fileName}/metadata.json", map.EncodeMeta());
+
+					//if (map.CoverBuffer != null)
+					//{
+					//	Godot.FileAccess cover = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png", Godot.FileAccess.ModeFlags.Write);
+					//	cover.StoreBuffer(map.CoverBuffer);
+					//	cover.Close();
+					//	
+					//	Image coverImage = Image.LoadFromFile($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png");
+					//	coverImage.Resize(128, 128);
+					//	coverImage.SavePng($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png");
+					//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
+					//}
+
+					title = map.PrettyTitle;
+					extra = $"{map.DifficultyName} - {map.PrettyMappers}";
+				}
+				else
+				{
+					Godot.FileAccess metaFile = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/maps/{fileName}/metadata.json", Godot.FileAccess.ModeFlags.Read);
+					Godot.Collections.Dictionary metadata = (Godot.Collections.Dictionary)Json.ParseString(Encoding.UTF8.GetString(metaFile.GetBuffer((long)metaFile.GetLength())));
+					metaFile.Close();
+
+					//if (File.Exists($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png"))
+					//{
+					//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
+					//}
+
+					string mappers = "";
+
+					foreach (string mapper in (string[])metadata["Mappers"])
+					{
+						mappers += $"{mapper}, ";
+					}
+
+					mappers = mappers.Substr(0, mappers.Length - 2);
+					extra = $"{((string)metadata["DifficultyName"] == "N/A" ? Constants.Difficulties[(int)metadata["Difficulty"]] : metadata["DifficultyName"])} - {mappers}";
+					title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
+				}
+
+				LoadedMaps.Add(fileName);
+
+				Panel mapButton = MapButton.Instantiate<Panel>();
+				Panel holder = mapButton.GetNode<Panel>("Holder");
+
+				if (coverFile != null)
+				{
+					holder.GetNode<TextureRect>("Cover").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile(coverFile));
+				}
+
+				mapButton.Name = fileName;
+				holder.GetNode<Label>("Title").Text = title;
+				holder.GetNode<Label>("Extra").Text = extra;
+
+				MapListContainer.AddChild(mapButton);
+
+				holder.GetNode<Button>("Button").MouseEntered += () => {
+					holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff10");
+				};
+				
+				holder.GetNode<Button>("Button").MouseExited += () => {
+					holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff00");
+				};
+				
+				holder.GetNode<Button>("Button").Pressed += () => {
+					if (SelectedMap != null)
+					{
+						Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+						selectedHolder.GetNode<Panel>("Normal").Visible = true;
+						selectedHolder.GetNode<Panel>("Selected").Visible = false;
+
+						Tween deselectTween = selectedHolder.CreateTween();
+						deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+						deselectTween.Parallel().TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+						deselectTween.Play();
+				
+						if (MapListContainer.GetNode(SelectedMap) == mapButton)
+						{
+							Map map = MapParser.Decode(mapFile);
+				
+							SceneManager.Load("res://scenes/game.tscn");
+							Runner.Play(map, Lobby.Speed, Lobby.Mods);
+						}
+					}
+
+					holder.GetNode<Panel>("Normal").Visible = false;
+					holder.GetNode<Panel>("Selected").Visible = true;
+					
+					Tween selectTween = holder.CreateTween();
+					selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+					selectTween.Parallel().TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+					selectTween.Play();
+
+					TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
+					SelectedMap = mapButton.Name;
+				};
+			}
+			catch
 			{
 				continue;
 			}
-
-			string title;
-			string extra;
-			string coverFile = null;
-
-			if (!Directory.Exists($"{Constants.UserFolder}/cache/maps/{fileName}"))
-        	{
-        	    Directory.CreateDirectory($"{Constants.UserFolder}/cache/maps/{fileName}");
-				Map map = MapParser.Decode(mapFile, false);
-
-				File.WriteAllText($"{Constants.UserFolder}/cache/maps/{fileName}/metadata.json", map.EncodeMeta());
-
-				//if (map.CoverBuffer != null)
-				//{
-				//	Godot.FileAccess cover = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png", Godot.FileAccess.ModeFlags.Write);
-				//	cover.StoreBuffer(map.CoverBuffer);
-				//	cover.Close();
-				//	
-				//	Image coverImage = Image.LoadFromFile($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png");
-				//	coverImage.Resize(128, 128);
-				//	coverImage.SavePng($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png");
-				//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
-				//}
-
-				title = map.PrettyTitle;
-				extra = $"{map.DifficultyName} - {map.PrettyMappers}";
-        	}
-			else
-			{
-				Godot.FileAccess metaFile = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/maps/{fileName}/metadata.json", Godot.FileAccess.ModeFlags.Read);
-				Godot.Collections.Dictionary metadata = (Godot.Collections.Dictionary)Json.ParseString(Encoding.UTF8.GetString(metaFile.GetBuffer((long)metaFile.GetLength())));
-				metaFile.Close();
-
-				//if (File.Exists($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png"))
-				//{
-				//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
-				//}
-
-				string mappers = "";
-
-				foreach (string mapper in (string[])metadata["Mappers"])
-        		{
-        		    mappers += $"{mapper}, ";
-        		}
-
-        		mappers = mappers.Substr(0, mappers.Length - 2);
-				extra = $"{((string)metadata["DifficultyName"] == "N/A" ? Constants.Difficulties[(int)metadata["Difficulty"]] : metadata["DifficultyName"])} - {mappers}";
-				title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
-			}
-
-			LoadedMaps.Add(fileName);
-
-			Panel mapButton = MapButton.Instantiate<Panel>();
-			Panel holder = mapButton.GetNode<Panel>("Holder");
-
-			if (coverFile != null)
-			{
-				holder.GetNode<TextureRect>("Cover").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile(coverFile));
-			}
-
-			mapButton.Name = fileName;
-			holder.GetNode<Label>("Title").Text = title;
-			holder.GetNode<Label>("Extra").Text = extra;
-
-			MapListContainer.AddChild(mapButton);
-
-			holder.GetNode<Button>("Button").MouseEntered += () => {
-				holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff10");
-			};
-			
-			holder.GetNode<Button>("Button").MouseExited += () => {
-				holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff00");
-			};
-			
-			holder.GetNode<Button>("Button").Pressed += () => {
-				if (SelectedMap != null)
-				{
-					Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
-					selectedHolder.GetNode<Panel>("Normal").Visible = true;
-					selectedHolder.GetNode<Panel>("Selected").Visible = false;
-
-					Tween deselectTween = selectedHolder.CreateTween();
-					deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-					deselectTween.Parallel().TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-					deselectTween.Play();
-			
-					if (MapListContainer.GetNode(SelectedMap) == mapButton)
-					{
-						Map map = MapParser.Decode(mapFile);
-			
-						SceneManager.Load("res://scenes/game.tscn");
-						Game.Play(map, Lobby.Speed, Lobby.Mods);
-					}
-				}
-
-				holder.GetNode<Panel>("Normal").Visible = false;
-				holder.GetNode<Panel>("Selected").Visible = true;
-				
-				Tween selectTween = holder.CreateTween();
-				selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-				selectTween.Parallel().TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-				selectTween.Play();
-
-				TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
-				SelectedMap = mapButton.Name;
-			};
 		}
 
 		UpdateMaxScroll();

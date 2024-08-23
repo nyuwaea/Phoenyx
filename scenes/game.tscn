@@ -1,9 +1,9 @@
-[gd_scene load_steps=41 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=45 format=3 uid="uid://vp1nmsiqt5yv"]
 
-[ext_resource type="Script" path="res://scripts/gameplay/Game.cs" id="1_v5074"]
+[ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
 [ext_resource type="Texture2D" uid="uid://b3g4aw54n6bow" path="res://skin/grid.png" id="2_q78ea"]
-[ext_resource type="Script" path="res://scripts/gameplay/Renderer.cs" id="2_rnyvc"]
+[ext_resource type="Script" path="res://scripts/game/Renderer.cs" id="3_ew8wr"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="3_negii"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="4_rvp5o"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="5_pxgh4"]
@@ -99,6 +99,22 @@ resource_local_to_scene = true
 material = SubResource("StandardMaterial3D_p1h21")
 size = Vector2(10.88, 0.8)
 
+[sub_resource type="ViewportTexture" id="ViewportTexture_5nddi"]
+viewport_path = NodePath("Video/SubViewport")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rj3ky"]
+resource_local_to_scene = true
+transparency = 1
+shading_mode = 0
+albedo_texture = SubResource("ViewportTexture_5nddi")
+texture_filter = 1
+texture_repeat = false
+
+[sub_resource type="QuadMesh" id="QuadMesh_3p7x2"]
+size = Vector2(258.3, 210)
+
+[sub_resource type="FFmpegVideoStream" id="FFmpegVideoStream_aj2pp"]
+
 [sub_resource type="ViewportTexture" id="ViewportTexture_b0vun"]
 viewport_path = NodePath("PanelLeft/SubViewport")
 
@@ -138,7 +154,7 @@ font_color = Color(1, 1, 1, 0.627451)
 font_size = 160
 
 [node name="Node3D" type="Node3D"]
-script = ExtResource("1_v5074")
+script = ExtResource("1_1hgss")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.75)
@@ -149,7 +165,7 @@ fov = 70.0
 material_override = SubResource("StandardMaterial3D_73q55")
 cast_shadow = 0
 multimesh = SubResource("MultiMesh_almyi")
-script = ExtResource("2_rnyvc")
+script = ExtResource("3_ew8wr")
 
 [node name="Grid" type="MeshInstance3D" parent="."]
 mesh = SubResource("QuadMesh_aih2q")
@@ -206,6 +222,28 @@ offset_bottom = 80.0
 texture = ExtResource("9_nde5v")
 expand_mode = 1
 stretch_mode = 1
+
+[node name="Video" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+material_override = SubResource("StandardMaterial3D_rj3ky")
+transparency = 0.8
+cast_shadow = 0
+mesh = SubResource("QuadMesh_3p7x2")
+
+[node name="SubViewport" type="SubViewport" parent="Video"]
+transparent_bg = true
+size = Vector2i(1920, 1080)
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Video/SubViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = SubResource("FFmpegVideoStream_aj2pp")
+volume_db = -80.0
+expand = true
 
 [node name="PanelLeft" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.984808, 0, 0.173648, 0, 1, 0, -0.173648, 0, 0.984808, -7.5, 0, -9)
@@ -435,22 +473,22 @@ outline_modulate = Color(0, 0, 0, 0)
 text = "Press Space to skip"
 font = ExtResource("5_pxgh4")
 
-[node name="FPSCounter" type="Label" parent="."]
-anchors_preset = 2
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_top = -23.0
-offset_right = 40.0
-grow_vertical = 0
-theme = ExtResource("4_rvp5o")
-text = "60 FPS"
-
 [node name="SongPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -25.0
 
 [node name="HitSoundPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -8.0
 max_polyphony = 4
+
+[node name="FPSCounter" type="Label" parent="."]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_top = -23.0
+offset_right = 51.0
+grow_vertical = 0
+theme = ExtResource("4_rvp5o")
+text = "60 FPS"
 
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
 anchors_preset = 3

@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using Godot;
@@ -48,6 +47,7 @@ public struct Settings
     public static double TrailTime {get; set;} = 0.05;
     public static double TrailDetail {get; set;} = 1;
     public static bool CursorDrift {get; set;} = true;
+    public static double VideoDim {get; set;} = 0.8;
     
     public Settings() {}
 
@@ -79,7 +79,8 @@ public struct Settings
             ["CursorTrail"] = CursorTrail,
             ["TrailTime"] = TrailTime,
             ["TrailDetail"] = TrailDetail,
-            ["CursorDrift"] = CursorDrift
+            ["CursorDrift"] = CursorDrift,
+            ["VideoDim"] = VideoDim
         };
 
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
@@ -112,7 +113,7 @@ public struct Settings
             Parallax = (double)data["Parallax"];
             ApproachRate = (double)data["ApproachRate"];
             ApproachDistance = (double)data["ApproachDistance"];
-            ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+            ApproachTime = ApproachDistance / ApproachRate;
             FadeIn = (double)data["FadeIn"];
             FadeOut = (bool)data["FadeOut"];
             Pushback = (bool)data["Pushback"];
@@ -122,6 +123,7 @@ public struct Settings
             TrailTime = (double)data["TrailTime"];
             TrailDetail = (double)data["TrailDetail"];
             CursorDrift = (bool)data["CursorDrift"];
+            VideoDim = (double)data["VideoDim"];
 
             if (Fullscreen)
 		    {
@@ -242,7 +244,7 @@ public class Util
         Initialized = true;
 
         DiscordRPC.Call("Set", "app_id", 1272588732834254878);
-		DiscordRPC.Call("Set", "large_image", "wizardry");
+		DiscordRPC.Call("Set", "large_image", "short");
 
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))
         {
