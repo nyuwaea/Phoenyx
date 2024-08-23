@@ -30,6 +30,7 @@ public struct Settings
     public static double VolumeMaster {get; set;} = 100;
     public static double VolumeMusic {get; set;} = 50;
     public static double VolumeSFX {get; set;} = 50;
+    public static bool AlwaysPlayHitSound {get; set;} = false;
     public static string Skin {get; set;} = "default";
     public static bool CameraLock {get; set;} = true;
     public static double FoV {get; set;} = 70;
@@ -47,7 +48,7 @@ public struct Settings
     public static double TrailTime {get; set;} = 0.05;
     public static double TrailDetail {get; set;} = 1;
     public static bool CursorDrift {get; set;} = true;
-    public static double VideoDim {get; set;} = 0.8;
+    public static double VideoDim {get; set;} = 80;
     
     public Settings() {}
 
@@ -64,6 +65,7 @@ public struct Settings
             ["VolumeMaster"] = VolumeMaster,
             ["VolumeMusic"] = VolumeMusic,
             ["VolumeSFX"] = VolumeSFX,
+            ["AlwaysPlayHitSound"] = AlwaysPlayHitSound,
             ["Skin"] = Skin,
             ["CameraLock"] = CameraLock,
             ["FoV"] = FoV,
@@ -106,6 +108,7 @@ public struct Settings
             VolumeMaster = (double)data["VolumeMaster"];            
             VolumeMusic = (double)data["VolumeMusic"];
             VolumeSFX = (double)data["VolumeSFX"];
+            AlwaysPlayHitSound = (bool)data["AlwaysPlayHitSound"];
             Skin = (string)data["Skin"];
             CameraLock = (bool)data["CameraLock"];
             FoV = (int)data["FoV"];
@@ -152,12 +155,16 @@ public struct Settings
 public struct Skin
 {
     public static string[] Colors {get; set;} = new string[]{"#00ffed", "#ff8ff9"};
+    public static string RawColors {get; set;} = "00ffed,ff8ff9";
     public static ImageTexture CursorImage {get; set;} = new();
     public static ImageTexture GridImage {get; set;} = new();
     public static ImageTexture HealthImage {get; set;} = new();
     public static ImageTexture HealthBackgroundImage {get; set;} = new();
     public static ImageTexture ProgressImage {get; set;} = new();
     public static ImageTexture ProgressBackgroundImage {get; set;} = new();
+    public static ImageTexture HitsImage {get; set;} = new();
+    public static ImageTexture MissesImage {get; set;} = new();
+    public static ImageTexture MissFeedbackImage {get; set;} = new();
     public static byte[] HitSoundBuffer {get; set;} = System.Array.Empty<byte>();
     public static ArrayMesh NoteMesh {get; set;} = new();
 
@@ -172,14 +179,16 @@ public struct Skin
             data += color + ",";
         }
         
-        data = data.TrimSuffix(",");
+        RawColors = data.TrimSuffix(",");
 
-        File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", data);
+        File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", RawColors);
     }
 
     public static void Load()
     {
-        string[] split = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt").Split(",");
+        RawColors = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt").TrimSuffix(",");
+
+        string[] split = RawColors.Split(",");
 
         for (int i = 0; i < split.Length; i++)
         {
@@ -194,6 +203,9 @@ public struct Skin
         HealthBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
         ProgressImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
         ProgressBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
+        HitsImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/hits.png"));
+        MissesImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/misses.png"));
+        MissFeedbackImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/miss_feedback.png"));
 
         if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
         {

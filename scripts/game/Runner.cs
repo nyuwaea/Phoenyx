@@ -84,7 +84,7 @@ public partial class Runner : Node3D
 			Speed = speed;
 			Players = players ?? Array.Empty<string>();
 			Progress = -1000;
-			ComboMultiplierIncrement = Map.Notes.Length / 100;
+			ComboMultiplierIncrement = Map.Notes.Length / 200;
 			Mods = new(){
 				["NoFail"] = mods.Contains("NoFail"),
 				["Ghost"] = mods.Contains("Ghost")
@@ -120,11 +120,12 @@ public partial class Runner : Node3D
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
-			if (HitTween != null)
+			if (!Settings.AlwaysPlayHitSound)
 			{
-				HitTween.Kill();
+				HitSound.Play();
 			}
 
+			HitTween?.Kill();
 			HitTween = HitsLabel.CreateTween();
 			HitTween.TweenProperty(HitsLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
 			HitTween.Play();
@@ -152,11 +153,7 @@ public partial class Runner : Node3D
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 
-			if (MissTween != null)
-			{
-				MissTween.Kill();
-			}
-
+			MissTween?.Kill();
 			MissTween = MissesLabel.CreateTween();
 			MissTween.TweenProperty(MissesLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
 			MissTween.Play();
@@ -221,8 +218,8 @@ public partial class Runner : Node3D
 		//	Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
 		//}
 
-		VideoQuad.Transparency = (float)Settings.VideoDim;
 		Camera.Fov = (float)Settings.FoV;
+		VideoQuad.Transparency = 1;
 		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
 		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
@@ -235,7 +232,7 @@ public partial class Runner : Node3D
 		Input.UseAccumulatedInput = false;
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
-		Cursor.Mesh.Set("size", new Vector2((float)(Constants.CursorSize * Settings.CursorScale), (float)(Constants.CursorSize * Settings.CursorScale)));
+		(Cursor.Mesh as QuadMesh).Size = new Vector2((float)(Constants.CursorSize * Settings.CursorScale), (float)(Constants.CursorSize * Settings.CursorScale));
 
 		try
 		{
@@ -327,6 +324,10 @@ public partial class Runner : Node3D
 			if (!Video.IsPlaying() && CurrentAttempt.Progress >= 0)
 			{
 				Video.Play();
+				
+				Tween videoInTween = VideoQuad.CreateTween();
+				videoInTween.TweenProperty(VideoQuad, "transparency", (float)Settings.VideoDim / 100, 0.5);
+				videoInTween.Play();
 			}
 		}
 		
@@ -373,6 +374,13 @@ public partial class Runner : Node3D
 			{
 				continue;
 			}
+
+			if (Settings.AlwaysPlayHitSound && !CurrentAttempt.Map.Notes[i].Hittable && note.Millisecond < CurrentAttempt.Progress)
+			{
+				CurrentAttempt.Map.Notes[i].Hittable = true;
+				
+				HitSound.Play();
+			}
 			
 			ToProcess++;
 			ProcessNotes.Add(note);
@@ -391,7 +399,6 @@ public partial class Runner : Node3D
 			if (CurrentAttempt.CursorPosition.X + Constants.HitBoxSize >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Constants.HitBoxSize <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Constants.HitBoxSize >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Constants.HitBoxSize <= note.Y + 0.5f)
 			{
 				CurrentAttempt.Hit(note.Index);
-				HitSound.Play();
 			}
 		}
 
@@ -486,6 +493,9 @@ public partial class Runner : Node3D
 	{
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
+			float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(Settings.FoV / 2)), 2) - Math.Pow(103.75, 2));
+			(VideoQuad.Mesh as QuadMesh).Size = new Vector2(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
+
 			if (Settings.CameraLock)
 			{
 				if (Settings.CursorDrift)
@@ -501,7 +511,7 @@ public partial class Runner : Node3D
 				Cursor.Position = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
 				Camera.Position = new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * (float)Settings.Parallax;
 				Camera.Rotation = Vector3.Zero;
-
+				
 				VideoQuad.Position = new Vector3(Camera.Position.X, Camera.Position.Y, -100);
 			}
 			else
@@ -515,6 +525,9 @@ public partial class Runner : Node3D
 				CurrentAttempt.RawCursorPosition = new Vector2(Camera.Basis.Z.X, Camera.Basis.Z.Y).Normalized() * -distance;
 				CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Constants.Bounds, Constants.Bounds);
 				Cursor.Position = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
+
+				VideoQuad.Position = Camera.Position - Camera.Basis.Z * 103.75f;
+				VideoQuad.Rotation = Camera.Rotation;
 			}
 		}
 		else if (@event is InputEventKey eventKey && eventKey.Pressed)
@@ -626,7 +639,7 @@ public partial class Runner : Node3D
 		ProcessNotes = null;
 		CurrentAttempt = new Attempt();
 
-		SceneManager.Load( "res://scenes/main_menu.tscn");
+		SceneManager.Load("res://scenes/main_menu.tscn");
 	}
 
 	private static void UpdateVolume()

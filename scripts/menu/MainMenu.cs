@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Godot;
 using Phoenyx;
@@ -387,6 +388,9 @@ public partial class MainMenu : Control
 			case "VolumeSFX":
 				Settings.VolumeSFX = (double)value;
 				break;
+			case "AlwaysPlayHitSound":
+				Settings.AlwaysPlayHitSound = (bool)value;
+				break;
 			case "NoteSize":
 				Settings.NoteSize = (double)value;
 				break;
@@ -445,6 +449,7 @@ public partial class MainMenu : Control
 			if (Settings.Skin == name)
 			{
 				skinOptions.Selected = i;
+				SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
 			}
 
 			i++;
@@ -456,6 +461,7 @@ public partial class MainMenu : Control
 				Settings.Skin = skinOptions.GetItemText((int)item);
 				Phoenyx.Skin.Load();
 				Cursor.Texture = Phoenyx.Skin.CursorImage;
+				SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
 			};
 		}
 
@@ -475,18 +481,8 @@ public partial class MainMenu : Control
 
 					if (connections)
 					{
-						slider.ValueChanged += (double value) => {
-							lineEdit.Text = value.ToString();
-
-							ApplySetting(option.Name, value);
-						};
-						lineEdit.FocusEntered += () => {
-							FocusedLineEdit = lineEdit;
-						};
-						lineEdit.FocusExited += () => {
-							FocusedLineEdit = null;
-						};
-						lineEdit.TextSubmitted += (string text) => {
+						void set(string text)
+						{
 							try
 							{
 								if (text == "")
@@ -498,7 +494,7 @@ public partial class MainMenu : Control
 								double value = text.ToFloat();
 
 								slider.Value = value;
-
+								
 								ApplySetting(option.Name, value);
 							}
 							catch (Exception exception)
@@ -507,6 +503,22 @@ public partial class MainMenu : Control
 							}
 
 							lineEdit.ReleaseFocus();
+						}
+
+						slider.ValueChanged += (double value) => {
+							lineEdit.Text = value.ToString();
+
+							ApplySetting(option.Name, value);
+						};
+						lineEdit.FocusEntered += () => {
+							FocusedLineEdit = lineEdit;
+						};
+						lineEdit.FocusExited += () => {
+							set(lineEdit.Text);
+							FocusedLineEdit = null;
+						};
+						lineEdit.TextSubmitted += (string text) => {
+							set(text);
 						};
 					}
 				}
@@ -527,41 +539,47 @@ public partial class MainMenu : Control
 				{
 					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
 
-					if (connections)
+                    void set(string text)
+                    {
+						if (text == "")
+						{
+							text = lineEdit.PlaceholderText;
+							lineEdit.Text = text;
+						}
+
+						switch (option.Name)
+						{
+							case "Colors":
+								string[] split = text.Split(",");
+
+								for (int i = 0; i < split.Length; i++)
+								{
+									split[i] = split[i].TrimPrefix("#").Substr(0, 6);
+								}
+
+								if (split.Length == 0)
+								{
+									split = lineEdit.PlaceholderText.Split(",");
+								}
+
+								Phoenyx.Skin.Colors = split;
+								break;
+						}
+
+						lineEdit.ReleaseFocus();
+                    }
+
+                    if (connections)
 					{
 						lineEdit.FocusEntered += () => {
 							FocusedLineEdit = lineEdit;
 						};
 						lineEdit.FocusExited += () => {
+							set(lineEdit.Text);
 							FocusedLineEdit = null;
 						};
 						lineEdit.TextSubmitted += (string text) => {
-							if (text == "")
-							{
-								text = lineEdit.PlaceholderText;
-								lineEdit.Text = text;
-							}
-
-							switch (option.Name)
-							{
-								case "Colors":
-									string[] split = text.Split(",");
-
-									for (int i = 0; i < split.Length; i++)
-									{
-										split[i] = split[i].TrimPrefix("#").Substr(0, 6);
-									}
-
-									if (split.Length == 0)
-									{
-										split = lineEdit.PlaceholderText.Split(",");
-									}
-
-									Phoenyx.Skin.Colors = split;
-									break;
-							}
-
-							lineEdit.ReleaseFocus();
+							set(text);
 						};
 					}
 				}
@@ -704,7 +722,7 @@ public partial class MainMenu : Control
 
 	public static void UpdateMaxScroll()
 	{
-		MaxScroll = (int)(LoadedMaps.Count * 90 - MapList.Size.Y);	// button.Size.Y + padding
+		MaxScroll = Math.Max(0, (int)(LoadedMaps.Count * 90 - MapList.Size.Y));
 	}
 
 	public static void Chat(string message)
