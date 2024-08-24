@@ -65,12 +65,12 @@ public partial class MainMenu : Control
 	
 		Util.Setup();
 
-		Util.DiscordRPC.Call("Set", "details", "In the menu");
+		Util.DiscordRPC.Call("Set", "details", "Browsing Maps");
 		Util.DiscordRPC.Call("Set", "state", "");
 		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 
 		Input.MouseMode = Input.MouseModeEnum.Visible;
-		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Adaptive);
+		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Mailbox);
 
 		GetTree().AutoAcceptQuit = false;
 		WindowSize = DisplayServer.WindowGetSize();
@@ -109,9 +109,6 @@ public partial class MainMenu : Control
 		JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
 		JukeboxIndex = (int)new Random().NextInt64(JukeboxQueue.Length - 1);
 
-		PlayJukebox(JukeboxIndex);
-		UpdateSpectrumSpacing();
-
 		Audio.Finished += () => {
 			JukeboxIndex++;
 			PlayJukebox(JukeboxIndex);
@@ -133,7 +130,7 @@ public partial class MainMenu : Control
 			};
 			button.MouseExited += () => {
 				Tween tween = button.CreateTween();
-				tween.TweenProperty(button, "self_modulate", Color.FromHtml("949494ff"), 0.25);
+				tween.TweenProperty(button, "self_modulate", Color.FromHtml("ffffff94"), 0.25);
 				tween.Play();
 			};
 			button.Pressed += () => {
@@ -211,7 +208,7 @@ public partial class MainMenu : Control
 			selectedMapHolder.GetNode<Panel>("Selected").Visible = true;
 
 			Tween selectTween = selectedMapHolder.CreateTween();
-			selectTween.TweenProperty(selectedMapHolder, "size", new Vector2(MapListContainer.Size.X, selectedMapHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+			selectTween.TweenProperty(selectedMapHolder, "size", new Vector2(MapListContainer.Size.X - 10, selectedMapHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
 			selectTween.Parallel().TweenProperty(selectedMapHolder, "position", new Vector2(0, selectedMapHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
 			selectTween.Play();
 		}
@@ -293,6 +290,13 @@ public partial class MainMenu : Control
 			Host.Disabled = true;
 			Join.Disabled = true;
 		};
+
+		// End
+
+		PlayJukebox(JukeboxIndex);
+		UpdateSpectrumSpacing();
+
+		Audio.VolumeDb = -80;
 	}
 
     public override void _Process(double delta)
@@ -304,7 +308,7 @@ public partial class MainMenu : Control
 		MapList.ScrollVertical = (int)Scroll;
 		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
 		JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
-		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta, 0, 1));
 
 		float prevHz = 0;
 
@@ -429,6 +433,8 @@ public partial class MainMenu : Control
 
 		Audio.Stream = Lib.Audio.LoadStream(map.AudioBuffer);
 		Audio.Play();
+
+		Util.DiscordRPC.Call("Set", "state", $"Listening to {map.PrettyTitle}");
 	}
 
 	public static void ShowSettings(bool show = true)
@@ -794,7 +800,8 @@ public partial class MainMenu : Control
 						if (MapListContainer.GetNode(SelectedMap) == mapButton)
 						{
 							Map map = MapParser.Decode(mapFile);
-				
+
+							Audio.Stop();
 							SceneManager.Load("res://scenes/game.tscn");
 							Runner.Play(map, Lobby.Speed, Lobby.Mods);
 						}

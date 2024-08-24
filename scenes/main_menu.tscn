@@ -63,7 +63,7 @@ grow_vertical = 2
 script = ExtResource("1_wfqfe")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-volume_db = -30.0
+volume_db = -80.0
 
 [node name="Background" type="ColorRect" parent="."]
 z_index = -10
@@ -2059,5 +2059,16 @@ offset_bottom = 32.0
 mouse_filter = 2
 texture = ExtResource("6_degwo")
 expand_mode = 1
+
+[node name="Transition" type="ColorRect" parent="."]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
 
 [connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]

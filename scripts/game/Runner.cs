@@ -238,6 +238,10 @@ public partial class Runner : Node3D
 		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 
+		Playing = false;
+		ProcessNotes = null;
+		CurrentAttempt = new Attempt();
+
 		Util.DiscordRPC.Call("Set", "details", "Playing a map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
 		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000 / CurrentAttempt.Speed);
@@ -643,10 +647,6 @@ public partial class Runner : Node3D
 
 	public static void Stop()
 	{
-		Playing = false;
-		ProcessNotes = null;
-		CurrentAttempt = new Attempt();
-
 		SceneManager.Load("res://scenes/main_menu.tscn");
 	}
 
