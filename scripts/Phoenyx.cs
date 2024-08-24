@@ -27,7 +27,7 @@ public struct Constants
 public struct Settings
 {
     public static bool Fullscreen {get; set;} = false;
-    public static double VolumeMaster {get; set;} = 100;
+    public static double VolumeMaster {get; set;} = 50;
     public static double VolumeMusic {get; set;} = 50;
     public static double VolumeSFX {get; set;} = 50;
     public static bool AlwaysPlayHitSound {get; set;} = false;
@@ -134,7 +134,6 @@ public struct Settings
 		    }
 
             ToastNotification.Notify($"Loaded profile [{profile}]");
-            ToastNotification.Notify($"Loaded skin [{Skin}]");
         }
         catch (Exception exception)
         {
@@ -165,6 +164,9 @@ public struct Skin
     public static ImageTexture HitsImage {get; set;} = new();
     public static ImageTexture MissesImage {get; set;} = new();
     public static ImageTexture MissFeedbackImage {get; set;} = new();
+    public static ImageTexture JukeboxPlayImage {get; set;} = new();
+    public static ImageTexture JukeboxPauseImage {get; set;} = new();
+    public static ImageTexture JukeboxSkipImage {get; set;} = new();
     public static byte[] HitSoundBuffer {get; set;} = System.Array.Empty<byte>();
     public static ArrayMesh NoteMesh {get; set;} = new();
 
@@ -206,6 +208,9 @@ public struct Skin
         HitsImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/hits.png"));
         MissesImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/misses.png"));
         MissFeedbackImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/miss_feedback.png"));
+        JukeboxPlayImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_play.png"));
+        JukeboxPauseImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_pause.png"));
+        JukeboxSkipImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_skip.png"));
 
         if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
         {
@@ -222,6 +227,8 @@ public struct Skin
         	HitSoundBuffer = file.GetBuffer((long)file.GetLength());
         	file.Close();
         }
+        
+        ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
     }
 }
 
@@ -229,7 +236,7 @@ public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "note.obj", "hit.mp3", "colors.txt"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "note.obj", "hit.mp3", "colors.txt"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -290,38 +297,45 @@ public class Util
         
         foreach (string skinFile in SkinFiles)
         {
-            if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
+            try
             {
-                byte[] buffer = System.Array.Empty<byte>();
-
-                if (skinFile.GetExtension() == "txt")
+                if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
                 {
-                    Godot.FileAccess file = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
-                    buffer = file.GetBuffer((long)file.GetLength());
-                }
-                else
-                {
-                    var source = ResourceLoader.Load($"res://skin/{skinFile}");
+                    byte[] buffer = System.Array.Empty<byte>();
 
-                    switch (source.GetType().Name)
+                    if (skinFile.GetExtension() == "txt")
                     {
-                        case "CompressedTexture2D":
-                            buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
-                            break;
-                        case "AudioStreamMP3":
-                            buffer = (source as AudioStreamMP3).Data;
-                            break;
+                        Godot.FileAccess file = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
+                        buffer = file.GetBuffer((long)file.GetLength());
                     }
-                }
+                    else
+                    {
+                        var source = ResourceLoader.Load($"res://skin/{skinFile}");
 
-                if (buffer.Length == 0)
-                {
-                    continue;
-                }
+                        switch (source.GetType().Name)
+                        {
+                            case "CompressedTexture2D":
+                                buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
+                                break;
+                            case "AudioStreamMP3":
+                                buffer = (source as AudioStreamMP3).Data;
+                                break;
+                        }
+                    }
 
-                Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
-                target.StoreBuffer(buffer);
-                target.Close();
+                    if (buffer.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
+                    target.StoreBuffer(buffer);
+                    target.Close();
+                }
+            }
+            catch (Exception exception)
+            {
+                Logger.Log($"Couldn't copy default skin file {skinFile}; {exception}");
             }
         }
 

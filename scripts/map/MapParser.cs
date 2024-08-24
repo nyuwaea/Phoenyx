@@ -98,6 +98,8 @@ public partial class MapParser : Node
 		objects.Store32(0);	// ar factor count
 		objects.Store32(0);	// text count
 
+		objects.Close();
+
 		if (map.AudioBuffer != null)
 		{
 			Godot.FileAccess audio = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/audio.{map.AudioExt}", Godot.FileAccess.ModeFlags.Write);
@@ -118,8 +120,6 @@ public partial class MapParser : Node
 			video.StoreBuffer(map.VideoBuffer);
 			video.Close();
 		}
-
-		objects.Close();
 
 		ZipFile.CreateFromDirectory($"{Constants.UserFolder}/cache/phxmencode", $"{Constants.UserFolder}/maps/{map.ID}.phxm", CompressionLevel.NoCompression, false);
 
@@ -456,6 +456,8 @@ public partial class MapParser : Node
 				
 				notes[i] = new(i, ms, x, y);
 			}
+
+			file.Dispose();
 			
 			map = new(notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer, videoBuffer);
 		}

@@ -12,9 +12,17 @@ public partial class SceneManager : Node
 
     public static void Load(string path)
     {
-        Node.GetTree().ChangeSceneToFile(path);
         Node.GetTree().Connect("node_added", Callable.From((Node child) => {
             Scene = child;
         }), 4);
+
+        try
+        {
+            Node.GetTree().ChangeSceneToFile(path);
+        }
+        catch
+        {
+            throw new("abc!");
+        }
     }
 }

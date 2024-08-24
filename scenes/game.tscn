@@ -82,7 +82,7 @@ material = SubResource("StandardMaterial3D_lvhmj")
 size = Vector2(0.263, 0.263)
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_q2syx"]
-viewport_path = NodePath("Health/SubViewport")
+viewport_path = NodePath("HealthViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_4p8vu"]
 resource_local_to_scene = true
@@ -97,7 +97,7 @@ material = SubResource("StandardMaterial3D_4p8vu")
 size = Vector2(10.88, 0.8)
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_n4au3"]
-viewport_path = NodePath("ProgressBar/SubViewport")
+viewport_path = NodePath("ProgressBarViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_p1h21"]
 resource_local_to_scene = true
@@ -112,7 +112,7 @@ material = SubResource("StandardMaterial3D_p1h21")
 size = Vector2(10.88, 0.8)
 
 [sub_resource type="ViewportTexture" id="ViewportTexture_5nddi"]
-viewport_path = NodePath("Video/SubViewport")
+viewport_path = NodePath("VideoViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rj3ky"]
 resource_local_to_scene = true
@@ -125,10 +125,8 @@ texture_repeat = false
 [sub_resource type="QuadMesh" id="QuadMesh_3p7x2"]
 size = Vector2(258.3, 210)
 
-[sub_resource type="FFmpegVideoStream" id="FFmpegVideoStream_aj2pp"]
-
 [sub_resource type="ViewportTexture" id="ViewportTexture_b0vun"]
-viewport_path = NodePath("PanelLeft/SubViewport")
+viewport_path = NodePath("PanelLeftViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_nody0"]
 resource_local_to_scene = true
@@ -140,12 +138,8 @@ texture_repeat = false
 [sub_resource type="QuadMesh" id="QuadMesh_ssyve"]
 size = Vector2(4, 10)
 
-[sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
-font = ExtResource("5_pxgh4")
-font_size = 160
-
 [sub_resource type="ViewportTexture" id="ViewportTexture_crm1r"]
-viewport_path = NodePath("PanelRight/SubViewport")
+viewport_path = NodePath("PanelRightViewport")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ro5ir"]
 resource_local_to_scene = true
@@ -153,6 +147,12 @@ transparency = 1
 shading_mode = 0
 albedo_texture = SubResource("ViewportTexture_crm1r")
 texture_repeat = false
+
+[sub_resource type="FFmpegVideoStream" id="FFmpegVideoStream_aj2pp"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
+font = ExtResource("5_pxgh4")
+font_size = 160
 
 [sub_resource type="LabelSettings" id="LabelSettings_5bid2"]
 font_size = 96
@@ -194,46 +194,10 @@ transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 
 cast_shadow = 0
 mesh = SubResource("QuadMesh_b1hbo")
 
-[node name="SubViewport" type="SubViewport" parent="Health"]
-disable_3d = true
-transparent_bg = true
-size = Vector2i(1088, 80)
-render_target_update_mode = 4
-
-[node name="Background" type="TextureRect" parent="Health/SubViewport"]
-offset_right = 1088.0
-offset_bottom = 80.0
-texture = ExtResource("6_bbly8")
-
-[node name="Main" type="TextureRect" parent="Health/SubViewport"]
-offset_right = 1088.0
-offset_bottom = 80.0
-texture = ExtResource("7_wjg6i")
-expand_mode = 1
-stretch_mode = 1
-
 [node name="ProgressBar" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.965926, -0.258819, 0, 0.258819, 0.965926, 0, 6.3, -10)
 cast_shadow = 0
 mesh = SubResource("QuadMesh_7mook")
-
-[node name="SubViewport" type="SubViewport" parent="ProgressBar"]
-disable_3d = true
-transparent_bg = true
-size = Vector2i(1088, 80)
-render_target_update_mode = 4
-
-[node name="Background" type="TextureRect" parent="ProgressBar/SubViewport"]
-offset_right = 1088.0
-offset_bottom = 80.0
-texture = ExtResource("8_eu3ux")
-
-[node name="Main" type="TextureRect" parent="ProgressBar/SubViewport"]
-offset_right = 1088.0
-offset_bottom = 80.0
-texture = ExtResource("9_nde5v")
-expand_mode = 1
-stretch_mode = 1
 
 [node name="Video" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
@@ -242,204 +206,15 @@ transparency = 1.0
 cast_shadow = 0
 mesh = SubResource("QuadMesh_3p7x2")
 
-[node name="SubViewport" type="SubViewport" parent="Video"]
-transparent_bg = true
-size = Vector2i(1920, 1080)
-
-[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="Video/SubViewport"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_bottom = 8.0
-grow_horizontal = 2
-grow_vertical = 2
-stream = SubResource("FFmpegVideoStream_aj2pp")
-volume_db = -80.0
-expand = true
-
 [node name="PanelLeft" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.984808, 0, 0.173648, 0, 1, 0, -0.173648, 0, 0.984808, -7.5, 0, -9)
 material_override = SubResource("StandardMaterial3D_nody0")
 mesh = SubResource("QuadMesh_ssyve")
 
-[node name="SubViewport" type="SubViewport" parent="PanelLeft"]
-disable_3d = true
-transparent_bg = true
-size = Vector2i(800, 2000)
-
-[node name="Background" type="TextureRect" parent="PanelLeft/SubViewport"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("11_sdncv")
-
-[node name="Score" type="Label" parent="PanelLeft/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -247.0
-offset_top = -300.0
-offset_right = 247.0
-offset_bottom = -149.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("4_rvp5o")
-text = "0"
-label_settings = SubResource("LabelSettings_usmyc")
-horizontal_alignment = 1
-
-[node name="Multiplier" type="Label" parent="PanelLeft/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -247.0
-offset_top = 100.0
-offset_right = 247.0
-offset_bottom = 289.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("4_rvp5o")
-text = "1x"
-label_settings = SubResource("LabelSettings_usmyc")
-horizontal_alignment = 1
-
 [node name="PanelRight" type="MeshInstance3D" parent="."]
 transform = Transform3D(0.984808, 0, -0.173648, 0, 1, 0, 0.173648, 0, 0.984808, 7.5, 0, -9)
 material_override = SubResource("StandardMaterial3D_ro5ir")
 mesh = SubResource("QuadMesh_ssyve")
-
-[node name="SubViewport" type="SubViewport" parent="PanelRight"]
-disable_3d = true
-transparent_bg = true
-size = Vector2i(800, 2000)
-
-[node name="Background" type="TextureRect" parent="PanelRight/SubViewport"]
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("12_whe6p")
-
-[node name="Accuracy" type="Label" parent="PanelRight/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -247.0
-offset_top = -300.0
-offset_right = 247.0
-offset_bottom = -149.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("4_rvp5o")
-text = "100.00%"
-label_settings = SubResource("LabelSettings_usmyc")
-horizontal_alignment = 1
-
-[node name="Hits" type="Label" parent="PanelRight/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -555.0
-offset_top = 96.0
-offset_right = -90.0
-offset_bottom = 247.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-theme = ExtResource("4_rvp5o")
-text = "0"
-label_settings = SubResource("LabelSettings_5bid2")
-horizontal_alignment = 2
-
-[node name="Misses" type="Label" parent="PanelRight/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 91.0
-offset_top = 96.0
-offset_right = 556.0
-offset_bottom = 247.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-theme = ExtResource("4_rvp5o")
-text = "0"
-label_settings = SubResource("LabelSettings_4qhw1")
-
-[node name="Sum" type="Label" parent="PanelRight/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -236.0
-offset_top = 230.0
-offset_right = 229.0
-offset_bottom = 381.0
-grow_horizontal = 2
-grow_vertical = 2
-size_flags_horizontal = 4
-theme = ExtResource("4_rvp5o")
-text = "0"
-label_settings = SubResource("LabelSettings_s1j5a")
-horizontal_alignment = 1
-
-[node name="HitsIcon" type="TextureRect" parent="PanelRight/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -74.0
-offset_top = 120.0
-offset_right = -10.0
-offset_bottom = 184.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("4_rvp5o")
-texture = ExtResource("13_6rhgc")
-expand_mode = 2
-
-[node name="MissesIcon" type="TextureRect" parent="PanelRight/SubViewport"]
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = 10.0
-offset_top = 120.0
-offset_right = 74.0
-offset_bottom = 184.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("4_rvp5o")
-texture = ExtResource("14_bqf11")
-expand_mode = 2
-
-[node name="Line" type="ColorRect" parent="PanelRight/SubViewport"]
-anchors_preset = 14
-anchor_top = 0.5
-anchor_right = 1.0
-anchor_bottom = 0.5
-offset_left = 100.0
-offset_top = 218.0
-offset_right = -100.0
-offset_bottom = 222.0
-grow_horizontal = 2
-grow_vertical = 2
 
 [node name="Progress" type="Label3D" parent="."]
 transform = Transform3D(3.5, 0, 0, 0, 3.38074, -0.905867, 0, 0.905867, 3.38074, 0, 7, -10)
@@ -490,7 +265,7 @@ volume_db = -25.0
 
 [node name="HitSoundPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -8.0
-max_polyphony = 4
+max_polyphony = 16
 
 [node name="FPSCounter" type="Label" parent="."]
 anchors_preset = 2
@@ -515,3 +290,229 @@ offset_bottom = -10.0
 grow_horizontal = 0
 grow_vertical = 0
 alignment = 2
+
+[node name="VideoViewport" type="SubViewport" parent="."]
+transparent_bg = true
+size = Vector2i(1920, 1080)
+
+[node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VideoViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_bottom = 8.0
+grow_horizontal = 2
+grow_vertical = 2
+stream = SubResource("FFmpegVideoStream_aj2pp")
+volume_db = -80.0
+expand = true
+
+[node name="PanelRightViewport" type="SubViewport" parent="."]
+process_mode = 3
+disable_3d = true
+transparent_bg = true
+size = Vector2i(800, 2000)
+
+[node name="Background" type="TextureRect" parent="PanelRightViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("12_whe6p")
+
+[node name="Accuracy" type="Label" parent="PanelRightViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -300.0
+offset_right = 247.0
+offset_bottom = -149.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+text = "100.00%"
+label_settings = SubResource("LabelSettings_usmyc")
+horizontal_alignment = 1
+
+[node name="Hits" type="Label" parent="PanelRightViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -555.0
+offset_top = 96.0
+offset_right = -90.0
+offset_bottom = 247.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme = ExtResource("4_rvp5o")
+text = "0"
+label_settings = SubResource("LabelSettings_5bid2")
+horizontal_alignment = 2
+
+[node name="Misses" type="Label" parent="PanelRightViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 91.0
+offset_top = 96.0
+offset_right = 556.0
+offset_bottom = 247.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme = ExtResource("4_rvp5o")
+text = "0"
+label_settings = SubResource("LabelSettings_4qhw1")
+
+[node name="Sum" type="Label" parent="PanelRightViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -236.0
+offset_top = 230.0
+offset_right = 229.0
+offset_bottom = 381.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme = ExtResource("4_rvp5o")
+text = "0"
+label_settings = SubResource("LabelSettings_s1j5a")
+horizontal_alignment = 1
+
+[node name="HitsIcon" type="TextureRect" parent="PanelRightViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -74.0
+offset_top = 120.0
+offset_right = -10.0
+offset_bottom = 184.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+texture = ExtResource("13_6rhgc")
+expand_mode = 2
+
+[node name="MissesIcon" type="TextureRect" parent="PanelRightViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = 10.0
+offset_top = 120.0
+offset_right = 74.0
+offset_bottom = 184.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+texture = ExtResource("14_bqf11")
+expand_mode = 2
+
+[node name="Line" type="ColorRect" parent="PanelRightViewport"]
+anchors_preset = 14
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 100.0
+offset_top = 218.0
+offset_right = -100.0
+offset_bottom = 222.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="PanelLeftViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(800, 2000)
+
+[node name="Background" type="TextureRect" parent="PanelLeftViewport"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("11_sdncv")
+
+[node name="Score" type="Label" parent="PanelLeftViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = -300.0
+offset_right = 247.0
+offset_bottom = -149.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+text = "0"
+label_settings = SubResource("LabelSettings_usmyc")
+horizontal_alignment = 1
+
+[node name="Multiplier" type="Label" parent="PanelLeftViewport"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -247.0
+offset_top = 100.0
+offset_right = 247.0
+offset_bottom = 289.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+text = "1x"
+label_settings = SubResource("LabelSettings_usmyc")
+horizontal_alignment = 1
+
+[node name="HealthViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(1088, 80)
+render_target_update_mode = 4
+
+[node name="Background" type="TextureRect" parent="HealthViewport"]
+offset_right = 1088.0
+offset_bottom = 80.0
+texture = ExtResource("6_bbly8")
+
+[node name="Main" type="TextureRect" parent="HealthViewport"]
+offset_right = 1088.0
+offset_bottom = 80.0
+texture = ExtResource("7_wjg6i")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="ProgressBarViewport" type="SubViewport" parent="."]
+disable_3d = true
+transparent_bg = true
+size = Vector2i(1088, 80)
+render_target_update_mode = 4
+
+[node name="Background" type="TextureRect" parent="ProgressBarViewport"]
+offset_right = 1088.0
+offset_bottom = 80.0
+texture = ExtResource("8_eu3ux")
+
+[node name="Main" type="TextureRect" parent="ProgressBarViewport"]
+offset_right = 1088.0
+offset_bottom = 80.0
+texture = ExtResource("9_nde5v")
+expand_mode = 1
+stretch_mode = 1

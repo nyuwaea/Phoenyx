@@ -10,7 +10,7 @@ public partial class Runner : Node3D
 {
 	private static Node3D Node3D;
 	private static readonly PackedScene PlayerScore = GD.Load<PackedScene>("res://prefabs/player_score.tscn");
-	private static readonly PackedScene MissFeedbackIcon = GD.Load<PackedScene>("res://prefabs/miss_icon.tscn");
+	private static readonly PackedScene MissFeedback = GD.Load<PackedScene>("res://prefabs/miss_icon.tscn");
 
 	private static Label FPSCounter;
 	private static Camera3D Camera;
@@ -64,6 +64,7 @@ public partial class Runner : Node3D
 		public string[] Players = Array.Empty<string>();
 		public int Hits = 0;
 		public int Misses = 0;
+		public int Sum = 0;
 		public int Combo = 0;
 		public int ComboMultiplier = 1;
 		public int ComboMultiplierProgress = 0;
@@ -102,6 +103,8 @@ public partial class Runner : Node3D
 		public void Hit(int index)
 		{
 			Hits++;
+			Sum++;
+			Accuracy = Math.Floor((float)Hits / Sum * 10000) / 100;
 			Combo++;
 			ComboMultiplierProgress++;
 
@@ -118,7 +121,11 @@ public partial class Runner : Node3D
 
 			ScoreLabel.Text = Util.PadMagnitude(Score.ToString());
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
+			HitsLabel.Text = $"{Hits}";
 			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			SumLabel.Text = Util.PadMagnitude(Sum.ToString());
+			AccuracyLabel.Text = $"{(Hits + Misses == 0 ? "100.00" : Accuracy.ToString().PadDecimals(2))}%";
+			ComboLabel.Text = Combo.ToString();
 
 			if (!Settings.AlwaysPlayHitSound)
 			{
@@ -139,19 +146,25 @@ public partial class Runner : Node3D
 		public void Miss(int index)
 		{
 			Misses++;
+			Sum++;
+			Accuracy = Math.Floor((float)Hits / Sum * 10000) / 100;
 			Combo = 0;
 			ComboMultiplierProgress = 0;
 			ComboMultiplier = Math.Max(1, ComboMultiplier - 1);
 			Health = Math.Max(0, Health - HealthStep);
 			HealthStep = Math.Min(HealthStep * 1.2f, 100);
 
-			if (Health <= 0 && !CurrentAttempt.Mods["NoFail"])
+			if (Health <= 0 && !Mods["NoFail"])
 			{
 				QueueStop();
 			}
 
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
+			MissesLabel.Text = $"{Misses}";
 			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			SumLabel.Text = Util.PadMagnitude(Sum.ToString());
+			AccuracyLabel.Text = $"{(Hits + Misses == 0 ? "100.00" : Accuracy.ToString().PadDecimals(2))}%";
+			ComboLabel.Text = Combo.ToString();
 
 			MissTween?.Kill();
 			MissTween = MissesLabel.CreateTween();
@@ -165,9 +178,10 @@ public partial class Runner : Node3D
 
 			MissIcons++;
 
-			Sprite3D icon = MissFeedbackIcon.Instantiate<Sprite3D>();
+			Sprite3D icon = MissFeedback.Instantiate<Sprite3D>();
 			Node3D.AddChild(icon);
 			icon.GlobalPosition = new Vector3(Map.Notes[index].X, -1.4f, 0);
+			icon.Texture = Phoenyx.Skin.MissFeedbackImage;
 
 			Tween tween = icon.CreateTween();
 			tween.TweenProperty(icon, "transparency", 1, 0.25f);
@@ -196,10 +210,10 @@ public partial class Runner : Node3D
 		VideoQuad = GetNode<MeshInstance3D>("Video");
 		NotesMultimesh = GetNode<MultiMeshInstance3D>("Notes");
 		CursorTrailMultimesh = GetNode<MultiMeshInstance3D>("CursorTrail");
-		Health = GetNode("Health").GetNode("SubViewport").GetNode<TextureRect>("Main");
-		ProgressBar = GetNode("ProgressBar").GetNode("SubViewport").GetNode<TextureRect>("Main");
-		PanelLeft = GetNode("PanelLeft").GetNode<SubViewport>("SubViewport");
-		PanelRight = GetNode("PanelRight").GetNode<SubViewport>("SubViewport");
+		Health = GetNode("HealthViewport").GetNode<TextureRect>("Main");
+		ProgressBar = GetNode("ProgressBarViewport").GetNode<TextureRect>("Main");
+		PanelLeft = GetNode<SubViewport>("PanelLeftViewport");
+		PanelRight = GetNode<SubViewport>("PanelRightViewport");
 		AccuracyLabel = PanelRight.GetNode<Label>("Accuracy");
 		HitsLabel = PanelRight.GetNode<Label>("Hits");
 		MissesLabel = PanelRight.GetNode<Label>("Misses");
@@ -208,7 +222,7 @@ public partial class Runner : Node3D
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
 		Audio = GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = GetNode<AudioStreamPlayer>("HitSoundPlayer");
-		Video = VideoQuad.GetNode("SubViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
+		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
 		//foreach (KeyValuePair<string, Player> entry in Lobby.Players)
 		//{
@@ -243,8 +257,10 @@ public partial class Runner : Node3D
 			Health.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.HealthBackgroundImage;
 			ProgressBar.Texture = Phoenyx.Skin.ProgressImage;
 			ProgressBar.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.ProgressBackgroundImage;
+			PanelRight.GetNode<TextureRect>("HitsIcon").Texture = Phoenyx.Skin.HitsImage;
+			PanelRight.GetNode<TextureRect>("MissesIcon").Texture = Phoenyx.Skin.MissesImage;
 			NotesMultimesh.Multimesh.Mesh = Phoenyx.Skin.NoteMesh;
-			HitSound.Stream = LoadAudioStream(Phoenyx.Skin.HitSoundBuffer);
+			HitSound.Stream = Lib.Audio.LoadStream(Phoenyx.Skin.HitSoundBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -254,7 +270,7 @@ public partial class Runner : Node3D
 
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
-			Audio.Stream = LoadAudioStream(CurrentAttempt.Map.AudioBuffer);
+			Audio.Stream = Lib.Audio.LoadStream(CurrentAttempt.Map.AudioBuffer);
 			Audio.PitchScale = (float)CurrentAttempt.Speed;
 			MapLength = (float)Audio.Stream.GetLength() * 1000;
 		}
@@ -419,18 +435,10 @@ public partial class Runner : Node3D
 			ProgressLabel.Modulate = Color.FromHtml("ffffff40");
 		}
 
-		int sum = CurrentAttempt.Hits + CurrentAttempt.Misses;
-		string accuracy = (Math.Floor((float)CurrentAttempt.Hits / sum * 10000) / 100).ToString().PadDecimals(2);
-
-		HitsLabel.Text = $"{CurrentAttempt.Hits}";
-		MissesLabel.Text = $"{CurrentAttempt.Misses}";
-		SumLabel.Text = Util.PadMagnitude(sum.ToString());
-		AccuracyLabel.Text = $"{(CurrentAttempt.Hits + CurrentAttempt.Misses == 0 ? "100.00" : accuracy)}%";
-		ComboLabel.Text = CurrentAttempt.Combo.ToString();
 		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 		SpeedLabel.Modulate = Color.FromHtml($"#ffffff{(CurrentAttempt.Speed == 1 ? "00" : "20")}");
 		ProgressLabel.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
-		Health.Size = new Vector2((float)CurrentAttempt.Health * 10.88f, 80);
+		Health.Size = new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80);
 		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
 		SkipLabel.Modulate = Color.FromHtml("#ffffff" + Math.Min(255, (int)(255 * SkipLabelAlpha)).ToString("X2"));
 
@@ -644,8 +652,8 @@ public partial class Runner : Node3D
 
 	private static void UpdateVolume()
 	{
-		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.5);
-		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.5);
+		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 	}
 
 	public static void UpdateScore(string player, int score)
@@ -664,31 +672,5 @@ public partial class Runner : Node3D
 		seconds = Math.Floor(seconds);
 
 		return $"{(seconds < 0 ? "-" : "")}{(padMinutes ? minutes.ToString().PadZeros(2) : minutes)}:{seconds.ToString().PadZeros(2)}";
-	}
-
-	private static AudioStream LoadAudioStream(byte[] buffer)
-	{
-		AudioStream stream;
-
-		if (buffer.Length <= 4)
-		{
-			Godot.FileAccess file = Godot.FileAccess.Open("res://sounds/quiet.mp3", Godot.FileAccess.ModeFlags.Read);
-			byte[] quietBuffer = file.GetBuffer((long)file.GetLength());
-
-			file.Close();
-
-			return new AudioStreamMP3(){Data = quietBuffer};
-		}
-
-		if (Encoding.UTF8.GetString(buffer[0..4]) == "OggS")
-		{
-			stream = AudioStreamOggVorbis.LoadFromBuffer(buffer);
-		}
-		else
-		{
-			stream = new AudioStreamMP3(){Data = buffer};
-		}
-
-		return stream;
 	}
 }

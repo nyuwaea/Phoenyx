@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Godot;
 using Phoenyx;
@@ -16,6 +15,11 @@ public partial class MainMenu : Control
 
 	private static TextureRect Cursor;
 	private static Panel TopBar;
+	private static Panel Jukebox;
+	private static ColorRect JukeboxProgress;
+	private static HBoxContainer JukeboxSpectrum;
+	private static AudioStreamPlayer Audio;
+	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
 
 	private static Button ImportButton;
 	private static Button UserFolderButton;
@@ -39,12 +43,16 @@ public partial class MainMenu : Control
 	private static bool Initialized = false;
 	private static Vector2I WindowSize = DisplayServer.WindowGetSize();
 	private static double LastFrame = Time.GetTicksUsec();
+	private static string[] JukeboxQueue = Array.Empty<string>();
+	private static int JukeboxIndex = 0;
+	private static bool JukeboxPaused = false;
+	private static ulong LastRewind = 0;
 	private static float Scroll = 0;
 	private static float TargetScroll = 0;
 	private static int MaxScroll = 0;
 	private static Vector2 MousePosition = Vector2.Zero;
 	private static bool RightMouseHeld = false;
-	private static List<string> LoadedMaps = new();
+	private static List<string> LoadedMapFiles = new();
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
 	private static LineEdit FocusedLineEdit = null;
@@ -62,7 +70,7 @@ public partial class MainMenu : Control
 		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 
 		Input.MouseMode = Input.MouseModeEnum.Visible;
-		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
+		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Adaptive);
 
 		GetTree().AutoAcceptQuit = false;
 		WindowSize = DisplayServer.WindowGetSize();
@@ -76,6 +84,7 @@ public partial class MainMenu : Control
 				WindowSize = DisplayServer.WindowGetSize();
 				UpdateMaxScroll();
 				TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
+				UpdateSpectrumSpacing();
 			};
 			viewport.Connect("files_dropped", Callable.From((string[] files) => {
 				MapParser.Import(files);
@@ -87,10 +96,76 @@ public partial class MainMenu : Control
 
 		Cursor = GetNode<TextureRect>("Cursor");
 		TopBar = GetNode<Panel>("TopBar");
-		LoadedMaps = new();
+		Jukebox = GetNode<Panel>("Jukebox");
+		JukeboxProgress = Jukebox.GetNode("Progress").GetNode<ColorRect>("Main");
+		JukeboxSpectrum = Jukebox.GetNode<HBoxContainer>("Spectrum");
+		Audio = GetNode<AudioStreamPlayer>("AudioStreamPlayer");
+		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
+		LoadedMapFiles = new();
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
+
+		JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
+		JukeboxIndex = (int)new Random().NextInt64(JukeboxQueue.Length - 1);
+
+		PlayJukebox(JukeboxIndex);
+		UpdateSpectrumSpacing();
+
+		Audio.Finished += () => {
+			JukeboxIndex++;
+			PlayJukebox(JukeboxIndex);
+		};
+
+		foreach (Node child in Jukebox.GetChildren())
+		{
+			if (child.GetType().Name != "TextureButton")
+			{
+				continue;
+			}
+
+			TextureButton button = child as TextureButton;
+
+			button.MouseEntered += () => {
+				Tween tween = button.CreateTween();
+				tween.TweenProperty(button, "self_modulate", Color.FromHtml("ffffffff"), 0.25);
+				tween.Play();
+			};
+			button.MouseExited += () => {
+				Tween tween = button.CreateTween();
+				tween.TweenProperty(button, "self_modulate", Color.FromHtml("949494ff"), 0.25);
+				tween.Play();
+			};
+			button.Pressed += () => {
+				switch (button.Name)
+				{
+					case "Pause":
+						JukeboxPaused = !JukeboxPaused;
+						button.TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+						Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
+						break;
+					case "Skip":
+						JukeboxIndex++;
+						PlayJukebox(JukeboxIndex);
+						break;
+					case "Rewind":
+						ulong now = Time.GetTicksMsec();
+
+						if (now - LastRewind < 1000)
+						{
+							JukeboxIndex--;
+							PlayJukebox(JukeboxIndex);
+						}
+						else
+						{
+							Audio.Seek(0);
+						}
+
+						LastRewind = now;
+						break;
+				}
+			};
+		}
 
 		// Map selection
 
@@ -123,24 +198,7 @@ public partial class MainMenu : Control
 			}
 		};
 		FileDialog.FilesSelected += (string[] files) => {
-			//if (Lobby.PlayerCount > 0)
-			//{
-			//	Lobby.Map = MapParser.Decode(path);
-			//	string[] split = path.Split("\\");
-			//	
-			//	ClientManager.Node.Rpc("ReceiveMapName", split[split.Length - 1]);
-			//
-			//	Lobby.Ready("1");
-			//
-			//	Lobby.AllReady += () => {
-			//		ClientManager.Node.Rpc("ReceiveAllReady", split[split.Length - 1], Lobby.Speed, Lobby.Mods);
-			//	};
-			//}
-			//else
-			//{
-
 			MapParser.Import(files);
-
 			UpdateMapList();
 		};
 
@@ -162,6 +220,11 @@ public partial class MainMenu : Control
 
 		foreach (Panel map in MapListContainer.GetChildren())
 		{
+			if (map.FindChild("Holder") == null)
+			{
+				continue;
+			}
+
 			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
 		}
 
@@ -240,6 +303,21 @@ public partial class MainMenu : Control
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
 		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
+		JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
+		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+
+		float prevHz = 0;
+
+		for (int i = 0; i < 32; i++)
+		{
+			float hz = (i + 1) * 4000 / 32;
+			float magnitude = AudioSpectrum.GetMagnitudeForFrequencyRange(prevHz, hz).Length();
+			float energy = (60 + Mathf.LinearToDb(magnitude)) / 30;
+			prevHz = hz;
+			
+			ColorRect colorRect = JukeboxSpectrum.GetNode((i + 1).ToString()).GetNode<ColorRect>("Main");
+			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
+		}
 
 		LastFrame = now;
     }
@@ -327,6 +405,31 @@ public partial class MainMenu : Control
 			Quit();
 		}
     }
+
+	public static void PlayJukebox(int index)
+	{
+		if (index >= JukeboxQueue.Length)
+		{
+			index = 0;
+		}
+		else if (index < 0)
+		{
+			index = JukeboxQueue.Length - 1;
+		}
+
+		Map map = MapParser.Decode(JukeboxQueue[index], false);
+
+		if (map.AudioBuffer == null)
+		{
+			JukeboxIndex++;
+			PlayJukebox(JukeboxIndex);
+		}
+
+		Jukebox.GetNode<Label>("Title").Text = map.PrettyTitle;
+
+		Audio.Stream = Lib.Audio.LoadStream(map.AudioBuffer);
+		Audio.Play();
+	}
 
 	public static void ShowSettings(bool show = true)
 	{
@@ -598,7 +701,7 @@ public partial class MainMenu : Control
 				string[] split = mapFile.Split("\\");
 				string fileName = split[split.Length - 1].Replace(".phxm", "");
 				
-				if (mapFile.GetExtension() != "phxm" || LoadedMaps.Contains(fileName))
+				if (mapFile.GetExtension() != "phxm" || LoadedMapFiles.Contains(fileName))
 				{
 					continue;
 				}
@@ -652,11 +755,11 @@ public partial class MainMenu : Control
 					title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
 				}
 
-				LoadedMaps.Add(fileName);
+				LoadedMapFiles.Add(fileName);
 
 				Panel mapButton = MapButton.Instantiate<Panel>();
 				Panel holder = mapButton.GetNode<Panel>("Holder");
-
+				
 				if (coverFile != null)
 				{
 					holder.GetNode<TextureRect>("Cover").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile(coverFile));
@@ -722,7 +825,12 @@ public partial class MainMenu : Control
 
 	public static void UpdateMaxScroll()
 	{
-		MaxScroll = Math.Max(0, (int)(LoadedMaps.Count * 90 - MapList.Size.Y));
+		MaxScroll = Math.Max(0, (int)(LoadedMapFiles.Count * 90 - MapList.Size.Y));
+	}
+
+	public static void UpdateSpectrumSpacing()
+	{
+		JukeboxSpectrum.AddThemeConstantOverride("separation", ((int)JukeboxSpectrum.Size.X - 32 * 6) / 48);
 	}
 
 	public static void Chat(string message)
