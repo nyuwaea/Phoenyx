@@ -16,6 +16,7 @@ public partial class MainMenu : Control
 	private static TextureRect Cursor;
 	private static Panel TopBar;
 	private static Panel Jukebox;
+	private static Button JukeboxButton;
 	private static ColorRect JukeboxProgress;
 	private static HBoxContainer JukeboxSpectrum;
 	private static AudioStreamPlayer Audio;
@@ -97,6 +98,7 @@ public partial class MainMenu : Control
 		Cursor = GetNode<TextureRect>("Cursor");
 		TopBar = GetNode<Panel>("TopBar");
 		Jukebox = GetNode<Panel>("Jukebox");
+		JukeboxButton = Jukebox.GetNode<Button>("Button");
 		JukeboxProgress = Jukebox.GetNode("Progress").GetNode<ColorRect>("Main");
 		JukeboxSpectrum = Jukebox.GetNode<HBoxContainer>("Spectrum");
 		Audio = GetNode<AudioStreamPlayer>("AudioStreamPlayer");
@@ -108,6 +110,20 @@ public partial class MainMenu : Control
 
 		JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
 		JukeboxIndex = (int)new Random().NextInt64(JukeboxQueue.Length - 1);
+
+		JukeboxButton.MouseEntered += () => {
+
+		};
+		JukeboxButton.MouseExited += () => {
+
+		};
+		JukeboxButton.Pressed += () => {
+			string[] split = JukeboxQueue[JukeboxIndex].Split("\\");
+			string fileName = split[split.Length - 1].TrimSuffix(".phxm");
+			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
+
+			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
+		};
 
 		Audio.Finished += () => {
 			JukeboxIndex++;
@@ -308,7 +324,7 @@ public partial class MainMenu : Control
 		MapList.ScrollVertical = (int)Scroll;
 		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
 		JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
-		Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta, 0, 1));
+		Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
 
 		float prevHz = 0;
 
@@ -342,7 +358,7 @@ public partial class MainMenu : Control
 		}
 		else if (@event is InputEventMouseButton eventMouseButton)
 		{
-			if (!SettingsShown)
+			if (!SettingsShown && !eventMouseButton.CtrlPressed)
 			{
 				switch (eventMouseButton.ButtonIndex)
 				{
@@ -694,6 +710,11 @@ public partial class MainMenu : Control
 				}
 			}
 		}
+	}
+
+	public static void UpdateVolume()
+	{
+		SettingsHolder.GetNode("Categories").GetNode("Audio").GetNode("Container").GetNode("VolumeMaster").GetNode<HSlider>("HSlider").Value = Settings.VolumeMaster;
 	}
 
     public static void UpdateMapList()

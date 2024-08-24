@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using Godot;
 using Phoenyx;
 
@@ -237,10 +236,6 @@ public partial class Runner : Node3D
 		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
 		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
-
-		Playing = false;
-		ProcessNotes = null;
-		CurrentAttempt = new Attempt();
 
 		Util.DiscordRPC.Call("Set", "details", "Playing a map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
@@ -585,27 +580,6 @@ public partial class Runner : Node3D
 		}
 	}
 
-	public override void _UnhandledInput(InputEvent @event)
-	{
-		if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.Pressed)
-		{
-			if (eventMouseButton.CtrlPressed)
-			{
-				switch (eventMouseButton.ButtonIndex)
-				{
-					case MouseButton.WheelUp:
-						Settings.VolumeMaster = Math.Min(100, Settings.VolumeMaster + 2.5f);
-						break;
-					case MouseButton.WheelDown:
-						Settings.VolumeMaster = Math.Max(0, Settings.VolumeMaster - 2.5f);
-						break;
-				}
-
-				UpdateVolume();
-			}
-		}
-	}
-
 	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null)
 	{
 		CurrentAttempt = new Attempt(map, speed, mods, players);
@@ -650,7 +624,7 @@ public partial class Runner : Node3D
 		SceneManager.Load("res://scenes/main_menu.tscn");
 	}
 
-	private static void UpdateVolume()
+	public static void UpdateVolume()
 	{
 		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
