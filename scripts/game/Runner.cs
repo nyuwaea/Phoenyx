@@ -31,6 +31,7 @@ public partial class Runner : Node3D
 	private static Label HitsLabel;
 	private static Label MissesLabel;
 	private static Label SumLabel;
+	private static Label SimpleMissesLabel;
 	private static Label ScoreLabel;
 	private static Label MultiplierLabel;
 	private static AudioStreamPlayer Audio;
@@ -160,6 +161,7 @@ public partial class Runner : Node3D
 
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			MissesLabel.Text = $"{Misses}";
+			SimpleMissesLabel.Text = $"{Misses}";
 			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
 			SumLabel.Text = Util.PadMagnitude(Sum.ToString());
 			AccuracyLabel.Text = $"{(Hits + Misses == 0 ? "100.00" : Accuracy.ToString().PadDecimals(2))}%";
@@ -217,11 +219,25 @@ public partial class Runner : Node3D
 		HitsLabel = PanelRight.GetNode<Label>("Hits");
 		MissesLabel = PanelRight.GetNode<Label>("Misses");
 		SumLabel = PanelRight.GetNode<Label>("Sum");
+		SimpleMissesLabel = PanelRight.GetNode<Label>("SimpleMisses");
 		ScoreLabel = PanelLeft.GetNode<Label>("Score");
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
 		Audio = GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = GetNode<AudioStreamPlayer>("HitSoundPlayer");
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
+
+		if (Settings.SimpleHUD)
+		{
+			Godot.Collections.Array<Node> widgets = PanelLeft.GetChildren();
+			widgets.AddRange(PanelRight.GetChildren());
+
+			foreach (Node widget in widgets)
+			{
+				(widget as CanvasItem).Visible = false;
+			}
+
+			SimpleMissesLabel.Visible = true;
+		}
 
 		//foreach (KeyValuePair<string, Player> entry in Lobby.Players)
 		//{
@@ -237,7 +253,7 @@ public partial class Runner : Node3D
 		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 
-		Util.DiscordRPC.Call("Set", "details", "Playing a map");
+		Util.DiscordRPC.Call("Set", "details", "Playing a Map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
 		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000 / CurrentAttempt.Speed);
 

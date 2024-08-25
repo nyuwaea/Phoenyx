@@ -49,6 +49,7 @@ public struct Settings
     public static double TrailDetail {get; set;} = 1;
     public static bool CursorDrift {get; set;} = true;
     public static double VideoDim {get; set;} = 80;
+    public static bool SimpleHUD {get; set;} = false;
     
     public Settings() {}
 
@@ -82,7 +83,8 @@ public struct Settings
             ["TrailTime"] = TrailTime,
             ["TrailDetail"] = TrailDetail,
             ["CursorDrift"] = CursorDrift,
-            ["VideoDim"] = VideoDim
+            ["VideoDim"] = VideoDim,
+            ["SimpleHUD"] = SimpleHUD
         };
 
         File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
@@ -96,6 +98,8 @@ public struct Settings
         {
             profile = Util.GetProfile();
         }
+
+        Exception err = null;
 
         try
         {
@@ -127,6 +131,7 @@ public struct Settings
             TrailDetail = (double)data["TrailDetail"];
             CursorDrift = (bool)data["CursorDrift"];
             VideoDim = (double)data["VideoDim"];
+            SimpleHUD = (bool)data["SimpleHUD"];
 
             if (Fullscreen)
 		    {
@@ -137,8 +142,7 @@ public struct Settings
         }
         catch (Exception exception)
         {
-            ToastNotification.Notify("Settings file corrupted", 2);
-            throw Logger.Error($"Settings file corrupted; {exception.Message}");
+            err = exception;
         }
 
         if (!Directory.Exists($"{Constants.UserFolder}/skins/{Skin}"))
@@ -148,6 +152,12 @@ public struct Settings
         }
 
         Phoenyx.Skin.Load();
+
+        if (err != null)
+        {
+            ToastNotification.Notify("Settings file corrupted", 2);
+            throw Logger.Error($"Settings file corrupted; {err.Message}");
+        }
     }
 }
 

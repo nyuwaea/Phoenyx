@@ -23,8 +23,8 @@ public struct Map
 
     public Map(Note[] data = null, string id = null, string artist = "", string title = "", float rating = 0, string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null, byte[] videoBuffer = null)
     {
-        Artist = artist;
-        Title = title;
+        Artist = artist.Replace("\n", "");
+        Title = title.Replace("\n", "");
         PrettyTitle = artist != "" ? $"{artist} - {title}" : title;
         Rating = rating;
         Mappers = mappers ?? new string[]{"N/A"};
@@ -45,7 +45,7 @@ public struct Map
             PrettyMappers += $"{mapper}, ";
         }
 
-        PrettyMappers = PrettyMappers.Substr(0, PrettyMappers.Length - 2);
+        PrettyMappers = PrettyMappers.Substr(0, PrettyMappers.Length - 2).Replace("\n", "");
     }
 
     public string EncodeMeta()

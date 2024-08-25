@@ -53,6 +53,7 @@ public partial class MainMenu : Control
 	private static int MaxScroll = 0;
 	private static Vector2 MousePosition = Vector2.Zero;
 	private static bool RightMouseHeld = false;
+	private static bool RightClickingButton = false;
 	private static List<string> LoadedMapFiles = new();
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
@@ -112,10 +113,16 @@ public partial class MainMenu : Control
 		JukeboxIndex = (int)new Random().NextInt64(JukeboxQueue.Length - 1);
 
 		JukeboxButton.MouseEntered += () => {
-
+			Label title = Jukebox.GetNode<Label>("Title");
+			Tween tween = title.CreateTween();
+			tween.TweenProperty(title, "modulate", Color.FromHtml("ffffffff"), 0.25).SetTrans(Tween.TransitionType.Quad);
+			tween.Play();
 		};
 		JukeboxButton.MouseExited += () => {
-
+			Label title = Jukebox.GetNode<Label>("Title");
+			Tween tween = title.CreateTween();
+			tween.TweenProperty(title, "modulate", Color.FromHtml("c2c2c2ff"), 0.25).SetTrans(Tween.TransitionType.Quad);
+			tween.Play();
 		};
 		JukeboxButton.Pressed += () => {
 			string[] split = JukeboxQueue[JukeboxIndex].Split("\\");
@@ -141,12 +148,12 @@ public partial class MainMenu : Control
 
 			button.MouseEntered += () => {
 				Tween tween = button.CreateTween();
-				tween.TweenProperty(button, "self_modulate", Color.FromHtml("ffffffff"), 0.25);
+				tween.TweenProperty(button, "self_modulate", Color.FromHtml("ffffffff"), 0.25).SetTrans(Tween.TransitionType.Quad);
 				tween.Play();
 			};
 			button.MouseExited += () => {
 				Tween tween = button.CreateTween();
-				tween.TweenProperty(button, "self_modulate", Color.FromHtml("ffffff94"), 0.25);
+				tween.TweenProperty(button, "self_modulate", Color.FromHtml("c2c2c2ff"), 0.25).SetTrans(Tween.TransitionType.Quad);
 				tween.Play();
 			};
 			button.Pressed += () => {
@@ -363,8 +370,18 @@ public partial class MainMenu : Control
 				switch (eventMouseButton.ButtonIndex)
 				{
 					case MouseButton.Right:
-						TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
 						RightMouseHeld = eventMouseButton.Pressed;
+						
+						if (!RightClickingButton)
+						{
+							TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
+						}
+
+						if (!RightMouseHeld && RightClickingButton)
+						{
+							RightClickingButton = false;
+						} 
+
 						break;
 					case MouseButton.WheelUp:
 						TargetScroll = Math.Max(0, TargetScroll - 80);
@@ -379,7 +396,7 @@ public partial class MainMenu : Control
 		{
 			MousePosition = eventMouseMotion.Position;
 
-			if (RightMouseHeld)
+			if (RightMouseHeld && !RightClickingButton)
 			{
 				TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
 			}
@@ -551,6 +568,9 @@ public partial class MainMenu : Control
 			case "VideoDim":
 				Settings.VideoDim = (double)value;
 				break;
+			case "SimpleHUD":
+				Settings.SimpleHUD = (bool)value;
+				break;
 		}
 
 		UpdateSettings();
@@ -587,6 +607,10 @@ public partial class MainMenu : Control
 				Phoenyx.Skin.Load();
 				Cursor.Texture = Phoenyx.Skin.CursorImage;
 				SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
+			};
+
+			SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<Button>("SkinFolder").Pressed += () => {
+				OS.ShellOpen($"{Constants.UserFolder}/skins/{Settings.Skin}");
 			};
 		}
 
@@ -794,7 +818,7 @@ public partial class MainMenu : Control
 
 				mapButton.Name = fileName;
 				holder.GetNode<Label>("Title").Text = title;
-				holder.GetNode<Label>("Extra").Text = extra;
+				holder.GetNode<Label>("Extra").Text = extra.ReplaceLineEndings("");
 
 				MapListContainer.AddChild(mapButton);
 
@@ -805,39 +829,49 @@ public partial class MainMenu : Control
 				holder.GetNode<Button>("Button").MouseExited += () => {
 					holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff00");
 				};
-				
+
 				holder.GetNode<Button>("Button").Pressed += () => {
-					if (SelectedMap != null)
+					if (!RightMouseHeld)
 					{
-						Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
-						selectedHolder.GetNode<Panel>("Normal").Visible = true;
-						selectedHolder.GetNode<Panel>("Selected").Visible = false;
-
-						Tween deselectTween = selectedHolder.CreateTween();
-						deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-						deselectTween.Parallel().TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-						deselectTween.Play();
-				
-						if (MapListContainer.GetNode(SelectedMap) == mapButton)
+						if (SelectedMap != null)
 						{
-							Map map = MapParser.Decode(mapFile);
+							Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+							selectedHolder.GetNode<Panel>("Normal").Visible = true;
+							selectedHolder.GetNode<Panel>("Selected").Visible = false;
 
-							Audio.Stop();
-							SceneManager.Load("res://scenes/game.tscn");
-							Runner.Play(map, Lobby.Speed, Lobby.Mods);
+							Tween deselectTween = selectedHolder.CreateTween();
+							deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+							deselectTween.Parallel().TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+							deselectTween.Play();
+
+							if (MapListContainer.GetNode(SelectedMap) == mapButton)
+							{
+								Map map = MapParser.Decode(mapFile);
+
+								Audio.Stop();
+								SceneManager.Load("res://scenes/game.tscn");
+								Runner.Play(map, Lobby.Speed, Lobby.Mods);
+							}
 						}
+
+						holder.GetNode<Panel>("Normal").Visible = false;
+						holder.GetNode<Panel>("Selected").Visible = true;
+						
+						Tween selectTween = holder.CreateTween();
+						selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+						selectTween.Parallel().TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+						selectTween.Play();
+
+						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
+						SelectedMap = mapButton.Name;
 					}
+					else
+					{
+						RightClickingButton = true;
+						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
 
-					holder.GetNode<Panel>("Normal").Visible = false;
-					holder.GetNode<Panel>("Selected").Visible = true;
-					
-					Tween selectTween = holder.CreateTween();
-					selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-					selectTween.Parallel().TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-					selectTween.Play();
-
-					TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
-					SelectedMap = mapButton.Name;
+						GD.Print("open context menu");
+					}
 				};
 			}
 			catch
@@ -876,7 +910,7 @@ public partial class MainMenu : Control
 		{
 			return;
 		}
-
+		
 		ServerManager.Node.Rpc("ValidateChat", ChatLine.Text);
 		ChatLine.Text = "";
 	}
@@ -884,6 +918,7 @@ public partial class MainMenu : Control
     private static void Quit()
 	{
 		Settings.Save();
+		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 		Util.DiscordRPC.Call("Clear");
 		Control.GetTree().Quit();
 	}

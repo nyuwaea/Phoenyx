@@ -1,4 +1,4 @@
-[gd_scene load_steps=50 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=51 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -161,6 +161,10 @@ font_color = Color(1, 1, 1, 0.627451)
 [sub_resource type="LabelSettings" id="LabelSettings_4qhw1"]
 font_size = 96
 font_color = Color(1, 1, 1, 0.627451)
+
+[sub_resource type="LabelSettings" id="LabelSettings_g4ffu"]
+font_size = 160
+font_color = Color(1, 1, 1, 0.768627)
 
 [sub_resource type="LabelSettings" id="LabelSettings_s1j5a"]
 font_size = 160
@@ -348,6 +352,20 @@ theme = ExtResource("4_rvp5o")
 text = "0"
 label_settings = SubResource("LabelSettings_4qhw1")
 
+[node name="SimpleMisses" type="Label" parent="PanelRightViewport"]
+visible = false
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 4
+theme = ExtResource("4_rvp5o")
+text = "0"
+label_settings = SubResource("LabelSettings_g4ffu")
+
 [node name="Sum" type="Label" parent="PanelRightViewport"]
 anchors_preset = 8
 anchor_left = 0.5
@@ -522,11 +540,12 @@ offset_right = -10.0
 offset_bottom = -10.0
 grow_horizontal = 0
 grow_vertical = 0
+mouse_filter = 2
 alignment = 2
 
 [node name="Volume" type="Panel" parent="."]
 modulate = Color(1, 1, 1, 0)
-anchors_preset = -1
+anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
 anchor_right = 0.5
@@ -569,7 +588,6 @@ color = Color(0, 0, 0, 0.768627)
 [node name="Main" type="ColorRect" parent="Volume"]
 layout_mode = 1
 anchors_preset = -1
-anchor_right = 1.0
 anchor_bottom = 1.0
 grow_vertical = 2
 

@@ -61,7 +61,7 @@ public partial class Keybinds : Node
                 Tween tween = volumePopup.CreateTween();
                 tween.TweenProperty(volumePopup, "modulate", Color.FromHtml("ffffffff"), 0.25).SetTrans(Tween.TransitionType.Quad);
                 tween.Parallel().TweenProperty(volumePopup.GetNode<ColorRect>("Main"), "anchor_right", Settings.VolumeMaster / 100, 0.15).SetTrans(Tween.TransitionType.Quad);
-                tween.Parallel().TweenProperty(label, "anchor_bottom", 0, 0.35).SetTrans(Tween.TransitionType.Quad);
+                tween.Parallel().TweenProperty(label, "anchor_bottom", 0, 0.15).SetTrans(Tween.TransitionType.Quad);
                 tween.Play();
 
                 PopupShown = true;

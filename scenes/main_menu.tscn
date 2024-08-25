@@ -290,12 +290,14 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 theme_override_constants/separation = 16
 alignment = 1
 
 [node name="1" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/1"]
 custom_minimum_size = Vector2(6, 0)
@@ -306,11 +308,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="2" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/2"]
 custom_minimum_size = Vector2(6, 0)
@@ -321,11 +325,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="3" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/3"]
 custom_minimum_size = Vector2(6, 0)
@@ -336,11 +342,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="4" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/4"]
 custom_minimum_size = Vector2(6, 0)
@@ -351,11 +359,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="5" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/5"]
 custom_minimum_size = Vector2(6, 0)
@@ -366,11 +376,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="6" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/6"]
 custom_minimum_size = Vector2(6, 0)
@@ -381,11 +393,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="7" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/7"]
 custom_minimum_size = Vector2(6, 0)
@@ -396,11 +410,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="8" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/8"]
 custom_minimum_size = Vector2(6, 0)
@@ -411,11 +427,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="9" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/9"]
 custom_minimum_size = Vector2(6, 0)
@@ -426,11 +444,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="10" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/10"]
 custom_minimum_size = Vector2(6, 0)
@@ -441,11 +461,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="11" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/11"]
 custom_minimum_size = Vector2(6, 0)
@@ -456,11 +478,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="12" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/12"]
 custom_minimum_size = Vector2(6, 0)
@@ -471,11 +495,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="13" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/13"]
 custom_minimum_size = Vector2(6, 0)
@@ -486,11 +512,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="14" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/14"]
 custom_minimum_size = Vector2(6, 0)
@@ -501,11 +529,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="15" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/15"]
 custom_minimum_size = Vector2(6, 0)
@@ -516,11 +546,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="16" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/16"]
 custom_minimum_size = Vector2(6, 0)
@@ -531,11 +563,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="17" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/17"]
 custom_minimum_size = Vector2(6, 0)
@@ -546,11 +580,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="18" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/18"]
 custom_minimum_size = Vector2(6, 0)
@@ -561,11 +597,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="19" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/19"]
 custom_minimum_size = Vector2(6, 0)
@@ -576,11 +614,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="20" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/20"]
 custom_minimum_size = Vector2(6, 0)
@@ -591,11 +631,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="21" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/21"]
 custom_minimum_size = Vector2(6, 0)
@@ -606,11 +648,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="22" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/22"]
 custom_minimum_size = Vector2(6, 0)
@@ -621,11 +665,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="23" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/23"]
 custom_minimum_size = Vector2(6, 0)
@@ -636,11 +682,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="24" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/24"]
 custom_minimum_size = Vector2(6, 0)
@@ -651,11 +699,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="25" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/25"]
 custom_minimum_size = Vector2(6, 0)
@@ -666,11 +716,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="26" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/26"]
 custom_minimum_size = Vector2(6, 0)
@@ -681,11 +733,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="27" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/27"]
 custom_minimum_size = Vector2(6, 0)
@@ -696,11 +750,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="28" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/28"]
 custom_minimum_size = Vector2(6, 0)
@@ -711,11 +767,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="29" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/29"]
 custom_minimum_size = Vector2(6, 0)
@@ -726,11 +784,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="30" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/30"]
 custom_minimum_size = Vector2(6, 0)
@@ -741,11 +801,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="31" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/31"]
 custom_minimum_size = Vector2(6, 0)
@@ -756,11 +818,13 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="32" type="Panel" parent="Jukebox/Spectrum"]
 custom_minimum_size = Vector2(6, 0)
 layout_mode = 2
+mouse_filter = 2
 
 [node name="Main" type="ColorRect" parent="Jukebox/Spectrum/32"]
 custom_minimum_size = Vector2(6, 0)
@@ -771,9 +835,11 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="Title" type="Label" parent="Jukebox"]
+modulate = Color(0.762404, 0.762404, 0.762404, 1)
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
@@ -799,12 +865,11 @@ offset_top = -10.0
 offset_right = -60.0
 offset_bottom = 11.0
 focus_mode = 0
-theme = ExtResource("2_46xtp")
 flat = true
 text_overrun_behavior = 3
 
 [node name="Pause" type="TextureButton" parent="Jukebox"]
-self_modulate = Color(0.581033, 0.581033, 0.581033, 1)
+self_modulate = Color(0.760784, 0.760784, 0.760784, 1)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -819,7 +884,7 @@ ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Skip" type="TextureButton" parent="Jukebox"]
-self_modulate = Color(0.581033, 0.581033, 0.581033, 1)
+self_modulate = Color(0.760784, 0.760784, 0.760784, 1)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -834,7 +899,7 @@ ignore_texture_size = true
 stretch_mode = 0
 
 [node name="Rewind" type="TextureButton" parent="Jukebox"]
-self_modulate = Color(0.581033, 0.581033, 0.581033, 1)
+self_modulate = Color(0.760784, 0.760784, 0.760784, 1)
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.5
@@ -859,12 +924,14 @@ offset_left = 64.0
 offset_top = -1.0
 offset_right = -64.0
 offset_bottom = 1.0
+mouse_filter = 2
 
 [node name="Background" type="ColorRect" parent="Jukebox/Progress"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
 [node name="Main" type="ColorRect" parent="Jukebox/Progress"]
@@ -872,6 +939,7 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
@@ -1654,6 +1722,20 @@ fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "default"
 
+[node name="SkinFolder" type="Button" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.575
+anchor_right = 0.8
+anchor_bottom = 1.0
+offset_top = 4.0
+offset_bottom = -4.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Skin Folder"
+
 [node name="Colors" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
@@ -1945,6 +2027,36 @@ context_menu_enabled = false
 flat = true
 caret_blink = true
 
+[node name="SimpleHUD" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Only shows misses"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/SimpleHUD"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Simple HUD"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Visuals/Container/SimpleHUD"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+flat = true
+
 [node name="Sidebar" type="ScrollContainer" parent="Settings/Holder"]
 layout_mode = 1
 anchors_preset = -1
@@ -2115,14 +2227,15 @@ offset_right = 2.0
 offset_bottom = 2.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 0.768627)
 
 [node name="Main" type="ColorRect" parent="Volume"]
 layout_mode = 1
 anchors_preset = -1
-anchor_right = 1.0
 anchor_bottom = 1.0
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="Cursor" type="TextureRect" parent="."]
 layout_mode = 0
