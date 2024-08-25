@@ -51,8 +51,6 @@ public struct Settings
     public static bool CursorDrift {get; set;} = true;
     public static double VideoDim {get; set;} = 80;
     public static bool SimpleHUD {get; set;} = false;
-    
-    public Settings() {}
 
     public static void Save(string profile = null)
     {
@@ -114,6 +112,7 @@ public struct Settings
             VolumeMaster = (double)data["VolumeMaster"];            
             VolumeMusic = (double)data["VolumeMusic"];
             VolumeSFX = (double)data["VolumeSFX"];
+            AutoplayJukebox = (bool)data["AutoplayJukebox"];
             AlwaysPlayHitSound = (bool)data["AlwaysPlayHitSound"];
             Skin = (string)data["Skin"];
             CameraLock = (bool)data["CameraLock"];
@@ -180,9 +179,8 @@ public struct Skin
     public static ImageTexture JukeboxPauseImage {get; set;} = new();
     public static ImageTexture JukeboxSkipImage {get; set;} = new();
     public static byte[] HitSoundBuffer {get; set;} = System.Array.Empty<byte>();
+    public static byte[] FailSoundBuffer {get; set;} = System.Array.Empty<byte>();
     public static ArrayMesh NoteMesh {get; set;} = new();
-
-    public Skin() {}
 
     public static void Save()
     {
@@ -239,6 +237,13 @@ public struct Skin
         	HitSoundBuffer = file.GetBuffer((long)file.GetLength());
         	file.Close();
         }
+
+        if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/fail.mp3"))
+        {
+        	Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/{Settings.Skin}/fail.mp3", Godot.FileAccess.ModeFlags.Read);
+        	FailSoundBuffer = file.GetBuffer((long)file.GetLength());
+        	file.Close();
+        }
         
         ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
     }
@@ -248,7 +253,7 @@ public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "note.obj", "hit.mp3", "colors.txt"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "note.obj", "hit.mp3", "fail.mp3", "colors.txt"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -374,23 +379,6 @@ public class Util
     public static string GetProfile()
     {
         return Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine();
-    }
-
-    public static string PadMagnitude(string str, string pad = ",")
-    {
-        string formatted = "";
-
-        for (int i = 0; i < str.Length; i++)
-        {
-            formatted += str[i];
-
-            if ((str.Length - i - 1) % 3 == 0)
-            {
-                formatted += pad;
-            }
-        }
-
-        return formatted.TrimSuffix(pad);
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()

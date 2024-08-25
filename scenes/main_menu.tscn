@@ -22,8 +22,7 @@ subpixel_positioning = 0
 resource_name = "Phoenix"
 default_font = SubResource("SystemFont_lsskb")
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46e4t"]
-bg_color = Color(1, 1, 1, 0.0313726)
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_18lcc"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_wksxa"]
 font = ExtResource("8_jfynb")
@@ -195,7 +194,16 @@ offset_top = 4.0
 offset_right = -4.0
 offset_bottom = 64.0
 theme = ExtResource("2_46xtp")
-theme_override_styles/panel = SubResource("StyleBoxFlat_46e4t")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+
+[node name="Background" type="ColorRect" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.0313726)
 
 [node name="Import" type="Button" parent="TopBar"]
 layout_mode = 1
@@ -281,7 +289,16 @@ offset_top = -64.0
 offset_right = -4.0
 offset_bottom = -4.0
 theme = ExtResource("2_46xtp")
-theme_override_styles/panel = SubResource("StyleBoxFlat_46e4t")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+
+[node name="Background" type="ColorRect" parent="Jukebox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.0313726)
 
 [node name="Spectrum" type="HBoxContainer" parent="Jukebox"]
 layout_mode = 1

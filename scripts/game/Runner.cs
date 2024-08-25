@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Godot;
+using Lib;
 using Phoenyx;
 
 public partial class Runner : Node3D
@@ -36,6 +37,7 @@ public partial class Runner : Node3D
 	private static Label MultiplierLabel;
 	private static AudioStreamPlayer Audio;
 	private static AudioStreamPlayer HitSound;
+	private static AudioStreamPlayer FailSound;
 	private static VideoStreamPlayer Video;
 	private static Tween HitTween;
 	private static Tween MissTween;
@@ -63,8 +65,11 @@ public partial class Runner : Node3D
 		public string[] RawMods;
 		public Dictionary<string, bool> Mods;
 		public string[] Players = Array.Empty<string>();
+		public bool Alive = true;
 		public int Hits = 0;
+		public List<Dictionary<string, int>> HitsInfo = new();
 		public int Misses = 0;
+		public List<int> MissesInfo = new();
 		public int Sum = 0;
 		public int Combo = 0;
 		public int ComboMultiplier = 1;
@@ -79,6 +84,7 @@ public partial class Runner : Node3D
 		public Vector2 CursorPosition = Vector2.Zero;
 		public Vector2 RawCursorPosition = Vector2.Zero;
 		public bool Skippable = false;
+		public bool Qualifies = true;
 
 		public Attempt(Map map, double speed, string[] mods, string[] players = null, bool replay = false)
 		{
@@ -110,6 +116,11 @@ public partial class Runner : Node3D
 			Combo++;
 			ComboMultiplierProgress++;
 
+			HitsInfo.Add(new(){
+				["Time"] = Map.Notes[index].Millisecond,
+				["Offset"] = (int)Progress - Map.Notes[index].Millisecond,
+			});
+
 			if (ComboMultiplierProgress >= ComboMultiplierIncrement && ComboMultiplier < 8)
 			{
 				ComboMultiplierProgress = 0;
@@ -121,11 +132,11 @@ public partial class Runner : Node3D
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
 
-			ScoreLabel.Text = Util.PadMagnitude(Score.ToString());
+			ScoreLabel.Text = Lib.String.PadMagnitude(Score.ToString());
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			HitsLabel.Text = $"{Hits}";
 			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
-			SumLabel.Text = Util.PadMagnitude(Sum.ToString());
+			SumLabel.Text = Lib.String.PadMagnitude(Sum.ToString());
 			AccuracyLabel.Text = $"{(Hits + Misses == 0 ? "100.00" : Accuracy.ToString().PadDecimals(2))}%";
 			ComboLabel.Text = Combo.ToString();
 
@@ -156,16 +167,27 @@ public partial class Runner : Node3D
 			Health = Math.Max(0, Health - HealthStep);
 			HealthStep = Math.Min(HealthStep * 1.2f, 100);
 
-			if (Health <= 0 && !Mods["NoFail"])
+			MissesInfo.Add(Map.Notes[index].Millisecond);
+
+			if (Health <= 0)
 			{
-				QueueStop();
+				if (Alive)
+				{
+					Alive = false;
+					FailSound.Play();
+				}
+
+				if (!Mods["NoFail"])
+				{
+					QueueStop();
+				}
 			}
 
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			MissesLabel.Text = $"{Misses}";
 			SimpleMissesLabel.Text = $"{Misses}";
 			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
-			SumLabel.Text = Util.PadMagnitude(Sum.ToString());
+			SumLabel.Text = Lib.String.PadMagnitude(Sum.ToString());
 			AccuracyLabel.Text = $"{(Hits + Misses == 0 ? "100.00" : Accuracy.ToString().PadDecimals(2))}%";
 			ComboLabel.Text = Combo.ToString();
 
@@ -226,6 +248,7 @@ public partial class Runner : Node3D
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
 		Audio = GetNode<AudioStreamPlayer>("SongPlayer");
 		HitSound = GetNode<AudioStreamPlayer>("HitSoundPlayer");
+		FailSound = GetNode<AudioStreamPlayer>("FailSoundPlayer");
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
 		if (Settings.SimpleHUD)
@@ -270,6 +293,7 @@ public partial class Runner : Node3D
 			PanelRight.GetNode<TextureRect>("MissesIcon").Texture = Phoenyx.Skin.MissesImage;
 			NotesMultimesh.Multimesh.Mesh = Phoenyx.Skin.NoteMesh;
 			HitSound.Stream = Lib.Audio.LoadStream(Phoenyx.Skin.HitSoundBuffer);
+			FailSound.Stream = Lib.Audio.LoadStream(Phoenyx.Skin.FailSoundBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -555,7 +579,9 @@ public partial class Runner : Node3D
 			switch (eventKey.Keycode)
 			{
 				case Key.Escape:
-					Stop();
+					CurrentAttempt.Alive = false;
+					FailSound.Play();
+					QueueStop();
 					break;
 				case Key.Apostrophe:
 					GetTree().ReloadCurrentScene();
@@ -645,6 +671,7 @@ public partial class Runner : Node3D
 	{
 		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		FailSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 	}
 
 	public static void UpdateScore(string player, int score)

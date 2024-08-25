@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://b7j67g0b2pt6t"]
+
+[node name="Hit" type="ColorRect"]
+anchors_preset = -1
+offset_right = 2.0
+offset_bottom = 2.0
+color = Color(0, 1, 0, 0.501961)

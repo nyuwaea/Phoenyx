@@ -380,8 +380,9 @@ public partial class MainMenu : Control
 
     public override void _Process(double delta)
     {
-		double now = Time.GetTicksUsec();
+		ulong now = Time.GetTicksUsec();
         delta = (now - LastFrame) / 1000000;
+		LastFrame = now;
 
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
@@ -405,8 +406,6 @@ public partial class MainMenu : Control
 			ColorRect colorRect = JukeboxSpectrum.GetNode((i + 1).ToString()).GetNode<ColorRect>("Main");
 			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
 		}
-
-		LastFrame = now;
     }
 
     public override void _Input(InputEvent @event)
@@ -415,6 +414,16 @@ public partial class MainMenu : Control
 		{
 			switch (eventKey.Keycode)
 			{
+				case Key.Space:
+					if (SelectedMap != null)
+					{
+						Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{SelectedMap}.phxm");
+
+						Audio.Stop();
+						SceneManager.Load("res://scenes/game.tscn");
+						Runner.Play(map, Lobby.Speed, Lobby.Mods);
+					}
+					break;
 				default:
 					if (FocusedLineEdit == null && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter)
 					{
@@ -476,21 +485,19 @@ public partial class MainMenu : Control
 						break;
 				}
 			}
-			else
+
+			switch (eventKey.Keycode)
 			{
-				switch (eventKey.Keycode)
-				{
-					case Key.Escape:
-						if (SettingsShown)
-						{
-							HideSettings();
-						}
-						else
-						{
-							Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
-						}
-						break;
-				}
+				case Key.Escape:
+					if (SettingsShown)
+					{
+						HideSettings();
+					}
+					else
+					{
+						Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+					}
+					break;
 			}
 		}
     }
@@ -856,7 +863,7 @@ public partial class MainMenu : Control
 					}
 
 					mappers = mappers.Substr(0, mappers.Length - 2);
-					extra = $"{((string)metadata["DifficultyName"] == "N/A" ? Constants.Difficulties[(int)metadata["Difficulty"]] : metadata["DifficultyName"])} - {mappers}";
+					extra = $"{metadata["DifficultyName"]} - {mappers}";
 					title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
 				}
 

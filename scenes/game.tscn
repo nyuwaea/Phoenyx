@@ -518,6 +518,9 @@ volume_db = -25.0
 volume_db = -8.0
 max_polyphony = 16
 
+[node name="FailSoundPlayer" type="AudioStreamPlayer" parent="."]
+volume_db = -8.0
+
 [node name="FPSCounter" type="Label" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
