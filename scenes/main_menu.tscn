@@ -10,7 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="7_8ivsy"]
 [ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="8_jfynb"]
 [ext_resource type="Theme" uid="uid://birpbaoexunde" path="res://settings_categories_theme.tres" id="8_ygdpt"]
-[ext_resource type="Texture2D" uid="uid://bkn5jnxibnjej" path="res://skin/jukebox_pause.png" id="9_gacqx"]
+[ext_resource type="Texture2D" uid="uid://8du82a5dxjdk" path="res://skin/jukebox_play.png" id="9_wc4q0"]
 [ext_resource type="Texture2D" uid="uid://bpsvcunhigs6c" path="res://skin/jukebox_skip.png" id="10_i0l4j"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="10_j4s1w"]
 
@@ -849,7 +849,6 @@ offset_top = -10.0
 offset_right = -60.0
 offset_bottom = 11.0
 theme = ExtResource("2_46xtp")
-text = "abc - defghijklmnopqrstuvwxyz"
 label_settings = SubResource("LabelSettings_wksxa")
 horizontal_alignment = 2
 vertical_alignment = 1
@@ -879,7 +878,7 @@ offset_left = -17.0
 offset_top = 13.0
 offset_right = 17.0
 offset_bottom = -13.0
-texture_normal = ExtResource("9_gacqx")
+texture_normal = ExtResource("9_wc4q0")
 ignore_texture_size = true
 stretch_mode = 0
 
@@ -2055,6 +2054,36 @@ offset_left = 8.0
 grow_vertical = 2
 focus_mode = 0
 theme = ExtResource("2_46xtp")
+flat = true
+
+[node name="AutoplayJukebox" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/AutoplayJukebox"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Autoplay Jukebox"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Audio/Container/AutoplayJukebox"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+button_pressed = true
 flat = true
 
 [node name="Other" type="ScrollContainer" parent="Settings/Holder/Categories"]

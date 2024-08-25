@@ -76,6 +76,8 @@ public partial class Keybinds : Node
                     case "SceneGame":
                         Runner.UpdateVolume();
                         break;
+                    default:
+                        break;
                 }
 			}
 		}

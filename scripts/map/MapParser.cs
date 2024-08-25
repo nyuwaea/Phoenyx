@@ -180,7 +180,7 @@ public partial class MapParser : Node
 	public static Map SSMapV1(string path)
 	{
 		string[] pathSplit = path.Split("\\");
-		string name = pathSplit[pathSplit.Length - 1].Replace(".txt", "");
+		string name = pathSplit[^1].Replace(".txt", "");
 		Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
 		Map map;
 
@@ -214,7 +214,7 @@ public partial class MapParser : Node
 	{
 		FileParser file = new(path);
 		Map map;
-
+		
 		try
 		{
 			if (file.GetString(4) != "SS+m")
@@ -368,7 +368,7 @@ public partial class MapParser : Node
 		catch (Exception exception)
 		{
 			ToastNotification.Notify($"SSPMV2 file corrupted", 2);
-			throw Logger.Error($"SSPMV2 file corrupted; {exception.Message}");
+			throw Logger.Error($"SSPMV2 file {path} corrupted; {exception.Message}");
 		}
 
 		return map;

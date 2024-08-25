@@ -10,7 +10,7 @@ public partial class SceneManager : Node
         Node = this;
 
         Node.GetTree().Connect("node_added", Callable.From((Node child) => {
-            if (child.Name != "SceneMenu" && child.Name != "SceneGame")
+            if (child.Name != "SceneMenu" && child.Name != "SceneGame" && child.Name != "SceneResults")
             {
                 return;
             }

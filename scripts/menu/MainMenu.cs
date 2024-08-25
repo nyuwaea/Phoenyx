@@ -111,7 +111,7 @@ public partial class MainMenu : Control
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
 
 		JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
-		JukeboxIndex = (int)new Random().NextInt64(JukeboxQueue.Length - 1);
+		JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, JukeboxQueue.Length - 1));
 
 		JukeboxButton.MouseEntered += () => {
 			Label title = Jukebox.GetNode<Label>("Title");
@@ -365,9 +365,14 @@ public partial class MainMenu : Control
 			Join.Disabled = true;
 		};
 
-		// End
+		// Finish
 
 		PlayJukebox(JukeboxIndex);
+
+		JukeboxPaused = !Settings.AutoplayJukebox;
+		Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
+		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+
 		UpdateSpectrumSpacing();
 
 		Audio.VolumeDb = -80;
@@ -381,8 +386,12 @@ public partial class MainMenu : Control
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
 		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
-		JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
-		Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
+		
+		if (Audio.Stream != null)
+		{
+			JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
+			Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
+		}
 
 		float prevHz = 0;
 
@@ -505,6 +514,11 @@ public partial class MainMenu : Control
 			index = JukeboxQueue.Length - 1;
 		}
 
+		if (JukeboxQueue.Length == 0)
+		{
+			return;
+		}
+
 		Map map = MapParser.Decode(JukeboxQueue[index], false);
 
 		if (map.AudioBuffer == null)
@@ -621,6 +635,9 @@ public partial class MainMenu : Control
 				break;
 			case "SimpleHUD":
 				Settings.SimpleHUD = (bool)value;
+				break;
+			case "AutoplayJukebox":
+				Settings.AutoplayJukebox = (bool)value;
 				break;
 		}
 

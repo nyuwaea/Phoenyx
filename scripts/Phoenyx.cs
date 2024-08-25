@@ -30,6 +30,7 @@ public struct Settings
     public static double VolumeMaster {get; set;} = 50;
     public static double VolumeMusic {get; set;} = 50;
     public static double VolumeSFX {get; set;} = 50;
+    public static bool AutoplayJukebox {get; set;} = true;
     public static bool AlwaysPlayHitSound {get; set;} = false;
     public static string Skin {get; set;} = "default";
     public static bool CameraLock {get; set;} = true;
@@ -66,6 +67,7 @@ public struct Settings
             ["VolumeMaster"] = VolumeMaster,
             ["VolumeMusic"] = VolumeMusic,
             ["VolumeSFX"] = VolumeSFX,
+            ["AutoplayJukebox"] = AutoplayJukebox,
             ["AlwaysPlayHitSound"] = AlwaysPlayHitSound,
             ["Skin"] = Skin,
             ["CameraLock"] = CameraLock,

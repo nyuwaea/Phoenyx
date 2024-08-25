@@ -23,8 +23,8 @@ public struct Map
 
     public Map(Note[] data = null, string id = null, string artist = "", string title = "", float rating = 0, string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null, byte[] videoBuffer = null)
     {
-        Artist = artist.Replace("\n", "");
-        Title = title.Replace("\n", "");
+        Artist = (artist ?? "").Replace("\n", "");
+        Title = (title ?? "").Replace("\n", "");
         PrettyTitle = artist != "" ? $"{artist} - {title}" : title;
         Rating = rating;
         Mappers = mappers ?? new string[]{"N/A"};
@@ -36,7 +36,7 @@ public struct Map
         VideoBuffer = videoBuffer;
 
         Notes = data ?? Array.Empty<Note>();
-        Length = length ?? Notes[Notes.Length - 1].Millisecond;
+        Length = length ?? Notes[^1].Millisecond;
         ID = id ?? new Regex("[^a-zA-Z0-9_ -]").Replace($"{Mappers.Stringify()}_{PrettyTitle}".Replace(" ", "_"), "");
         AudioExt = (AudioBuffer != null && Encoding.UTF8.GetString(AudioBuffer[0..4]) == "OggS") ? "ogg" : "mp3";
         

@@ -1,0 +1,124 @@
+[gd_scene load_steps=8 format=3 uid="uid://bhcvypmhm5rke"]
+
+[ext_resource type="Script" path="res://scripts/menu/Results.cs" id="1_llpx6"]
+[ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_dgnpu"]
+[ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="2_ow183"]
+[ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="3_vdcg2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c11o2"]
+bg_color = Color(1, 1, 1, 0.0313726)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dc6lk"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_6rb22"]
+font_size = 18
+outline_size = 5
+outline_color = Color(0, 0, 0, 0.501961)
+
+[node name="SceneResults" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_llpx6")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 4.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = 64.0
+theme = ExtResource("2_dgnpu")
+theme_override_styles/panel = SubResource("StyleBoxFlat_c11o2")
+
+[node name="Logo" type="TextureRect" parent="TopBar"]
+layout_mode = 0
+offset_left = 6.0
+offset_top = 6.0
+offset_right = 54.0
+offset_bottom = 54.0
+texture = ExtResource("3_vdcg2")
+expand_mode = 2
+stretch_mode = 5
+
+[node name="Volume" type="Panel" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -128.0
+offset_top = -38.0
+offset_right = 128.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_dc6lk")
+
+[node name="Label" type="Label" parent="Volume"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 2.0
+offset_top = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "100"
+label_settings = SubResource("LabelSettings_6rb22")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Background" type="ColorRect" parent="Volume"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.768627)
+
+[node name="Main" type="ColorRect" parent="Volume"]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Cursor" type="TextureRect" parent="."]
+offset_right = 32.0
+offset_bottom = 32.0
+mouse_filter = 2
+texture = ExtResource("2_ow183")
+expand_mode = 1
+
+[node name="Transition" type="ColorRect" parent="."]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)

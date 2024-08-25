@@ -632,7 +632,7 @@ public partial class Runner : Node3D
 
 	public static void Stop()
 	{
-		SceneManager.Load("res://scenes/main_menu.tscn");
+		SceneManager.Load("res://scenes/results.tscn");
 	}
 
 	public static void UpdateVolume()
