@@ -332,7 +332,6 @@ public partial class Runner : Node3D
 	public override void _Process(double delta)
 	{
 		ulong now = Time.GetTicksUsec();
-
 		delta = (now - LastFrame) / 1000000;	// more reliable
 		LastFrame = now;
 		FrameCount++;

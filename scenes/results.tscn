@@ -399,6 +399,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Cursor" type="TextureRect" parent="."]
+layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
 mouse_filter = 2

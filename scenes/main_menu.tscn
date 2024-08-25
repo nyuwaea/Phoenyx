@@ -1,4 +1,4 @@
-[gd_scene load_steps=28 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=29 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -29,6 +29,8 @@ font = ExtResource("8_jfynb")
 font_size = 17
 outline_size = 6
 outline_color = Color(0, 0, 0, 0.501961)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t0m3h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4xjus"]
 bg_color = Color(0.051971, 0.051971, 0.0519709, 1)
@@ -66,18 +68,30 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("1_wfqfe")
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 volume_db = -80.0
 
-[node name="FileDialog" type="FileDialog" parent="."]
+[node name="ImportDialog" type="FileDialog" parent="."]
 title = "Open File(s)"
 initial_position = 2
 size = Vector2i(454, 175)
 theme = SubResource("Theme_nlclj")
 ok_button_text = "Open"
 file_mode = 1
+access = 2
+use_native_dialog = true
+
+[node name="VideoDialog" type="FileDialog" parent="."]
+auto_translate_mode = 1
+title = "Open a File"
+initial_position = 2
+size = Vector2i(454, 175)
+theme = SubResource("Theme_nlclj")
+ok_button_text = "Open"
+file_mode = 0
 access = 2
 use_native_dialog = true
 
@@ -89,6 +103,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
 [node name="Multiplayer" type="Panel" parent="."]
@@ -993,6 +1008,68 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
 theme = ExtResource("2_46xtp")
+
+[node name="ContextMenu" type="Panel" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 150.0
+offset_bottom = 90.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_t0m3h")
+
+[node name="Background" type="ColorRect" parent="ContextMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.768627)
+
+[node name="Container" type="VBoxContainer" parent="ContextMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="Favorite" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(1, 1, 0.768627, 1)
+theme_override_colors/font_color = Color(1, 1, 0.501961, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Favorite"
+flat = true
+alignment = 0
+
+[node name="Delete" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(1, 0.768627, 0.768627, 1)
+theme_override_colors/font_color = Color(1, 0.501961, 0.501961, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Delete"
+flat = true
+alignment = 0
+
+[node name="Video" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.768627, 0.768627, 1, 1)
+theme_override_colors/font_color = Color(0.501961, 0.501961, 1, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Add Video"
+flat = true
+alignment = 0
 
 [node name="Settings" type="ColorRect" parent="."]
 modulate = Color(1, 1, 1, 0)
@@ -2363,4 +2440,5 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
 
-[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="file_selected" from="ImportDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="file_selected" from="VideoDialog" to="." method="_on_file_dialog_file_selected"]

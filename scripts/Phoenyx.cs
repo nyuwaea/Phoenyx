@@ -178,6 +178,7 @@ public struct Skin
     public static ImageTexture JukeboxPlayImage {get; set;} = new();
     public static ImageTexture JukeboxPauseImage {get; set;} = new();
     public static ImageTexture JukeboxSkipImage {get; set;} = new();
+    public static ImageTexture FavoriteImage {get; set;} = new();
     public static byte[] HitSoundBuffer {get; set;} = System.Array.Empty<byte>();
     public static byte[] FailSoundBuffer {get; set;} = System.Array.Empty<byte>();
     public static ArrayMesh NoteMesh {get; set;} = new();
@@ -221,6 +222,7 @@ public struct Skin
         JukeboxPlayImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_play.png"));
         JukeboxPauseImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_pause.png"));
         JukeboxSkipImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_skip.png"));
+        FavoriteImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/favorite.png"));
 
         if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
         {
@@ -253,7 +255,7 @@ public class Util
 {
     private static bool Initialized = false;
     private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "note.obj", "hit.mp3", "fail.mp3", "colors.txt"};
+    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "note.obj", "hit.mp3", "fail.mp3", "colors.txt"};
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -281,6 +283,11 @@ public class Util
 
         DiscordRPC.Call("Set", "app_id", 1272588732834254878);
 		DiscordRPC.Call("Set", "large_image", "short");
+
+        if (!File.Exists($"{Constants.UserFolder}/favorites.txt"))
+        {
+            File.Create($"{Constants.UserFolder}/favorites.txt");
+        }
 
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))
         {

@@ -1,6 +1,7 @@
-[gd_scene load_steps=6 format=3 uid="uid://vgvjvbvu0qsc"]
+[gd_scene load_steps=7 format=3 uid="uid://vgvjvbvu0qsc"]
 
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="1_rhnis"]
+[ext_resource type="Texture2D" uid="uid://cacq7g5ijo7sy" path="res://skin/favorite.png" id="2_c1lr1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jhkog"]
 bg_color = Color(0.0383972, 0.0383972, 0.0383972, 0.768627)
@@ -94,7 +95,7 @@ anchor_right = 1.0
 anchor_bottom = 0.5
 offset_left = 8.0
 offset_top = 12.0
-offset_right = -8.0
+offset_right = -40.0
 grow_vertical = 0
 theme = ExtResource("1_rhnis")
 text = "hello hi"
@@ -131,3 +132,17 @@ mouse_filter = 1
 action_mode = 0
 button_mask = 3
 flat = true
+
+[node name="Favorited" type="TextureRect" parent="Holder"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -32.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 32.0
+grow_horizontal = 0
+texture = ExtResource("2_c1lr1")
+expand_mode = 1

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Godot;
 using Phoenyx;
@@ -21,12 +23,13 @@ public partial class MainMenu : Control
 	private static HBoxContainer JukeboxSpectrum;
 	private static AudioStreamPlayer Audio;
 	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
+	private static Panel ContextMenu;
 
 	private static Button ImportButton;
 	private static Button UserFolderButton;
 	private static Button SettingsButton;
 	private static LineEdit SearchEdit;
-	private static FileDialog FileDialog;
+	private static FileDialog ImportDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
 
@@ -55,11 +58,13 @@ public partial class MainMenu : Control
 	private static bool RightMouseHeld = false;
 	private static bool RightClickingButton = false;
 	private static List<string> LoadedMapFiles = new();
+	private static Dictionary<string, int> OriginalMapOrder = new();
 	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
 	private static LineEdit FocusedLineEdit = null;
 	private static string Search = "";
+	private static string ContextMenuTarget;
 
 	public override void _Ready()
 	{
@@ -105,6 +110,7 @@ public partial class MainMenu : Control
 		JukeboxSpectrum = Jukebox.GetNode<HBoxContainer>("Spectrum");
 		Audio = GetNode<AudioStreamPlayer>("AudioStreamPlayer");
 		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
+		ContextMenu = GetNode<Panel>("ContextMenu");
 		LoadedMapFiles = new();
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
@@ -194,11 +200,11 @@ public partial class MainMenu : Control
 		UserFolderButton = TopBar.GetNode<Button>("UserFolder");
 		SettingsButton = TopBar.GetNode<Button>("Settings");
 		SearchEdit = TopBar.GetNode<LineEdit>("Search");
-		FileDialog = GetNode<FileDialog>("FileDialog"); 
+		ImportDialog = GetNode<FileDialog>("ImportDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
 		
-		ImportButton.Pressed += FileDialog.Show;
+		ImportButton.Pressed += ImportDialog.Show;
 		UserFolderButton.Pressed += () => {
 			OS.ShellOpen($"{Constants.UserFolder}");
 		};
@@ -227,7 +233,7 @@ public partial class MainMenu : Control
 
 			UpdateMaxScroll();
 		};
-		FileDialog.FilesSelected += (string[] files) => {
+		ImportDialog.FilesSelected += (string[] files) => {
 			MapParser.Import(files);
 			UpdateMapList();
 		};
@@ -287,14 +293,90 @@ public partial class MainMenu : Control
 		skinOptions.ItemSelected += (long item) => {
 			Settings.Skin = skinOptions.GetItemText((int)item);
 			Phoenyx.Skin.Load();
+
 			Cursor.Texture = Phoenyx.Skin.CursorImage;
 			SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
+		};
+
+		ContextMenu.GetNode("Container").GetNode<Button>("Favorite").Pressed += () => {
+			ContextMenu.Visible = false;
+
+			string favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt");
+			bool favorited = favorites.Split("\n").ToList().Contains(ContextMenuTarget);
+			TextureRect favorite = MapListContainer.GetNode(ContextMenuTarget).GetNode("Holder").GetNode<TextureRect>("Favorited");
+			favorite.Visible = !favorited;
+
+			if (favorited)
+			{
+				File.WriteAllText($"{Constants.UserFolder}/favorites.txt", favorites.Replace($"{ContextMenuTarget}\n", ""));
+			}
+			else
+			{
+				favorite.Texture = Phoenyx.Skin.FavoriteImage;
+				File.WriteAllText($"{Constants.UserFolder}/favorites.txt", $"{favorites}{ContextMenuTarget}\n");
+			}
+			
+			MapListContainer.MoveChild(MapListContainer.GetNode(ContextMenuTarget), favorited ? OriginalMapOrder[ContextMenuTarget] : 0);
+
+			ToastNotification.Notify($"Successfully {(favorited ? "removed" : "added")} map {(favorited ? "from" : "to")} favorites");
+		};
+		ContextMenu.GetNode("Container").GetNode<Button>("Delete").Pressed += () => {
+			ContextMenu.Visible = false;
+			MapListContainer.GetNode(ContextMenuTarget).QueueFree();
+
+			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+			
+			if (Directory.Exists($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+			{
+				foreach (string file in Directory.GetFiles($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+				{
+					File.Delete(file);
+				}
+
+				Directory.Delete($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
+			}
+
+			ToastNotification.Notify("Successfuly deleted map");
+		};
+		ContextMenu.GetNode("Container").GetNode<Button>("Video").Pressed += () => {
+			ContextMenu.Visible = false;
+			GetNode<FileDialog>("VideoDialog").Visible = true;
+		};
+		GetNode<FileDialog>("VideoDialog").FileSelected += (string path) => {
+			if (path.GetExtension() != "mp4")
+			{
+				ToastNotification.Notify("Only .mp4 files are allowed", 1);
+				return;
+			}
+
+			Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
+			byte[] videoBuffer = file.GetBuffer((long)file.GetLength());
+			file.Close();
+			Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+
+			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+
+			map.VideoBuffer = videoBuffer;
+			GD.PrintT(videoBuffer.Length, map.VideoBuffer.Length);
+
+			MapParser.Encode(map);
+
+			if (Directory.Exists($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+			{
+				foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+				{
+					File.Delete(filePath);
+				}
+
+				Directory.Delete($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
+			}
+
+			ToastNotification.Notify("Successfully added video to map");
 		};
 
 		SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<Button>("SkinFolder").Pressed += () => {
 			OS.ShellOpen($"{Constants.UserFolder}/skins/{Settings.Skin}");
 		};
-		
 		SettingsHolder.GetNode("Categories").GetNode("Other").GetNode("Container").GetNode("RhythiaImport").GetNode<Button>("Button").Pressed += () => {
 			if (!Directory.Exists($"{OS.GetDataDir()}/SoundSpacePlus") || !File.Exists($"{OS.GetDataDir()}/SoundSpacePlus/settings.json"))
 			{
@@ -321,6 +403,8 @@ public partial class MainMenu : Control
 			Settings.SimpleHUD = (bool)data["simple_hud"];
 
 			UpdateSettings();
+
+			ToastNotification.Notify("Successfully imported Rhythia settings");
 		};
 
 		UpdateSettings(true);
@@ -453,9 +537,11 @@ public partial class MainMenu : Control
 
 						break;
 					case MouseButton.WheelUp:
+						ContextMenu.Visible = false;
 						TargetScroll = Math.Max(0, TargetScroll - 80);
 						break;
 					case MouseButton.WheelDown:
+						ContextMenu.Visible = false;
 						TargetScroll = Math.Min(MaxScroll, TargetScroll + 80);
 						break;
 				}
@@ -497,6 +583,15 @@ public partial class MainMenu : Control
 					{
 						Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
 					}
+					break;
+			}
+		}
+		else if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.Pressed)
+		{
+			switch (eventMouseButton.ButtonIndex)
+			{
+				case MouseButton.Left:
+					ContextMenu.Visible = false;
 					break;
 			}
 		}
@@ -805,6 +900,8 @@ public partial class MainMenu : Control
     public static void UpdateMapList()
 	{
 		double start = Time.GetTicksUsec();
+		int i = 0;
+		List<string> favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList();
 
 		foreach (string mapFile in Directory.GetFiles($"{Constants.UserFolder}/maps"))
 		{
@@ -812,6 +909,7 @@ public partial class MainMenu : Control
 			{
 				string[] split = mapFile.Split("\\");
 				string fileName = split[^1].Replace(".phxm", "");
+				bool favorited = favorites.Contains(fileName);
 				
 				if (mapFile.GetExtension() != "phxm" || LoadedMapFiles.Contains(fileName))
 				{
@@ -884,6 +982,17 @@ public partial class MainMenu : Control
 
 				MapListContainer.AddChild(mapButton);
 
+				OriginalMapOrder[fileName] = i + 1;
+
+				if (favorited)
+				{
+					MapListContainer.MoveChild(mapButton, 0);
+
+					TextureRect favorite = holder.GetNode<TextureRect>("Favorited");
+					favorite.Texture = Phoenyx.Skin.FavoriteImage;
+					favorite.Visible = true;
+				}
+
 				holder.GetNode<Button>("Button").MouseEntered += () => {
 					holder.GetNode<ColorRect>("Hover").Color = Color.FromHtml("#ffffff10");
 				};
@@ -893,6 +1002,8 @@ public partial class MainMenu : Control
 				};
 
 				holder.GetNode<Button>("Button").Pressed += () => {
+					ContextMenu.Visible = false;
+
 					if (!RightMouseHeld)
 					{
 						if (SelectedMap != null)
@@ -931,10 +1042,17 @@ public partial class MainMenu : Control
 					{
 						RightClickingButton = true;
 						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
+						ContextMenu.Visible = true;
+						ContextMenu.Position = MousePosition;
+						ContextMenuTarget = fileName;
 
-						GD.Print("open context menu");
+						bool favorited = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList().Contains(fileName);
+
+						ContextMenu.GetNode("Container").GetNode<Button>("Favorite").Text = favorited ? "Unfavorite" : "Favorite";
 					}
 				};
+
+				i++;
 			}
 			catch
 			{
