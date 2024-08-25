@@ -55,6 +55,7 @@ public partial class MainMenu : Control
 	private static bool RightMouseHeld = false;
 	private static bool RightClickingButton = false;
 	private static List<string> LoadedMapFiles = new();
+	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
 	private static LineEdit FocusedLineEdit = null;
@@ -126,7 +127,7 @@ public partial class MainMenu : Control
 		};
 		JukeboxButton.Pressed += () => {
 			string[] split = JukeboxQueue[JukeboxIndex].Split("\\");
-			string fileName = split[split.Length - 1].TrimSuffix(".phxm");
+			string fileName = split[^1].TrimSuffix(".phxm");
 			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
 
 			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
@@ -212,10 +213,19 @@ public partial class MainMenu : Control
 				SearchEdit.ReleaseFocus();
 			}
 
+			VisibleMaps = 0;
+
 			foreach (Panel map in MapListContainer.GetChildren())
 			{
 				map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
+
+				if (map.Visible)
+				{
+					VisibleMaps++;
+				}
 			}
+
+			UpdateMaxScroll();
 		};
 		FileDialog.FilesSelected += (string[] files) => {
 			MapParser.Import(files);
@@ -271,6 +281,47 @@ public partial class MainMenu : Control
 				}
 			};
 		}
+
+		OptionButton skinOptions = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+
+		skinOptions.ItemSelected += (long item) => {
+			Settings.Skin = skinOptions.GetItemText((int)item);
+			Phoenyx.Skin.Load();
+			Cursor.Texture = Phoenyx.Skin.CursorImage;
+			SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
+		};
+
+		SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<Button>("SkinFolder").Pressed += () => {
+			OS.ShellOpen($"{Constants.UserFolder}/skins/{Settings.Skin}");
+		};
+		
+		SettingsHolder.GetNode("Categories").GetNode("Other").GetNode("Container").GetNode("RhythiaImport").GetNode<Button>("Button").Pressed += () => {
+			if (!Directory.Exists($"{OS.GetDataDir()}/SoundSpacePlus") || !File.Exists($"{OS.GetDataDir()}/SoundSpacePlus/settings.json"))
+			{
+				ToastNotification.Notify("Could not locate Rhythia settings", 1);
+				return;
+			}
+
+			Godot.FileAccess file = Godot.FileAccess.Open($"{OS.GetDataDir()}/SoundSpacePlus/settings.json", Godot.FileAccess.ModeFlags.Read);
+            Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)Json.ParseString(file.GetAsText());
+
+			Settings.ApproachRate = (float)data["approach_rate"];
+			Settings.ApproachDistance = (float)data["spawn_distance"];
+			Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+			Settings.FoV = (float)data["fov"];
+			Settings.Sensitivity = (float)data["sensitivity"] * 2;
+			Settings.Parallax = (float)data["parallax"] / 100;
+			Settings.FadeIn = (float)data["fade_length"] * 100;
+			Settings.FadeOut = (bool)data["half_ghost"];
+			Settings.Pushback = (bool)data["do_note_pushback"];
+			Settings.NoteSize = (float)data["note_size"] * 0.875f;
+			Settings.CursorScale = (float)data["cursor_scale"];
+			Settings.CursorTrail = (bool)data["cursor_trail"];
+			Settings.TrailTime = (float)data["trail_time"];
+			Settings.SimpleHUD = (bool)data["simple_hud"];
+
+			UpdateSettings();
+		};
 
 		UpdateSettings(true);
 
@@ -587,7 +638,7 @@ public partial class MainMenu : Control
 		foreach (string path in Directory.GetDirectories($"{Constants.UserFolder}/skins"))
 		{
 			string[] split = path.Split("\\");
-			string name = split[split.Length - 1];
+			string name = split[^1];
 			
 			skinOptions.AddItem(name, i);
 
@@ -598,20 +649,6 @@ public partial class MainMenu : Control
 			}
 
 			i++;
-		}
-
-		if (connections)
-		{
-			skinOptions.ItemSelected += (long item) => {
-				Settings.Skin = skinOptions.GetItemText((int)item);
-				Phoenyx.Skin.Load();
-				Cursor.Texture = Phoenyx.Skin.CursorImage;
-				SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
-			};
-
-			SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<Button>("SkinFolder").Pressed += () => {
-				OS.ShellOpen($"{Constants.UserFolder}/skins/{Settings.Skin}");
-			};
 		}
 
 		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
@@ -750,7 +787,7 @@ public partial class MainMenu : Control
 			try
 			{
 				string[] split = mapFile.Split("\\");
-				string fileName = split[split.Length - 1].Replace(".phxm", "");
+				string fileName = split[^1].Replace(".phxm", "");
 				
 				if (mapFile.GetExtension() != "phxm" || LoadedMapFiles.Contains(fileName))
 				{
@@ -807,6 +844,7 @@ public partial class MainMenu : Control
 				}
 
 				LoadedMapFiles.Add(fileName);
+				VisibleMaps++;
 
 				Panel mapButton = MapButton.Instantiate<Panel>();
 				Panel holder = mapButton.GetNode<Panel>("Holder");
@@ -887,7 +925,7 @@ public partial class MainMenu : Control
 
 	public static void UpdateMaxScroll()
 	{
-		MaxScroll = Math.Max(0, (int)(LoadedMapFiles.Count * 90 - MapList.Size.Y));
+		MaxScroll = Math.Max(0, (int)(VisibleMaps * 90 - MapList.Size.Y));
 	}
 
 	public static void UpdateSpectrumSpacing()

@@ -239,14 +239,6 @@ public partial class Runner : Node3D
 			SimpleMissesLabel.Visible = true;
 		}
 
-		//foreach (KeyValuePair<string, Player> entry in Lobby.Players)
-		//{
-		//	ColorRect playerScore = PlayerScore.Instantiate<ColorRect>();
-		//	playerScore.GetNode<Label>("Name").Text = entry.Key;
-		//	playerScore.Name = entry.Key;
-		//	Leaderboard.GetNode("SubViewport").GetNode("Players").AddChild(playerScore);
-		//}
-
 		Camera.Fov = (float)Settings.FoV;
 		VideoQuad.Transparency = 1;
 		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
@@ -468,7 +460,7 @@ public partial class Runner : Node3D
 		
 		if (Settings.CursorTrail)
 		{
-			List<Dictionary<string, object>> newList = new();
+			List<Dictionary<string, object>> culledList = new();
 
 			LastCursorPositions.Add(new(){
 				["Time"] = now,
@@ -482,19 +474,22 @@ public partial class Runner : Node3D
 					continue;
 				}
 
-				newList.Add(entry);
-			}
+				if (CurrentAttempt.CursorPosition.DistanceTo((Vector2)entry["Position"]) == 0)
+				{
+					continue;
+				}
 
-			LastCursorPositions = newList;
+				culledList.Add(entry);
+			}
 			
-			int count = LastCursorPositions.Count;
+			int count = culledList.Count;
 			float size = ((Vector2)Cursor.Mesh.Get("size")).X;
 			Transform3D transform = new Transform3D(new Vector3(size, 0, 0), new Vector3(0, size, 0), new Vector3(0, 0, size), Vector3.Zero);
 			int j = 0;
 
 			CursorTrailMultimesh.Multimesh.InstanceCount = count;
 
-			foreach (Dictionary<string, object> entry in LastCursorPositions)
+			foreach (Dictionary<string, object> entry in culledList)
 			{
 				ulong difference = now - (ulong)entry["Time"];
 				uint alpha = (uint)((float)(difference) / (Settings.TrailTime * 1000000) * 255);
