@@ -197,7 +197,7 @@ public partial class MapParser : Node
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
 
-			map = new(notes, name);
+			map = new(path, notes, name);
 		}
 		catch (Exception exception)
 		{
@@ -363,7 +363,7 @@ public partial class MapParser : Node
 				notes[i].Index = i;
 			}
 			
-			map = new Map(notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
+			map = new Map(path, notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -459,7 +459,7 @@ public partial class MapParser : Node
 
 			file.Dispose();
 			
-			map = new(notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer, videoBuffer);
+			map = new(path, notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer, videoBuffer);
 		}
 		catch (Exception exception)
 		{

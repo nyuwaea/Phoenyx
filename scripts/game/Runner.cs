@@ -60,6 +60,7 @@ public partial class Runner : Node3D
 		public double Progress = 0;	// ms
 		public Map Map = new Map();
 		public double Speed = 1;
+		public string[] RawMods;
 		public Dictionary<string, bool> Mods;
 		public string[] Players = Array.Empty<string>();
 		public int Hits = 0;
@@ -86,6 +87,7 @@ public partial class Runner : Node3D
 			Players = players ?? Array.Empty<string>();
 			Progress = -1000;
 			ComboMultiplierIncrement = Map.Notes.Length / 200;
+			RawMods = mods;
 			Mods = new(){
 				["NoFail"] = mods.Contains("NoFail"),
 				["Ghost"] = mods.Contains("Ghost")
@@ -554,6 +556,10 @@ public partial class Runner : Node3D
 			{
 				case Key.Escape:
 					Stop();
+					break;
+				case Key.Apostrophe:
+					GetTree().ReloadCurrentScene();
+					Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.RawMods, CurrentAttempt.Players);
 					break;
 				case Key.Space:
 					if (Lobby.PlayerCount > 1)

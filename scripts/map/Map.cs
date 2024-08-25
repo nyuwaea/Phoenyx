@@ -2,10 +2,12 @@ using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using Godot;
+using Phoenyx;
 
 public struct Map
 {
     public string ID;
+    public string FilePath;
     public string Artist;
     public string Title;
     public string PrettyTitle;
@@ -21,8 +23,9 @@ public struct Map
     public byte[] VideoBuffer;
     public Note[] Notes;
 
-    public Map(Note[] data = null, string id = null, string artist = "", string title = "", float rating = 0, string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null, byte[] videoBuffer = null)
+    public Map(string filePath, Note[] data = null, string id = null, string artist = "", string title = "", float rating = 0, string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null, byte[] videoBuffer = null)
     {
+        FilePath = filePath;
         Artist = (artist ?? "").Replace("\n", "");
         Title = (title ?? "").Replace("\n", "");
         PrettyTitle = artist != "" ? $"{artist} - {title}" : title;
@@ -30,7 +33,7 @@ public struct Map
         Mappers = mappers ?? new string[]{"N/A"};
         PrettyMappers = "";
         Difficulty = difficulty;
-        DifficultyName = difficultyName ?? "N/A";
+        DifficultyName = difficultyName ?? Constants.Difficulties[Difficulty];
         AudioBuffer = audioBuffer;
         CoverBuffer = coverBuffer;
         VideoBuffer = videoBuffer;

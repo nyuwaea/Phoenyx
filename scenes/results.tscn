@@ -1,11 +1,35 @@
-[gd_scene load_steps=8 format=3 uid="uid://bhcvypmhm5rke"]
+[gd_scene load_steps=16 format=3 uid="uid://bhcvypmhm5rke"]
 
 [ext_resource type="Script" path="res://scripts/menu/Results.cs" id="1_llpx6"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_dgnpu"]
+[ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="2_f4qdi"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="2_ow183"]
+[ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="3_rsbg1"]
 [ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="3_vdcg2"]
+[ext_resource type="FontFile" uid="uid://dvb6fvy008bhv" path="res://fonts/Roboto-Medium.ttf" id="4_yxv8s"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_13vky"]
+font = ExtResource("2_f4qdi")
+font_size = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_wwu1g"]
+font = ExtResource("3_rsbg1")
+font_size = 24
+font_color = Color(0.627451, 0.627451, 0.627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_sbrx2"]
+font = ExtResource("3_rsbg1")
+font_size = 18
+font_color = Color(0.627451, 0.627451, 0.627451, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c11o2"]
+bg_color = Color(1, 1, 1, 0.0313726)
+
+[sub_resource type="LabelSettings" id="LabelSettings_f104l"]
+font = ExtResource("4_yxv8s")
+font_size = 32
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_rrr5y"]
 bg_color = Color(1, 1, 1, 0.0313726)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dc6lk"]
@@ -33,6 +57,45 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0, 0, 0, 1)
 
+[node name="Title" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 32.0
+offset_top = 96.0
+offset_right = -32.0
+offset_bottom = 160.0
+text = "AAAAAAAAAAAAAAAAA"
+label_settings = SubResource("LabelSettings_13vky")
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Difficulty" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 32.0
+offset_top = 160.0
+offset_right = -32.0
+offset_bottom = 190.0
+text = "very hard"
+label_settings = SubResource("LabelSettings_wwu1g")
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Mappers" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 32.0
+offset_top = 198.0
+offset_right = -32.0
+offset_bottom = 220.0
+text = "by deez, nuts & abc"
+label_settings = SubResource("LabelSettings_sbrx2")
+vertical_alignment = 1
+text_overrun_behavior = 3
+
 [node name="TopBar" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = -1
@@ -53,6 +116,60 @@ offset_bottom = 54.0
 texture = ExtResource("3_vdcg2")
 expand_mode = 2
 stretch_mode = 5
+
+[node name="Label" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.6
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+text = "RESULTS"
+label_settings = SubResource("LabelSettings_f104l")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Footer" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -64.0
+offset_right = -4.0
+offset_bottom = -4.0
+theme = ExtResource("2_dgnpu")
+theme_override_styles/panel = SubResource("StyleBoxFlat_rrr5y")
+
+[node name="Back" type="Button" parent="Footer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.075
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_bottom = -8.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "Back"
+flat = true
+
+[node name="Play" type="Button" parent="Footer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.925
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "Play"
+flat = true
 
 [node name="Volume" type="Panel" parent="."]
 modulate = Color(1, 1, 1, 0)
