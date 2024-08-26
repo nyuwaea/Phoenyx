@@ -428,7 +428,7 @@ public partial class MainMenu : Control
 			Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
 			Settings.FoV = (float)data["fov"];
 			Settings.Sensitivity = (float)data["sensitivity"] * 2;
-			Settings.Parallax = (float)data["parallax"] / 100;
+			Settings.Parallax = (float)data["parallax"] / 50;
 			Settings.FadeIn = (float)data["fade_length"] * 100;
 			Settings.FadeOut = (bool)data["half_ghost"];
 			Settings.Pushback = (bool)data["do_note_pushback"];
@@ -912,6 +912,7 @@ public partial class MainMenu : Control
 								}
 
 								Phoenyx.Skin.Colors = split;
+								Phoenyx.Skin.RawColors = text.TrimPrefix("#");
 								break;
 						}
 

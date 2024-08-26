@@ -116,9 +116,12 @@ public partial class Runner : Node3D
 			Combo++;
 			ComboMultiplierProgress++;
 
+			int lateness = (int)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed);
+			float factor = 1 - Math.Max(0, lateness - 20) / 100f;
+
 			HitsInfo.Add(new(){
 				["Time"] = Map.Notes[index].Millisecond,
-				["Offset"] = (int)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed),
+				["Offset"] = lateness,
 			});
 
 			if (ComboMultiplierProgress >= ComboMultiplierIncrement && ComboMultiplier < 8)
@@ -127,7 +130,7 @@ public partial class Runner : Node3D
 				ComboMultiplier = Math.Min(8, ComboMultiplier + 1);
 			}
 
-			Score += (int)(100 * ComboMultiplier * ModsMultiplier);
+			Score += (int)(100 * ComboMultiplier * ModsMultiplier * factor);
 			HealthStep = Math.Max(HealthStep / 1.45f, 15);
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
