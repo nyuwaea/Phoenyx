@@ -270,6 +270,9 @@ public partial class Runner : Node3D
 		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 
+		float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(Settings.FoV / 2)), 2) - Math.Pow(103.75, 2));
+		(VideoQuad.Mesh as QuadMesh).Size = new Vector2(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
+
 		Util.DiscordRPC.Call("Set", "details", "Playing a Map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
 		Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000 / CurrentAttempt.Speed);
@@ -536,9 +539,6 @@ public partial class Runner : Node3D
 	{
 		if (@event is InputEventMouseMotion eventMouseMotion)
 		{
-			float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(Settings.FoV / 2)), 2) - Math.Pow(103.75, 2));
-			(VideoQuad.Mesh as QuadMesh).Size = new Vector2(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
-
 			if (Settings.CameraLock)
 			{
 				if (Settings.CursorDrift)

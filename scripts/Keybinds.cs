@@ -82,6 +82,4 @@ public partial class Keybinds : Node
 			}
 		}
 	}
-
-
 }

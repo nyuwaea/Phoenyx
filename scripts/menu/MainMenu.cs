@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Text;
 using Godot;
 using Phoenyx;
@@ -57,7 +56,8 @@ public partial class MainMenu : Control
 	private static Vector2 MousePosition = Vector2.Zero;
 	private static bool RightMouseHeld = false;
 	private static bool RightClickingButton = false;
-	private static List<string> LoadedMapFiles = new();
+	private static List<string> LoadedMaps = new();
+	private static List<string> FavoritedMaps = new();
 	private static Dictionary<string, int> OriginalMapOrder = new();
 	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
@@ -111,7 +111,7 @@ public partial class MainMenu : Control
 		Audio = GetNode<AudioStreamPlayer>("AudioStreamPlayer");
 		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
 		ContextMenu = GetNode<Panel>("ContextMenu");
-		LoadedMapFiles = new();
+		LoadedMaps = new();
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
@@ -309,11 +309,13 @@ public partial class MainMenu : Control
 			if (favorited)
 			{
 				File.WriteAllText($"{Constants.UserFolder}/favorites.txt", favorites.Replace($"{ContextMenuTarget}\n", ""));
+				FavoritedMaps.Remove(ContextMenuTarget);
 			}
 			else
 			{
 				favorite.Texture = Phoenyx.Skin.FavoriteImage;
 				File.WriteAllText($"{Constants.UserFolder}/favorites.txt", $"{favorites}{ContextMenuTarget}\n");
+				FavoritedMaps.Add(ContextMenuTarget);
 			}
 			
 			MapListContainer.MoveChild(MapListContainer.GetNode(ContextMenuTarget), favorited ? OriginalMapOrder[ContextMenuTarget] : 0);
@@ -489,6 +491,14 @@ public partial class MainMenu : Control
 			
 			ColorRect colorRect = JukeboxSpectrum.GetNode((i + 1).ToString()).GetNode<ColorRect>("Main");
 			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
+		}
+
+		for (int i = 0; i < FavoritedMaps.Count; i++)
+		{
+			TextureRect favoriteRect = MapListContainer.GetNode(FavoritedMaps[i]).GetNode("Holder").GetNode<TextureRect>("Favorited");
+			Color modulate = Color.FromHtml("ffffff" + (196 + (int)(59 * Math.Sin(Math.PI * now / 1000000 + i))).ToString("X2"));
+			favoriteRect.Rotation = (float)now / 1000000;
+			favoriteRect.Modulate = modulate;
 		}
     }
 
@@ -902,6 +912,7 @@ public partial class MainMenu : Control
 		double start = Time.GetTicksUsec();
 		int i = 0;
 		List<string> favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList();
+		FavoritedMaps = new();
 
 		foreach (string mapFile in Directory.GetFiles($"{Constants.UserFolder}/maps"))
 		{
@@ -911,7 +922,7 @@ public partial class MainMenu : Control
 				string fileName = split[^1].Replace(".phxm", "");
 				bool favorited = favorites.Contains(fileName);
 				
-				if (mapFile.GetExtension() != "phxm" || LoadedMapFiles.Contains(fileName))
+				if (mapFile.GetExtension() != "phxm" || LoadedMaps.Contains(fileName))
 				{
 					continue;
 				}
@@ -965,7 +976,7 @@ public partial class MainMenu : Control
 					title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
 				}
 
-				LoadedMapFiles.Add(fileName);
+				LoadedMaps.Add(fileName);
 				VisibleMaps++;
 
 				Panel mapButton = MapButton.Instantiate<Panel>();
@@ -987,6 +998,7 @@ public partial class MainMenu : Control
 				if (favorited)
 				{
 					MapListContainer.MoveChild(mapButton, 0);
+					FavoritedMaps.Add(fileName);
 
 					TextureRect favorite = holder.GetNode<TextureRect>("Favorited");
 					favorite.Texture = Phoenyx.Skin.FavoriteImage;
@@ -1046,7 +1058,7 @@ public partial class MainMenu : Control
 						ContextMenu.Position = MousePosition;
 						ContextMenuTarget = fileName;
 
-						bool favorited = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList().Contains(fileName);
+						bool favorited = FavoritedMaps.Contains(fileName);
 
 						ContextMenu.GetNode("Container").GetNode<Button>("Favorite").Text = favorited ? "Unfavorite" : "Favorite";
 					}
