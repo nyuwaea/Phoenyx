@@ -33,12 +33,12 @@ outline_color = Color(0, 0, 0, 0.501961)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t0m3h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4xjus"]
-bg_color = Color(0.051971, 0.051971, 0.0519709, 1)
+bg_color = Color(0.0360807, 0.0300716, 0.0527505, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wwrgs"]
-bg_color = Color(0.0383972, 0.0383972, 0.0383971, 1)
+bg_color = Color(0.0235294, 0.0196078, 0.0352941, 1)
 
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_13m77"]
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xcpmx"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yol12"]
 
@@ -46,7 +46,7 @@ bg_color = Color(0.0383972, 0.0383972, 0.0383971, 1)
 font = ExtResource("8_jfynb")
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wntef"]
-bg_color = Color(0.0295065, 0.0295066, 0.0295065, 1)
+bg_color = Color(0.0235294, 0.0196078, 0.0352941, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_txd3p"]
 font_size = 26
@@ -1136,7 +1136,7 @@ offset_left = 8.00001
 offset_top = 48.0
 offset_right = -8.0
 offset_bottom = -8.0
-theme_override_styles/panel = SubResource("StyleBoxEmpty_13m77")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_xcpmx")
 
 [node name="Gameplay" type="ScrollContainer" parent="Settings/Holder/Categories"]
 layout_mode = 1

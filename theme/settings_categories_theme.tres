@@ -3,15 +3,15 @@
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="1_cn2fb"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kncke"]
-bg_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
+bg_color = Color(0.0352941, 0.0313726, 0.0509804, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6kbgk"]
-bg_color = Color(0.0562916, 0.0562916, 0.0562916, 1)
+bg_color = Color(0.0360807, 0.0300716, 0.0527505, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jlnvv"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y08lf"]
-bg_color = Color(0.0666667, 0.0666667, 0.0666667, 1)
+bg_color = Color(0.076273, 0.0667037, 0.100363, 1)
 
 [resource]
 Button/fonts/font = ExtResource("1_cn2fb")

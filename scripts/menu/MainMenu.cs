@@ -912,7 +912,7 @@ public partial class MainMenu : Control
 								}
 
 								Phoenyx.Skin.Colors = split;
-								Phoenyx.Skin.RawColors = text.TrimPrefix("#");
+								Phoenyx.Skin.RawColors = text.TrimPrefix("#").Replace(" ", "");
 								break;
 						}
 

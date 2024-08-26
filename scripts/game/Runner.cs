@@ -399,7 +399,7 @@ public partial class Runner : Node3D
 		}
 
 		ToProcess = 0;
-		ProcessNotes = new List<Note>();
+		ProcessNotes.Clear();
 
 		// note process check
 		for (int i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)
@@ -475,7 +475,7 @@ public partial class Runner : Node3D
 
 		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 		SpeedLabel.Modulate = Color.FromHtml($"#ffffff{(CurrentAttempt.Speed == 1 ? "00" : "20")}");
-		ProgressLabel.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
+		ProgressLabel.Text = $"{Lib.String.FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {Lib.String.FormatTime(MapLength / 1000)}";
 		Health.Size = new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80);
 		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
 		SkipLabel.Modulate = Color.FromHtml("#ffffff" + Math.Min(255, (int)(255 * SkipLabelAlpha)).ToString("X2"));
@@ -683,15 +683,5 @@ public partial class Runner : Node3D
 		//Label scoreLabel = playerScore.GetNode<Label>("Score");
 		//playerScore.Position = new Vector2(playerScore.Position.X, score);
 		//scoreLabel.Text = score.ToString();
-	}
-
-	private static string FormatTime(double seconds, bool padMinutes = false)
-	{
-		int minutes = (int)Math.Floor(seconds / 60);
-
-		seconds -= minutes * 60;
-		seconds = Math.Floor(seconds);
-
-		return $"{(seconds < 0 ? "-" : "")}{(padMinutes ? minutes.ToString().PadZeros(2) : minutes)}:{seconds.ToString().PadZeros(2)}";
 	}
 }
