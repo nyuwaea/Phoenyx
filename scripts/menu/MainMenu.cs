@@ -340,9 +340,31 @@ public partial class MainMenu : Control
 
 			ToastNotification.Notify("Successfuly deleted map");
 		};
-		ContextMenu.GetNode("Container").GetNode<Button>("Video").Pressed += () => {
+		ContextMenu.GetNode("Container").GetNode<Button>("VideoAdd").Pressed += () => {
 			ContextMenu.Visible = false;
 			GetNode<FileDialog>("VideoDialog").Visible = true;
+		};
+		ContextMenu.GetNode("Container").GetNode<Button>("VideoRemove").Pressed += () => {
+			ContextMenu.Visible = false;
+			Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+
+			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+
+			map.VideoBuffer = null;
+
+			MapParser.Encode(map);
+
+			if (Directory.Exists($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+			{
+				foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+				{
+					File.Delete(filePath);
+				}
+
+				Directory.Delete($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
+			}
+
+			ToastNotification.Notify("Successfully removed video from map");
 		};
 		GetNode<FileDialog>("VideoDialog").FileSelected += (string path) => {
 			if (path.GetExtension() != "mp4")
@@ -359,7 +381,6 @@ public partial class MainMenu : Control
 			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
 
 			map.VideoBuffer = videoBuffer;
-			GD.PrintT(videoBuffer.Length, map.VideoBuffer.Length);
 
 			MapParser.Encode(map);
 
@@ -1015,7 +1036,7 @@ public partial class MainMenu : Control
 
 				holder.GetNode<Button>("Button").Pressed += () => {
 					ContextMenu.Visible = false;
-
+					
 					if (!RightMouseHeld)
 					{
 						if (SelectedMap != null)

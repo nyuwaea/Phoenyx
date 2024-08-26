@@ -118,7 +118,7 @@ public partial class Runner : Node3D
 
 			HitsInfo.Add(new(){
 				["Time"] = Map.Notes[index].Millisecond,
-				["Offset"] = (int)Progress - Map.Notes[index].Millisecond,
+				["Offset"] = (int)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed),
 			});
 
 			if (ComboMultiplierProgress >= ComboMultiplierIncrement && ComboMultiplier < 8)
@@ -560,6 +560,7 @@ public partial class Runner : Node3D
 			else
 			{
 				Camera.Rotation += new Vector3(-eventMouseMotion.Relative.Y / 120 * (float)Settings.Sensitivity / (float)Math.PI, -eventMouseMotion.Relative.X / 120 * (float)Settings.Sensitivity / (float)Math.PI, 0);
+				Camera.Rotation = new Vector3((float)Math.Clamp(Camera.Rotation.X, Mathf.DegToRad(-90), Mathf.DegToRad(90)), Camera.Rotation.Y, Camera.Rotation.Z);
 				Camera.Position = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
 				
 				float hypotenuse = 3.5f / Camera.Basis.Z.Z;
@@ -575,14 +576,14 @@ public partial class Runner : Node3D
 		}
 		else if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
-			switch (eventKey.Keycode)
+			switch (eventKey.PhysicalKeycode)
 			{
 				case Key.Escape:
 					CurrentAttempt.Alive = false;
 					FailSound.Play();
 					QueueStop();
 					break;
-				case Key.Apostrophe:
+				case Key.Quoteleft:
 					GetTree().ReloadCurrentScene();
 					Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.RawMods, CurrentAttempt.Players);
 					break;

@@ -286,7 +286,8 @@ public class Util
 
         if (!File.Exists($"{Constants.UserFolder}/favorites.txt"))
         {
-            File.Create($"{Constants.UserFolder}/favorites.txt");
+            FileStream file = File.Create($"{Constants.UserFolder}/favorites.txt");
+            file.Close();
         }
 
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))

@@ -1013,7 +1013,7 @@ theme = ExtResource("2_46xtp")
 visible = false
 layout_mode = 0
 offset_right = 150.0
-offset_bottom = 90.0
+offset_bottom = 120.0
 theme_override_styles/panel = SubResource("StyleBoxEmpty_t0m3h")
 
 [node name="Background" type="ColorRect" parent="ContextMenu"]
@@ -1059,7 +1059,7 @@ text = "Delete"
 flat = true
 alignment = 0
 
-[node name="Video" type="Button" parent="ContextMenu/Container"]
+[node name="VideoAdd" type="Button" parent="ContextMenu/Container"]
 custom_minimum_size = Vector2(0, 30)
 layout_mode = 2
 size_flags_vertical = 3
@@ -1068,6 +1068,18 @@ theme_override_colors/font_hover_color = Color(0.768627, 0.768627, 1, 1)
 theme_override_colors/font_color = Color(0.501961, 0.501961, 1, 1)
 theme_override_fonts/font = ExtResource("10_j4s1w")
 text = "Add Video"
+flat = true
+alignment = 0
+
+[node name="VideoRemove" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.768627, 1, 1, 1)
+theme_override_colors/font_color = Color(0.501961, 1, 1, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Remove Video"
 flat = true
 alignment = 0
 
