@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=29 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -7,13 +7,30 @@
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
 [ext_resource type="StyleBox" uid="uid://bfimbyi3x5h0n" path="res://theme/line_edit_stylebox_normal.tres" id="6_6ryry"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="6_degwo"]
-[ext_resource type="Texture2D" uid="uid://hfxs1uxwtx36" path="res://textures/logo_full_transparent.png" id="7_jyap7"]
+[ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="7_8ivsy"]
 [ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="8_jfynb"]
-[ext_resource type="Theme" uid="uid://birpbaoexunde" path="res://settings_categories_theme.tres" id="8_ygdpt"]
+[ext_resource type="Theme" uid="uid://birpbaoexunde" path="res://theme/settings_categories_theme.tres" id="8_ygdpt"]
+[ext_resource type="Texture2D" uid="uid://8du82a5dxjdk" path="res://skin/jukebox_play.png" id="9_wc4q0"]
+[ext_resource type="Texture2D" uid="uid://bpsvcunhigs6c" path="res://skin/jukebox_skip.png" id="10_i0l4j"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="10_j4s1w"]
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_46e4t"]
-bg_color = Color(1, 1, 1, 0.0627451)
+[sub_resource type="SystemFont" id="SystemFont_lsskb"]
+font_names = PackedStringArray("Ubuntu")
+subpixel_positioning = 0
+
+[sub_resource type="Theme" id="Theme_nlclj"]
+resource_name = "Phoenix"
+default_font = SubResource("SystemFont_lsskb")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_18lcc"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_wksxa"]
+font = ExtResource("8_jfynb")
+font_size = 17
+outline_size = 6
+outline_color = Color(0, 0, 0, 0.501961)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t0m3h"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4xjus"]
 bg_color = Color(0.051971, 0.051971, 0.0519709, 1)
@@ -37,22 +54,46 @@ font_size = 26
 [sub_resource type="LabelSettings" id="LabelSettings_mc5fm"]
 font = ExtResource("10_j4s1w")
 
-[sub_resource type="SystemFont" id="SystemFont_lsskb"]
-font_names = PackedStringArray("Ubuntu")
-subpixel_positioning = 0
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0ne5a"]
 
-[sub_resource type="Theme" id="Theme_nlclj"]
-resource_name = "Phoenix"
-default_font = SubResource("SystemFont_lsskb")
+[sub_resource type="LabelSettings" id="LabelSettings_6ohrb"]
+font_size = 18
+outline_size = 5
+outline_color = Color(0, 0, 0, 0.501961)
 
-[node name="Control" type="Control"]
+[node name="SceneMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 script = ExtResource("1_wfqfe")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+volume_db = -80.0
+
+[node name="ImportDialog" type="FileDialog" parent="."]
+title = "Open File(s)"
+initial_position = 2
+size = Vector2i(454, 175)
+theme = SubResource("Theme_nlclj")
+ok_button_text = "Open"
+file_mode = 1
+access = 2
+use_native_dialog = true
+
+[node name="VideoDialog" type="FileDialog" parent="."]
+auto_translate_mode = 1
+title = "Open a File"
+initial_position = 2
+size = Vector2i(454, 175)
+theme = SubResource("Theme_nlclj")
+ok_button_text = "Open"
+file_mode = 0
+access = 2
+use_native_dialog = true
 
 [node name="Background" type="ColorRect" parent="."]
 z_index = -10
@@ -62,7 +103,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 1)
+mouse_filter = 2
+color = Color(0.0235294, 0.0196078, 0.0352941, 1)
 
 [node name="Multiplayer" type="Panel" parent="."]
 visible = false
@@ -167,7 +209,16 @@ offset_top = 4.0
 offset_right = -4.0
 offset_bottom = 64.0
 theme = ExtResource("2_46xtp")
-theme_override_styles/panel = SubResource("StyleBoxFlat_46e4t")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+
+[node name="Background" type="ColorRect" parent="TopBar"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.0313726)
 
 [node name="Import" type="Button" parent="TopBar"]
 layout_mode = 1
@@ -236,11 +287,691 @@ caret_blink = true
 layout_mode = 0
 offset_left = 6.0
 offset_top = 6.0
-offset_right = 134.0
+offset_right = 54.0
 offset_bottom = 54.0
-texture = ExtResource("7_jyap7")
+texture = ExtResource("7_8ivsy")
 expand_mode = 2
 stretch_mode = 5
+
+[node name="Jukebox" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -64.0
+offset_right = -4.0
+offset_bottom = -4.0
+theme = ExtResource("2_46xtp")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+
+[node name="Background" type="ColorRect" parent="Jukebox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.0313726)
+
+[node name="Spectrum" type="HBoxContainer" parent="Jukebox"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="1" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/1"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="2" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/2"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="3" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/3"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="4" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/4"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="5" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/5"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="6" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/6"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="7" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/7"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="8" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/8"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="9" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/9"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="10" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/10"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="11" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/11"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="12" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/12"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="13" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/13"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="14" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/14"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="15" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/15"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="16" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/16"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="17" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/17"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="18" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/18"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="19" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/19"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="20" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/20"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="21" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/21"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="22" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/22"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="23" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/23"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="24" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/24"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="25" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/25"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="26" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/26"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="27" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/27"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="28" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/28"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="29" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/29"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="30" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/30"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="31" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/31"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="32" type="Panel" parent="Jukebox/Spectrum"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
+mouse_filter = 2
+
+[node name="Main" type="ColorRect" parent="Jukebox/Spectrum/32"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
+
+[node name="Title" type="Label" parent="Jukebox"]
+modulate = Color(0.762404, 0.762404, 0.762404, 1)
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = -10.0
+offset_right = -60.0
+offset_bottom = 11.0
+theme = ExtResource("2_46xtp")
+label_settings = SubResource("LabelSettings_wksxa")
+horizontal_alignment = 2
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Button" type="Button" parent="Jukebox"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_top = -10.0
+offset_right = -60.0
+offset_bottom = 11.0
+focus_mode = 0
+flat = true
+text_overrun_behavior = 3
+
+[node name="Pause" type="TextureButton" parent="Jukebox"]
+self_modulate = Color(0.760784, 0.760784, 0.760784, 1)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -17.0
+offset_top = 13.0
+offset_right = 17.0
+offset_bottom = -13.0
+texture_normal = ExtResource("9_wc4q0")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Skip" type="TextureButton" parent="Jukebox"]
+self_modulate = Color(0.760784, 0.760784, 0.760784, 1)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = 20.0
+offset_top = 13.0
+offset_right = 54.0
+offset_bottom = -13.0
+texture_normal = ExtResource("10_i0l4j")
+ignore_texture_size = true
+stretch_mode = 0
+
+[node name="Rewind" type="TextureButton" parent="Jukebox"]
+self_modulate = Color(0.760784, 0.760784, 0.760784, 1)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -54.0
+offset_top = 13.0
+offset_right = -20.0
+offset_bottom = -13.0
+texture_normal = ExtResource("10_i0l4j")
+ignore_texture_size = true
+stretch_mode = 0
+flip_h = true
+
+[node name="Progress" type="Panel" parent="Jukebox"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = -1.0
+offset_right = -64.0
+offset_bottom = 1.0
+mouse_filter = 2
+
+[node name="Background" type="ColorRect" parent="Jukebox/Progress"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Main" type="ColorRect" parent="Jukebox/Progress"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_filter = 2
+color = Color(0.996078, 0.376471, 0, 1)
 
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -263,9 +994,9 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 80.0
+offset_top = 72.0
 offset_right = -8.0
-offset_bottom = -8.0
+offset_bottom = -72.0
 grow_horizontal = 0
 mouse_filter = 2
 theme = ExtResource("2_46xtp")
@@ -277,6 +1008,80 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
 theme = ExtResource("2_46xtp")
+
+[node name="ContextMenu" type="Panel" parent="."]
+visible = false
+layout_mode = 0
+offset_right = 150.0
+offset_bottom = 120.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_t0m3h")
+
+[node name="Background" type="ColorRect" parent="ContextMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.768627)
+
+[node name="Container" type="VBoxContainer" parent="ContextMenu"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 0
+
+[node name="Favorite" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(1, 1, 0.768627, 1)
+theme_override_colors/font_color = Color(1, 1, 0.501961, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Favorite"
+flat = true
+alignment = 0
+
+[node name="Delete" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(1, 0.768627, 0.768627, 1)
+theme_override_colors/font_color = Color(1, 0.501961, 0.501961, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Delete"
+flat = true
+alignment = 0
+
+[node name="VideoAdd" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.768627, 0.768627, 1, 1)
+theme_override_colors/font_color = Color(0.501961, 0.501961, 1, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Add Video"
+flat = true
+alignment = 0
+
+[node name="VideoRemove" type="Button" parent="ContextMenu/Container"]
+custom_minimum_size = Vector2(0, 30)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 0
+theme_override_colors/font_hover_color = Color(0.768627, 1, 1, 1)
+theme_override_colors/font_color = Color(0.501961, 1, 1, 1)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+text = "Remove Video"
+flat = true
+alignment = 0
 
 [node name="Settings" type="ColorRect" parent="."]
 modulate = Color(1, 1, 1, 0)
@@ -373,6 +1178,9 @@ theme = ExtResource("2_46xtp")
 max_value = 3.0
 step = 0.01
 value = 0.66
+allow_greater = true
+allow_lesser = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/Sensitivity"]
 clip_contents = true
@@ -382,10 +1190,12 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "0.66"
 placeholder_text = "0.66"
-max_length = 4
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
@@ -406,6 +1216,37 @@ clip_text = true
 text_overrun_behavior = 3
 
 [node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Gameplay/Container/CameraLock"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+button_pressed = true
+flat = true
+
+[node name="CursorDrift" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "A.K.A. \"Buffer cursor\""
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/CursorDrift"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Drift"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Gameplay/Container/CursorDrift"]
 clip_contents = true
 layout_mode = 1
 anchors_preset = -1
@@ -446,6 +1287,9 @@ min_value = 1.0
 max_value = 60.0
 step = 0.5
 value = 35.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/ApproachRate"]
 clip_contents = true
@@ -455,10 +1299,12 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "35"
 placeholder_text = "35"
-max_length = 4
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
@@ -490,6 +1336,9 @@ min_value = 1.0
 max_value = 60.0
 step = 0.5
 value = 16.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/ApproachDistance"]
 clip_contents = true
@@ -499,10 +1348,12 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "16"
 placeholder_text = "16"
-max_length = 4
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
@@ -531,6 +1382,7 @@ anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
 rounded = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/FadeIn"]
 clip_contents = true
@@ -540,17 +1392,19 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "0"
 placeholder_text = "0"
-max_length = 3
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
 [node name="FadeOut" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
-tooltip_text = "A.K.A. Half-ghost"
+tooltip_text = "A.K.A. \"Half-ghost\""
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
 [node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/FadeOut"]
@@ -634,6 +1488,9 @@ theme = ExtResource("2_46xtp")
 max_value = 1.0
 step = 0.025
 value = 1.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/Parallax"]
 clip_contents = true
@@ -643,10 +1500,12 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "0.1"
 placeholder_text = "0.1"
-max_length = 4
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
@@ -674,9 +1533,11 @@ anchor_left = 0.3
 anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
-min_value = 40.0
+min_value = 30.0
+max_value = 120.0
 value = 70.0
 rounded = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/FoV"]
 clip_contents = true
@@ -686,12 +1547,399 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "70"
 placeholder_text = "70"
-max_length = 3
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
+
+[node name="Visuals" type="ScrollContainer" parent="Settings/Holder/Categories"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Visuals"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="Skin" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Skin"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="OptionsButton" type="OptionButton" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_bottom = -4.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 1
+popup/item_0/text = "default"
+
+[node name="SkinFolder" type="Button" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.575
+anchor_right = 0.8
+anchor_bottom = 1.0
+offset_top = 4.0
+offset_bottom = -4.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Skin Folder"
+
+[node name="Colors" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Hexadecimal format only, separated by a comma"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/Colors"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Colors"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/Colors"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "00ffed,ff8ff9"
+placeholder_text = "00ffed,ff8ff9"
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="NoteSize" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "This does not affect the hit box size"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Note Size"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 2.0
+step = 0.025
+value = 0.875
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0.875"
+placeholder_text = "0.875"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="CursorScale" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Scale"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 4.0
+step = 0.025
+value = 1.0
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "1"
+placeholder_text = "1"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="CursorTrail" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Does not apply in menu"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/CursorTrail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Trail"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Visuals/Container/CursorTrail"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+flat = true
+
+[node name="TrailTime" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Trail Time"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 1.0
+step = 0.01
+value = 0.05
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0.05"
+placeholder_text = "0.05"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="TrailDetail" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Not yet implemented"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Trail Detail"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+max_value = 10.0
+step = 0.05
+value = 1.0
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "1"
+placeholder_text = "1"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="VideoDim" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/VideoDim"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Video Dim"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/VideoDim"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+value = 80.0
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/VideoDim"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "80"
+placeholder_text = "80"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="SimpleHUD" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Only shows misses"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/SimpleHUD"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Simple HUD"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Visuals/Container/SimpleHUD"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+flat = true
 
 [node name="Video" type="ScrollContainer" parent="Settings/Holder/Categories"]
 visible = false
@@ -711,6 +1959,7 @@ theme_override_constants/separation = 2
 [node name="Fullscreen" type="Panel" parent="Settings/Holder/Categories/Video/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+tooltip_text = "F11 or ALT + ENTER"
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
 [node name="Label" type="Label" parent="Settings/Holder/Categories/Video/Container/Fullscreen"]
@@ -718,7 +1967,6 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.3
 anchor_bottom = 1.0
-tooltip_text = "F11 or ALT + ENTER"
 text = "Fullscreen"
 label_settings = SubResource("LabelSettings_15nul")
 vertical_alignment = 1
@@ -776,8 +2024,9 @@ anchor_left = 0.3
 anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
-value = 100.0
-rounded = true
+value = 50.0
+allow_greater = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeMaster"]
 clip_contents = true
@@ -787,10 +2036,12 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
-text = "100"
-placeholder_text = "100"
-max_length = 3
+text = "50"
+placeholder_text = "50"
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
@@ -818,7 +2069,8 @@ anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
 value = 50.0
-rounded = true
+allow_greater = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeMusic"]
 clip_contents = true
@@ -828,10 +2080,12 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "50"
 placeholder_text = "50"
-max_length = 3
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
@@ -859,7 +2113,8 @@ anchor_right = 0.9
 anchor_bottom = 1.0
 theme = ExtResource("2_46xtp")
 value = 50.0
-rounded = true
+allow_greater = true
+scrollable = false
 
 [node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeSFX"]
 clip_contents = true
@@ -869,14 +2124,75 @@ anchor_left = 0.9
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "50"
 placeholder_text = "50"
-max_length = 3
+max_length = 16
+context_menu_enabled = false
 flat = true
 caret_blink = true
 
-[node name="Skin" type="ScrollContainer" parent="Settings/Holder/Categories"]
+[node name="AlwaysPlayHitSound" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/AlwaysPlayHitSound"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Always Play Hit Sound"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Audio/Container/AlwaysPlayHitSound"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+flat = true
+
+[node name="AutoplayJukebox" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/AutoplayJukebox"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Autoplay Jukebox"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Audio/Container/AutoplayJukebox"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+button_pressed = true
+flat = true
+
+[node name="Other" type="ScrollContainer" parent="Settings/Holder/Categories"]
 visible = false
 layout_mode = 1
 anchors_preset = 15
@@ -885,107 +2201,42 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Skin"]
+[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Other"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 theme_override_constants/separation = 2
 
-[node name="Skin" type="Panel" parent="Settings/Holder/Categories/Skin/Container"]
+[node name="RhythiaImport" type="Panel" parent="Settings/Holder/Categories/Other/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
 
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Skin/Container/Skin"]
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Other/Container/RhythiaImport"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.3
 anchor_bottom = 1.0
-text = "Skin"
+text = "Rhythia Settings Import"
 label_settings = SubResource("LabelSettings_15nul")
 vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="OptionsButton" type="OptionButton" parent="Settings/Holder/Categories/Skin/Container/Skin"]
-clip_contents = true
+[node name="Button" type="Button" parent="Settings/Holder/Categories/Other/Container/RhythiaImport"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.8
+anchor_left = 0.7
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
 offset_top = 4.0
+offset_right = -4.0
 offset_bottom = -4.0
-grow_vertical = 2
+grow_horizontal = 0
 focus_mode = 0
 theme = ExtResource("2_46xtp")
-alignment = 1
-selected = 0
-fit_to_longest_item = false
-item_count = 1
-popup/item_0/text = "default"
-
-[node name="NoteSize" type="Panel" parent="Settings/Holder/Categories/Skin/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Default: 0.875"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Skin/Container/NoteSize"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-tooltip_text = "Visual only"
-text = "Note Size"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Skin/Container/NoteSize"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 2.0
-step = 0.025
-value = 0.875
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Skin/Container/NoteSize"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-theme_override_font_sizes/font_size = 16
-text = "0.875"
-placeholder_text = "700.875"
-max_length = 5
-flat = true
-caret_blink = true
-
-[node name="Colors" type="Panel" parent="Settings/Holder/Categories/Skin/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Not supported yet - Edit your settings profile in AppData/Roaming/Phoenyx/profiles/xxxx.json"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Skin/Container/Colors"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Colors"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "1-Click Import"
 
 [node name="Sidebar" type="ScrollContainer" parent="Settings/Holder"]
 layout_mode = 1
@@ -1014,6 +2265,21 @@ offset_bottom = 50.0
 focus_mode = 0
 theme = ExtResource("8_ygdpt")
 text = "  GAMEPLAY"
+alignment = 0
+
+[node name="Visuals" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 50.0
+focus_mode = 0
+theme = ExtResource("8_ygdpt")
+text = "  VISUALS"
 alignment = 0
 
 [node name="Video" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
@@ -1046,19 +2312,19 @@ theme = ExtResource("8_ygdpt")
 text = "  AUDIO"
 alignment = 0
 
-[node name="Skin" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
+[node name="Other" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
 custom_minimum_size = Vector2(0, 50)
 layout_mode = 2
 color = Color(1, 1, 1, 0)
 
-[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Skin"]
+[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Other"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 offset_bottom = 50.0
 focus_mode = 0
 theme = ExtResource("8_ygdpt")
-text = "  SKIN"
+text = "  OTHER"
 alignment = 0
 
 [node name="Header" type="Panel" parent="Settings/Holder"]
@@ -1116,15 +2382,56 @@ fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "default"
 
-[node name="FileDialog" type="FileDialog" parent="."]
-title = "Open File(s)"
-initial_position = 2
-size = Vector2i(454, 175)
-theme = SubResource("Theme_nlclj")
-ok_button_text = "Open"
-file_mode = 1
-access = 2
-use_native_dialog = true
+[node name="Volume" type="Panel" parent="."]
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -128.0
+offset_top = -38.0
+offset_right = 128.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_0ne5a")
+
+[node name="Label" type="Label" parent="Volume"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 2.0
+offset_top = -14.0
+grow_horizontal = 2
+grow_vertical = 0
+text = "100"
+label_settings = SubResource("LabelSettings_6ohrb")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Background" type="ColorRect" parent="Volume"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -2.0
+offset_top = -2.0
+offset_right = 2.0
+offset_bottom = 2.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.768627)
+
+[node name="Main" type="ColorRect" parent="Volume"]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+grow_vertical = 2
+mouse_filter = 2
 
 [node name="Cursor" type="TextureRect" parent="."]
 layout_mode = 0
@@ -1134,4 +2441,16 @@ mouse_filter = 2
 texture = ExtResource("6_degwo")
 expand_mode = 1
 
-[connection signal="file_selected" from="FileDialog" to="." method="_on_file_dialog_file_selected"]
+[node name="Transition" type="ColorRect" parent="."]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[connection signal="file_selected" from="ImportDialog" to="." method="_on_file_dialog_file_selected"]
+[connection signal="file_selected" from="VideoDialog" to="." method="_on_file_dialog_file_selected"]

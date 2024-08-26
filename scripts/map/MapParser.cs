@@ -98,6 +98,8 @@ public partial class MapParser : Node
 		objects.Store32(0);	// ar factor count
 		objects.Store32(0);	// text count
 
+		objects.Close();
+
 		if (map.AudioBuffer != null)
 		{
 			Godot.FileAccess audio = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/audio.{map.AudioExt}", Godot.FileAccess.ModeFlags.Write);
@@ -112,7 +114,12 @@ public partial class MapParser : Node
 			cover.Close();
 		}
 
-		objects.Close();
+		if (map.VideoBuffer != null)
+		{
+			Godot.FileAccess video = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/video.mp4", Godot.FileAccess.ModeFlags.Write);
+			video.StoreBuffer(map.VideoBuffer);
+			video.Close();
+		}
 
 		ZipFile.CreateFromDirectory($"{Constants.UserFolder}/cache/phxmencode", $"{Constants.UserFolder}/maps/{map.ID}.phxm", CompressionLevel.NoCompression, false);
 
@@ -125,7 +132,7 @@ public partial class MapParser : Node
 
 		if (logBenchmark)
 		{
-			Logger.Log($"Encoding PHXM: {(Time.GetTicksUsec() - start) / 1000}ms");
+			Logger.Log($"ENCODING PHXM: {(Time.GetTicksUsec() - start) / 1000}ms");
 		}
 	}
 
@@ -159,7 +166,7 @@ public partial class MapParser : Node
 
 		if (logBenchmark)
 		{
-			Logger.Log($"Decoding {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
+			Logger.Log($"DECODING {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
 		}
 
 		if (!File.Exists($"{Constants.UserFolder}/maps/{map.ID}.phxm"))
@@ -173,7 +180,7 @@ public partial class MapParser : Node
 	public static Map SSMapV1(string path)
 	{
 		string[] pathSplit = path.Split("\\");
-		string name = pathSplit[pathSplit.Length - 1].Replace(".txt", "");
+		string name = pathSplit[^1].Replace(".txt", "");
 		Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
 		Map map;
 
@@ -190,7 +197,7 @@ public partial class MapParser : Node
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
 
-			map = new(notes, name);
+			map = new(path, notes, name);
 		}
 		catch (Exception exception)
 		{
@@ -207,7 +214,7 @@ public partial class MapParser : Node
 	{
 		FileParser file = new(path);
 		Map map;
-
+		
 		try
 		{
 			if (file.GetString(4) != "SS+m")
@@ -356,12 +363,12 @@ public partial class MapParser : Node
 				notes[i].Index = i;
 			}
 			
-			map = new Map(notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
+			map = new Map(path, notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{
 			ToastNotification.Notify($"SSPMV2 file corrupted", 2);
-			throw Logger.Error($"SSPMV2 file corrupted; {exception.Message}");
+			throw Logger.Error($"SSPMV2 file {path} corrupted; {exception.Message}");
 		}
 
 		return map;
@@ -386,11 +393,12 @@ public partial class MapParser : Node
 			ZipArchive file = ZipFile.OpenRead(path);
 			Stream metaStream = file.GetEntry("metadata.json").Open();
 			Stream objectsStream = file.GetEntry("objects.phxmo").Open();
-
+			
 			byte[] metaBuffer = new byte[metaStream.Length];
 			byte[] objectsBuffer = new byte[objectsStream.Length];
 			byte[] audioBuffer = null;
 			byte[] coverBuffer = null;
+			byte[] videoBuffer = null;
 			metaStream.Read(metaBuffer, 0, (int)metaStream.Length);
 			objectsStream.Read(objectsBuffer, 0, (int)objectsStream.Length);
 			metaStream.Close();
@@ -409,10 +417,18 @@ public partial class MapParser : Node
 
 			if ((bool)metadata["HasCover"])
 			{
-				Stream coverStream = file.GetEntry($"cover.png").Open();
+				Stream coverStream = file.GetEntry("cover.png").Open();
 				coverBuffer = new byte[coverStream.Length];
 				coverStream.Read(coverBuffer, 0, (int)coverStream.Length);
 				coverStream.Close();
+			}
+
+			if ((bool)metadata["HasVideo"])
+			{
+				Stream videoStream = file.GetEntry("video.mp4").Open();
+				videoBuffer = new byte[videoStream.Length];
+				videoStream.Read(videoBuffer, 0, (int)videoStream.Length);
+				videoStream.Close();
 			}
 
 			uint typeCount = objects.GetUInt32();
@@ -440,8 +456,10 @@ public partial class MapParser : Node
 				
 				notes[i] = new(i, ms, x, y);
 			}
+
+			file.Dispose();
 			
-			map = new(notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer);
+			map = new(path, notes, (string)metadata["ID"], (string)metadata["Artist"], (string)metadata["Title"], 0, (string[])metadata["Mappers"], (int)metadata["Difficulty"], (string)metadata["DifficultyName"], (int)metadata["Length"], audioBuffer, coverBuffer, videoBuffer);
 		}
 		catch (Exception exception)
 		{

@@ -42,18 +42,7 @@ bg_color = Color(0, 0, 0, 1)
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_otipb"]
 bg_color = Color(0.0470588, 0.0470588, 0.0470588, 1)
 
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aqmem"]
-bg_color = Color(0.0383972, 0.0383972, 0.0383972, 0.768627)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(1, 1, 1, 0.0627451)
-border_blend = true
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jpkpw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uonmj"]
 bg_color = Color(1, 1, 1, 0)
@@ -90,7 +79,7 @@ OptionButton/font_sizes/font_size = 14
 OptionButton/styles/hover = SubResource("StyleBoxFlat_jo0jq")
 OptionButton/styles/normal = SubResource("StyleBoxFlat_4ml12")
 OptionButton/styles/pressed = SubResource("StyleBoxFlat_otipb")
-Panel/styles/panel = SubResource("StyleBoxFlat_aqmem")
+Panel/styles/panel = SubResource("StyleBoxEmpty_jpkpw")
 VBoxContainer/constants/separation = 10
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_uonmj")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_aekky")
