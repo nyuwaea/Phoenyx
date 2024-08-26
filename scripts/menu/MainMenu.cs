@@ -97,6 +97,13 @@ public partial class MainMenu : Control
 			viewport.Connect("files_dropped", Callable.From((string[] files) => {
 				MapParser.Import(files);
 				UpdateMapList();
+				Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm"));
+				
+				if (!mapButton.Name.ToString().Contains(Search))
+				{
+					mapButton.Visible = false;
+					VisibleMaps--;
+				}
 			}));
 		}
 
@@ -325,6 +332,12 @@ public partial class MainMenu : Control
 		ContextMenu.GetNode("Container").GetNode<Button>("Delete").Pressed += () => {
 			ContextMenu.Visible = false;
 			MapListContainer.GetNode(ContextMenuTarget).QueueFree();
+			LoadedMaps.Remove(ContextMenuTarget);
+			
+			if (ContextMenuTarget.Contains(Search))
+			{
+				VisibleMaps--;
+			}
 
 			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
 			
@@ -945,6 +958,11 @@ public partial class MainMenu : Control
 				
 				if (mapFile.GetExtension() != "phxm" || LoadedMaps.Contains(fileName))
 				{
+					if (favorited)
+					{
+						FavoritedMaps.Add(fileName);
+					}
+
 					continue;
 				}
 

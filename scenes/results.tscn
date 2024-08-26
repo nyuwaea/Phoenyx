@@ -1,4 +1,4 @@
-[gd_scene load_steps=26 format=3 uid="uid://bhcvypmhm5rke"]
+[gd_scene load_steps=27 format=3 uid="uid://bhcvypmhm5rke"]
 
 [ext_resource type="Script" path="res://scripts/menu/Results.cs" id="1_llpx6"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_dgnpu"]
@@ -8,6 +8,7 @@
 [ext_resource type="Shader" path="res://scripts/shaders/canvas_blur.gdshader" id="2_vg5t8"]
 [ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="3_rsbg1"]
 [ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="3_vdcg2"]
+[ext_resource type="Script" path="res://scripts/menu/Graph.cs" id="4_b55ol"]
 [ext_resource type="FontFile" uid="uid://dvb6fvy008bhv" path="res://fonts/Roboto-Medium.ttf" id="4_yxv8s"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_k33hc"]
@@ -15,11 +16,6 @@ shader = ExtResource("2_vg5t8")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rn6l"]
 shader = ExtResource("2_oatel")
-
-[sub_resource type="LabelSettings" id="LabelSettings_6anxq"]
-font = ExtResource("3_rsbg1")
-font_size = 11
-font_color = Color(0.627451, 0.627451, 0.627451, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wqycr"]
 
@@ -55,6 +51,11 @@ font_color = Color(0.627451, 0.627451, 0.627451, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_yaaow"]
 font = ExtResource("2_f4qdi")
 font_size = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_6anxq"]
+font = ExtResource("3_rsbg1")
+font_size = 11
+font_color = Color(0.627451, 0.627451, 0.627451, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ttaov"]
 
@@ -106,40 +107,6 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 expand_mode = 1
 stretch_mode = 5
-
-[node name="Graph" type="ColorRect" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 1.0
-anchor_right = 0.6
-anchor_bottom = 1.0
-offset_left = 32.0
-offset_top = -256.0
-offset_bottom = -96.0
-color = Color(1, 1, 1, 0.0313726)
-
-[node name="OffsetTop" type="Label" parent="Graph"]
-layout_mode = 1
-anchors_preset = -1
-offset_left = -32.0
-grow_horizontal = 0
-text = "0ms"
-label_settings = SubResource("LabelSettings_6anxq")
-horizontal_alignment = 2
-vertical_alignment = 1
-
-[node name="OffsetBottom" type="Label" parent="Graph"]
-layout_mode = 1
-anchors_preset = -1
-anchor_top = 1.0
-anchor_bottom = 1.0
-offset_left = -32.0
-grow_horizontal = 0
-grow_vertical = 0
-text = "55ms"
-label_settings = SubResource("LabelSettings_6anxq")
-horizontal_alignment = 2
-vertical_alignment = 1
 
 [node name="Holder" type="Panel" parent="."]
 layout_mode = 1
@@ -253,6 +220,41 @@ label_settings = SubResource("LabelSettings_yaaow")
 horizontal_alignment = 2
 vertical_alignment = 1
 text_overrun_behavior = 3
+
+[node name="Graph" type="ColorRect" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 0.6
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -256.0
+offset_bottom = -96.0
+color = Color(1, 1, 1, 0.0313726)
+script = ExtResource("4_b55ol")
+
+[node name="OffsetTop" type="Label" parent="Holder/Graph"]
+layout_mode = 1
+anchors_preset = -1
+offset_left = -32.0
+grow_horizontal = 0
+text = "0ms"
+label_settings = SubResource("LabelSettings_6anxq")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="OffsetBottom" type="Label" parent="Holder/Graph"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = -32.0
+grow_horizontal = 0
+grow_vertical = 0
+text = "55ms"
+label_settings = SubResource("LabelSettings_6anxq")
+horizontal_alignment = 2
+vertical_alignment = 1
 
 [node name="TopBar" type="Panel" parent="."]
 layout_mode = 1

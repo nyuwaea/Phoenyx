@@ -132,7 +132,7 @@ public partial class MapParser : Node
 
 		if (logBenchmark)
 		{
-			Logger.Log($"Encoding PHXM: {(Time.GetTicksUsec() - start) / 1000}ms");
+			Logger.Log($"ENCODING PHXM: {(Time.GetTicksUsec() - start) / 1000}ms");
 		}
 	}
 
@@ -166,7 +166,7 @@ public partial class MapParser : Node
 
 		if (logBenchmark)
 		{
-			Logger.Log($"Decoding {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
+			Logger.Log($"DECODING {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
 		}
 
 		if (!File.Exists($"{Constants.UserFolder}/maps/{map.ID}.phxm"))

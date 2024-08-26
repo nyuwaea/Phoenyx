@@ -1,20 +1,16 @@
 using Godot;
 using Phoenyx;
 using System;
-using System.Collections.Generic;
 
 public partial class Results : Control
 {
 	private static Control Control;
-	private static readonly PackedScene GraphMissTemplate = GD.Load<PackedScene>("res://prefabs/graph_miss.tscn");
-	private static readonly PackedScene GraphHitTemplate = GD.Load<PackedScene>("res://prefabs/graph_hit.tscn");
 
 	private static TextureRect Cursor;
 	private static Panel TopBar;
 	private static Panel Footer;
 	private static Panel Holder;
 	private static TextureRect Cover;
-	private static ColorRect Graph;
 
 	public static double LastFrame = 0;
 	public static Vector2 MousePosition = Vector2.Zero;
@@ -28,7 +24,6 @@ public partial class Results : Control
 		Footer = GetNode<Panel>("Footer");
 		Holder = GetNode<Panel>("Holder");
 		Cover = GetNode<TextureRect>("Cover");
-		Graph = GetNode<ColorRect>("Graph");
 
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Mailbox);
@@ -52,24 +47,6 @@ public partial class Results : Control
 
 			Cover.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/cache/cover.png"));
 			GetNode<TextureRect>("CoverBackground").Texture = Cover.Texture;
-		}
-
-		foreach (int miss in Runner.CurrentAttempt.MissesInfo)
-		{
-			ColorRect graphMiss = GraphMissTemplate.Instantiate<ColorRect>();
-			Graph.AddChild(graphMiss);
-			graphMiss.AnchorLeft = miss / (float)Runner.CurrentAttempt.Map.Length;
-			graphMiss.AnchorRight = graphMiss.AnchorLeft;
-		}
-		
-		foreach (Dictionary<string, int> hit in Runner.CurrentAttempt.HitsInfo)
-		{
-			ColorRect graphHit = GraphHitTemplate.Instantiate<ColorRect>();
-			Graph.AddChild(graphHit);
-			graphHit.AnchorLeft = hit["Time"] / (float)Runner.CurrentAttempt.Map.Length;
-			graphHit.AnchorRight = graphHit.AnchorLeft;
-			graphHit.AnchorTop = hit["Offset"] / 55f;
-			graphHit.AnchorBottom = graphHit.AnchorTop;
 		}
 
 		Footer.GetNode<Button>("Back").Pressed += () => {
