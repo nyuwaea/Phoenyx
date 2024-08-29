@@ -53,7 +53,7 @@ public partial class Runner : Node3D
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
-	public static List<Note> ProcessNotes;
+	public static List<Note> ProcessNotes = new();
 	public static Attempt CurrentAttempt;
 	public static double MapLength;
 
@@ -630,7 +630,7 @@ public partial class Runner : Node3D
 	{
 		CurrentAttempt = new Attempt(map, speed, mods, players);
 		Playing = true;
-		ProcessNotes = null;
+		ProcessNotes = [];
 	}
 
 	public static void Skip()

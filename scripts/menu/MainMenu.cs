@@ -97,7 +97,7 @@ public partial class MainMenu : Control
 			viewport.Connect("files_dropped", Callable.From((string[] files) => {
 				MapParser.Import(files);
 				UpdateMapList();
-				Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm"));
+				Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm").TrimSuffix(".sspm").TrimSuffix(".txt"));
 				
 				if (!mapButton.Name.ToString().Contains(Search))
 				{
@@ -503,7 +503,6 @@ public partial class MainMenu : Control
 		ulong now = Time.GetTicksUsec();
         delta = (now - LastFrame) / 1000000;
 		LastFrame = now;
-
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
 		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
@@ -912,7 +911,8 @@ public partial class MainMenu : Control
 								}
 
 								Phoenyx.Skin.Colors = split;
-								Phoenyx.Skin.RawColors = text.TrimPrefix("#").Replace(" ", "");
+								Phoenyx.Skin.RawColors = text.TrimPrefix("#").Replace(" ", "").Replace("\n", ",");
+
 								break;
 						}
 

@@ -152,22 +152,22 @@ texture_repeat = false
 
 [sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
 font = ExtResource("5_pxgh4")
-font_size = 160
+font_size = 50
 
 [sub_resource type="LabelSettings" id="LabelSettings_5bid2"]
-font_size = 96
+font_size = 30
 font_color = Color(1, 1, 1, 0.627451)
 
 [sub_resource type="LabelSettings" id="LabelSettings_4qhw1"]
-font_size = 96
+font_size = 30
 font_color = Color(1, 1, 1, 0.627451)
 
 [sub_resource type="LabelSettings" id="LabelSettings_g4ffu"]
-font_size = 160
+font_size = 50
 font_color = Color(1, 1, 1, 0.768627)
 
 [sub_resource type="LabelSettings" id="LabelSettings_s1j5a"]
-font_size = 160
+font_size = 50
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t86sn"]
 
@@ -290,7 +290,7 @@ expand = true
 process_mode = 3
 disable_3d = true
 transparent_bg = true
-size = Vector2i(800, 2000)
+size = Vector2i(250, 625)
 
 [node name="Background" type="TextureRect" parent="PanelRightViewport"]
 anchors_preset = 15
@@ -301,15 +301,12 @@ grow_vertical = 2
 texture = ExtResource("12_whe6p")
 
 [node name="Accuracy" type="Label" parent="PanelRightViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -247.0
-offset_top = -300.0
-offset_right = 247.0
-offset_bottom = -149.0
+offset_bottom = -150.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
@@ -318,16 +315,13 @@ label_settings = SubResource("LabelSettings_usmyc")
 horizontal_alignment = 1
 
 [node name="Hits" type="Label" parent="PanelRightViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -555.0
-offset_top = 96.0
-offset_right = -90.0
-offset_bottom = 247.0
-grow_horizontal = 2
+offset_right = -26.0
+grow_horizontal = 0
 grow_vertical = 2
 size_flags_horizontal = 4
 theme = ExtResource("4_rvp5o")
@@ -336,16 +330,12 @@ label_settings = SubResource("LabelSettings_5bid2")
 horizontal_alignment = 2
 
 [node name="Misses" type="Label" parent="PanelRightViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 91.0
-offset_top = 96.0
-offset_right = 556.0
-offset_bottom = 247.0
-grow_horizontal = 2
+offset_left = 26.0
 grow_vertical = 2
 size_flags_horizontal = 4
 theme = ExtResource("4_rvp5o")
@@ -367,15 +357,12 @@ text = "0"
 label_settings = SubResource("LabelSettings_g4ffu")
 
 [node name="Sum" type="Label" parent="PanelRightViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -236.0
-offset_top = 230.0
-offset_right = 229.0
-offset_bottom = 381.0
+offset_top = 100.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -385,53 +372,50 @@ label_settings = SubResource("LabelSettings_s1j5a")
 horizontal_alignment = 1
 
 [node name="HitsIcon" type="TextureRect" parent="PanelRightViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -74.0
-offset_top = 120.0
-offset_right = -10.0
-offset_bottom = 184.0
-grow_horizontal = 2
+offset_top = -10.0
+offset_right = -2.0
+offset_bottom = 10.0
+grow_horizontal = 0
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
 texture = ExtResource("13_6rhgc")
 expand_mode = 2
 
 [node name="MissesIcon" type="TextureRect" parent="PanelRightViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = 10.0
-offset_top = 120.0
-offset_right = 74.0
-offset_bottom = 184.0
-grow_horizontal = 2
+offset_left = 2.0
+offset_top = -10.0
+offset_bottom = 10.0
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
 texture = ExtResource("14_bqf11")
 expand_mode = 2
 
 [node name="Line" type="ColorRect" parent="PanelRightViewport"]
-anchors_preset = 14
+anchors_preset = -1
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
-offset_left = 100.0
-offset_top = 218.0
-offset_right = -100.0
-offset_bottom = 222.0
+offset_left = 16.0
+offset_top = 20.0
+offset_right = -16.0
+offset_bottom = 21.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="PanelLeftViewport" type="SubViewport" parent="."]
 disable_3d = true
 transparent_bg = true
-size = Vector2i(800, 2000)
+size = Vector2i(250, 625)
 
 [node name="Background" type="TextureRect" parent="PanelLeftViewport"]
 anchors_preset = 15
@@ -442,15 +426,12 @@ grow_vertical = 2
 texture = ExtResource("11_sdncv")
 
 [node name="Score" type="Label" parent="PanelLeftViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -247.0
-offset_top = -300.0
-offset_right = 247.0
-offset_bottom = -149.0
+offset_bottom = -150.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
@@ -459,15 +440,12 @@ label_settings = SubResource("LabelSettings_usmyc")
 horizontal_alignment = 1
 
 [node name="Multiplier" type="Label" parent="PanelLeftViewport"]
-anchors_preset = 8
+anchors_preset = -1
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -247.0
 offset_top = 100.0
-offset_right = 247.0
-offset_bottom = 289.0
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
@@ -529,7 +507,7 @@ offset_top = -23.0
 offset_right = 51.0
 grow_vertical = 0
 theme = ExtResource("4_rvp5o")
-text = "60 FPS"
+text = "0 FPS"
 
 [node name="NotificationHolder" type="VBoxContainer" parent="."]
 anchors_preset = 3

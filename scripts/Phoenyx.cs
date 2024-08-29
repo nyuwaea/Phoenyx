@@ -1,9 +1,11 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Godot;
 using Godot.Collections;
+using Microsoft.Win32;
 
 namespace Phoenyx;
 
@@ -254,8 +256,8 @@ public struct Skin
 public class Util
 {
     private static bool Initialized = false;
-    private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "note.obj", "hit.mp3", "fail.mp3", "colors.txt"};
+    private static string[] UserDirectories = ["maps", "profiles", "skins", "replays"];
+    private static string[] SkinFiles = ["cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "hit.mp3", "fail.mp3", "colors.txt"];
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -283,11 +285,10 @@ public class Util
 
         DiscordRPC.Call("Set", "app_id", 1272588732834254878);
 		DiscordRPC.Call("Set", "large_image", "short");
-
+        
         if (!File.Exists($"{Constants.UserFolder}/favorites.txt"))
         {
-            FileStream file = File.Create($"{Constants.UserFolder}/favorites.txt");
-            file.Close();
+            File.WriteAllText($"{Constants.UserFolder}/favorites.txt", "");
         }
 
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))
