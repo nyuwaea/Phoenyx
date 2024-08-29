@@ -69,7 +69,6 @@ public partial class MainMenu : Control
 	public override void _Ready()
 	{
 		Control = this;
-		SceneManager.Scene = this;
 	
 		Util.Setup();
 
@@ -495,7 +494,7 @@ public partial class MainMenu : Control
 
 		UpdateSpectrumSpacing();
 
-		Audio.VolumeDb = -80;
+		Audio.VolumeDb = -180;
 	}
 
     public override void _Process(double delta)
@@ -552,7 +551,7 @@ public partial class MainMenu : Control
 					}
 					break;
 				default:
-					if (FocusedLineEdit == null && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter)
+					if (FocusedLineEdit == null && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
 					{
 						SearchEdit.GrabFocus();
 					}

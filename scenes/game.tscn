@@ -301,7 +301,7 @@ grow_vertical = 2
 texture = ExtResource("12_whe6p")
 
 [node name="Accuracy" type="Label" parent="PanelRightViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -315,7 +315,7 @@ label_settings = SubResource("LabelSettings_usmyc")
 horizontal_alignment = 1
 
 [node name="Hits" type="Label" parent="PanelRightViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -330,7 +330,7 @@ label_settings = SubResource("LabelSettings_5bid2")
 horizontal_alignment = 2
 
 [node name="Misses" type="Label" parent="PanelRightViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -357,7 +357,7 @@ text = "0"
 label_settings = SubResource("LabelSettings_g4ffu")
 
 [node name="Sum" type="Label" parent="PanelRightViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -372,7 +372,7 @@ label_settings = SubResource("LabelSettings_s1j5a")
 horizontal_alignment = 1
 
 [node name="HitsIcon" type="TextureRect" parent="PanelRightViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -387,7 +387,7 @@ texture = ExtResource("13_6rhgc")
 expand_mode = 2
 
 [node name="MissesIcon" type="TextureRect" parent="PanelRightViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -401,7 +401,7 @@ texture = ExtResource("14_bqf11")
 expand_mode = 2
 
 [node name="Line" type="ColorRect" parent="PanelRightViewport"]
-anchors_preset = -1
+anchors_preset = 14
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 0.5
@@ -426,7 +426,7 @@ grow_vertical = 2
 texture = ExtResource("11_sdncv")
 
 [node name="Score" type="Label" parent="PanelLeftViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -440,7 +440,7 @@ label_settings = SubResource("LabelSettings_usmyc")
 horizontal_alignment = 1
 
 [node name="Multiplier" type="Label" parent="PanelLeftViewport"]
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
