@@ -60,9 +60,9 @@ public partial class MainMenu : Control
 	private static Vector2 MousePosition = Vector2.Zero;
 	private static bool RightMouseHeld = false;
 	private static bool RightClickingButton = false;
-	private static List<string> LoadedMaps = new();
-	private static List<string> FavoritedMaps = new();
-	private static Dictionary<string, int> OriginalMapOrder = new();
+	private static List<string> LoadedMaps = [];
+	private static List<string> FavoritedMaps = [];
+	private static Dictionary<string, int> OriginalMapOrder = [];
 	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
@@ -85,6 +85,7 @@ public partial class MainMenu : Control
 
 		GetTree().AutoAcceptQuit = false;
 		WindowSize = DisplayServer.WindowGetSize();
+		VisibleMaps = 0;
 		
 		if (!Initialized)
 		{
@@ -121,7 +122,7 @@ public partial class MainMenu : Control
 		Audio = GetNode<AudioStreamPlayer>("AudioStreamPlayer");
 		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
 		ContextMenu = GetNode<Panel>("ContextMenu");
-		LoadedMaps = new();
+		LoadedMaps = [];
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
@@ -951,7 +952,7 @@ public partial class MainMenu : Control
 		double start = Time.GetTicksUsec();
 		int i = 0;
 		List<string> favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList();
-		FavoritedMaps = new();
+		FavoritedMaps = [];
 
 		foreach (string mapFile in Directory.GetFiles($"{Constants.UserFolder}/maps"))
 		{

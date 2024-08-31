@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Godot;
-using Lib;
 using Phoenyx;
 
 public partial class Runner : Node3D
@@ -36,8 +35,6 @@ public partial class Runner : Node3D
 	private static Label ScoreLabel;
 	private static Label MultiplierLabel;
 	private static AudioStreamPlayer Audio;
-	private static AudioStreamPlayer HitSound;
-	private static AudioStreamPlayer FailSound;
 	private static VideoStreamPlayer Video;
 	private static Tween HitTween;
 	private static Tween MissTween;
@@ -60,7 +57,7 @@ public partial class Runner : Node3D
 	public struct Attempt
 	{
 		public double Progress = 0;	// ms
-		public Map Map = new Map();
+		public Map Map = new();
 		public double Speed = 1;
 		public string[] RawMods;
 		public Dictionary<string, bool> Mods;
@@ -145,7 +142,7 @@ public partial class Runner : Node3D
 
 			if (!Settings.AlwaysPlayHitSound)
 			{
-				HitSound.Play();
+				SoundManager.HitSound.Play();
 			}
 
 			HitTween?.Kill();
@@ -177,7 +174,7 @@ public partial class Runner : Node3D
 				if (Alive)
 				{
 					Alive = false;
-					FailSound.Play();
+					SoundManager.FailSound.Play();
 				}
 
 				if (!Mods["NoFail"])
@@ -250,8 +247,6 @@ public partial class Runner : Node3D
 		ScoreLabel = PanelLeft.GetNode<Label>("Score");
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
 		Audio = GetNode<AudioStreamPlayer>("SongPlayer");
-		HitSound = GetNode<AudioStreamPlayer>("HitSoundPlayer");
-		FailSound = GetNode<AudioStreamPlayer>("FailSoundPlayer");
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
 		if (Settings.SimpleHUD)
@@ -298,14 +293,14 @@ public partial class Runner : Node3D
 			PanelRight.GetNode<TextureRect>("HitsIcon").Texture = Phoenyx.Skin.HitsImage;
 			PanelRight.GetNode<TextureRect>("MissesIcon").Texture = Phoenyx.Skin.MissesImage;
 			NotesMultimesh.Multimesh.Mesh = Phoenyx.Skin.NoteMesh;
-			HitSound.Stream = Lib.Audio.LoadStream(Phoenyx.Skin.HitSoundBuffer);
-			FailSound.Stream = Lib.Audio.LoadStream(Phoenyx.Skin.FailSoundBuffer);
 		}
 		catch (Exception exception)
 		{
 			ToastNotification.Notify("Could not load skin", 2);
 			throw Logger.Error($"Could not load skin; {exception.Message}");
 		}
+
+		SoundManager.UpdateSounds();
 
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
@@ -433,7 +428,7 @@ public partial class Runner : Node3D
 			{
 				CurrentAttempt.Map.Notes[i].Hittable = true;
 				
-				HitSound.Play();
+				SoundManager.HitSound.Play();
 			}
 			
 			ToProcess++;
@@ -583,7 +578,7 @@ public partial class Runner : Node3D
 			{
 				case Key.Escape:
 					CurrentAttempt.Alive = false;
-					FailSound.Play();
+					SoundManager.FailSound.Play();
 					QueueStop();
 					break;
 				case Key.Quoteleft:
@@ -673,8 +668,8 @@ public partial class Runner : Node3D
 	public static void UpdateVolume()
 	{
 		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
-		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
-		FailSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		SoundManager.HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		SoundManager.FailSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 	}
 
 	public static void UpdateScore(string player, int score)
