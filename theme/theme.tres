@@ -45,15 +45,19 @@ bg_color = Color(0.0470588, 0.0470588, 0.0470588, 1)
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jpkpw"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uonmj"]
-bg_color = Color(1, 1, 1, 0)
+draw_center = false
 border_width_right = 4
 border_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_aekky"]
-bg_color = Color(1, 1, 1, 1)
+draw_center = false
+border_width_right = 4
+border_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_e2vfl"]
-bg_color = Color(1, 1, 1, 1)
+draw_center = false
+border_width_right = 4
+border_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4vasv"]
 content_margin_left = 6.0

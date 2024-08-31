@@ -1878,7 +1878,7 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.3
 anchor_bottom = 1.0
-text = "Video Dim"
+text = "Video BG Dim"
 label_settings = SubResource("LabelSettings_15nul")
 vertical_alignment = 1
 clip_text = true
@@ -1906,6 +1906,50 @@ mouse_default_cursor_shape = 0
 theme_override_font_sizes/font_size = 16
 text = "80"
 placeholder_text = "80"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="VideoRenderScale" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
+
+[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/VideoRenderScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Video BG Render Scale"
+label_settings = SubResource("LabelSettings_15nul")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/VideoRenderScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("2_46xtp")
+value = 100.0
+rounded = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/VideoRenderScale"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "100"
+placeholder_text = "100"
 max_length = 16
 context_menu_enabled = false
 flat = true

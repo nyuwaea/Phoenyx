@@ -50,6 +50,7 @@ public struct Settings
     public static double TrailDetail {get; set;} = 1;
     public static bool CursorDrift {get; set;} = true;
     public static double VideoDim {get; set;} = 80;
+    public static double VideoRenderScale {get; set;} = 100;
     public static bool SimpleHUD {get; set;} = false;
 
     public static void Save(string profile = null)
@@ -84,6 +85,7 @@ public struct Settings
             ["TrailDetail"] = TrailDetail,
             ["CursorDrift"] = CursorDrift,
             ["VideoDim"] = VideoDim,
+            ["VideoRenderScale"] = VideoRenderScale,
             ["SimpleHUD"] = SimpleHUD
         };
 
@@ -132,6 +134,7 @@ public struct Settings
             TrailDetail = (double)data["TrailDetail"];
             CursorDrift = (bool)data["CursorDrift"];
             VideoDim = (double)data["VideoDim"];
+            VideoRenderScale = (double)data["VideoRenderScale"];
             SimpleHUD = (bool)data["SimpleHUD"];
 
             if (Fullscreen)
@@ -401,7 +404,7 @@ public class Util
             
             for (int i = 0; i < children.Count; i++)
             {   
-                Node childClone = (Node)typeof(Util).GetMethod("Clone", BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(children[i].GetType()).Invoke(null, new object[]{children[i], recursive});
+                Node childClone = (Node)typeof(Util).GetMethod("Clone", BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(children[i].GetType()).Invoke(null, [children[i], recursive]);
 
                 clone.AddChild(childClone);
             }

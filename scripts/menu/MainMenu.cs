@@ -4,9 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Transactions;
 using Godot;
-using Microsoft.VisualBasic.FileIO;
 using Phoenyx;
 
 namespace Menu;
@@ -47,6 +45,7 @@ public partial class MainMenu : Control
 	private static VBoxContainer ChatHolder;
 
 	private static bool Initialized = false;
+	private static bool FirstFrame = true;
 	private static bool Quitting = false;
 	private static Vector2I WindowSize = DisplayServer.WindowGetSize();
 	private static double LastFrame = Time.GetTicksUsec();
@@ -86,6 +85,7 @@ public partial class MainMenu : Control
 		GetTree().AutoAcceptQuit = false;
 		WindowSize = DisplayServer.WindowGetSize();
 		VisibleMaps = 0;
+		FirstFrame = true;
 		
 		if (!Initialized)
 		{
@@ -250,18 +250,6 @@ public partial class MainMenu : Control
 		};
 
 		UpdateMapList();
-
-		if (SelectedMap != null)
-		{
-			Panel selectedMapHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
-			selectedMapHolder.GetNode<Panel>("Normal").Visible = false;
-			selectedMapHolder.GetNode<Panel>("Selected").Visible = true;
-
-			Tween selectTween = selectedMapHolder.CreateTween();
-			selectTween.TweenProperty(selectedMapHolder, "size", new Vector2(MapListContainer.Size.X - 10, selectedMapHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			selectTween.Parallel().TweenProperty(selectedMapHolder, "position", new Vector2(0, selectedMapHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			selectTween.Play();
-		}
 
 		SearchEdit.Text = Search;
 
@@ -510,6 +498,20 @@ public partial class MainMenu : Control
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
 		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
+
+		if (FirstFrame)
+		{
+			FirstFrame = false;
+
+			if (SelectedMap != null)
+			{
+				Panel selectedMapHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+				selectedMapHolder.GetNode<Panel>("Normal").Visible = false;
+				selectedMapHolder.GetNode<Panel>("Selected").Visible = true;
+				selectedMapHolder.Size = new Vector2(MapListContainer.Size.X, selectedMapHolder.Size.Y);
+				selectedMapHolder.Position = new Vector2(0, selectedMapHolder.Position.Y);
+			}
+		}
 		
 		if (Audio.Stream != null)
 		{
@@ -546,7 +548,7 @@ public partial class MainMenu : Control
 			switch (eventKey.Keycode)
 			{
 				case Key.Space:
-					if (SelectedMap != null)
+					if (SelectedMap != null && !SearchEdit.HasFocus())
 					{
 						Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{SelectedMap}.phxm");
 
@@ -782,6 +784,9 @@ public partial class MainMenu : Control
 			case "VideoDim":
 				Settings.VideoDim = (double)value;
 				break;
+			case "VideoRenderScale":
+				Settings.VideoRenderScale = (double)value;
+				break;
 			case "SimpleHUD":
 				Settings.SimpleHUD = (bool)value;
 				break;
@@ -900,7 +905,8 @@ public partial class MainMenu : Control
 						switch (option.Name)
 						{
 							case "Colors":
-								string[] split = text.Split(",");
+								string[] split = text.Replace(" ", "").Replace("\n", ",").Split(",");
+								string raw = "";
 								Color[] colors = new Color[split.Length];
 
 								if (split.Length == 0)
@@ -910,13 +916,18 @@ public partial class MainMenu : Control
 
 								for (int i = 0; i < split.Length; i++)
 								{
-									split[i] = split[i].TrimPrefix("#").Substr(0, 6);
+									split[i] = split[i].TrimPrefix("#").Substr(0, 6).PadRight(6, Convert.ToChar("f"));
 									split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
 									colors[i] = Color.FromHtml(split[i]);
+
+									raw += $"{split[i]},";
 								}
 
+								raw = raw.TrimSuffix(",");
+								lineEdit.Text = raw;
+
 								Phoenyx.Skin.Colors = colors;
-								Phoenyx.Skin.RawColors = text.TrimPrefix("#").Replace(" ", "").Replace("\n", ",");
+								Phoenyx.Skin.RawColors = raw;
 
 								break;
 						}
