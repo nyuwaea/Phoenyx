@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Transactions;
 using Godot;
+using Microsoft.VisualBasic.FileIO;
 using Phoenyx;
 
 namespace Menu;
@@ -826,7 +827,7 @@ public partial class MainMenu : Control
 					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
 
 					slider.Value = (double)property.GetValue(new());
-					lineEdit.Text = slider.Value.ToString();
+					lineEdit.Text = (Math.Floor(slider.Value * 1000) / 1000).ToString();
 
 					if (connections)
 					{
@@ -837,14 +838,12 @@ public partial class MainMenu : Control
 								if (text == "")
 								{
 									text = lineEdit.PlaceholderText;
-									lineEdit.Text = text;
 								}
 
-								double value = text.ToFloat();
-
-								slider.Value = value;
+								slider.Value = text.ToFloat();
+								lineEdit.Text = slider.Value.ToString();
 								
-								ApplySetting(option.Name, value);
+								ApplySetting(option.Name, slider.Value);
 							}
 							catch (Exception exception)
 							{
