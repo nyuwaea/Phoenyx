@@ -33,10 +33,12 @@ public partial class Renderer : MultiMeshInstance3D
             }
             
             int j = Runner.ToProcess - i - 1;
-
+            Color color = Phoenyx.Skin.Colors[note.Index % Phoenyx.Skin.Colors.Length];
+            
             transform.Origin = new Vector3(note.X, note.Y, -depth);
+            color.A = alpha;
             Multimesh.SetInstanceTransform(j, transform);
-            Multimesh.SetInstanceColor(j, Color.FromHtml(Phoenyx.Skin.Colors[note.Index % Phoenyx.Skin.Colors.Length] + ((int)(Math.Clamp(alpha, 0, 1) * 255)).ToString("X2").Substr(0, 2)));
+            Multimesh.SetInstanceColor(j, color);
         }
     }
 }

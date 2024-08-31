@@ -1,11 +1,9 @@
 using System;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using Godot;
 using Godot.Collections;
-using Microsoft.Win32;
 
 namespace Phoenyx;
 
@@ -19,7 +17,7 @@ public struct Constants
     public static double HitBoxSize {get;} = 0.07;
     public static double HitWindow {get;} = 55;
     public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
-    public static string[] Difficulties = new string[6]{"N/A", "Easy", "Medium", "Hard", "Expert", "Insane"};
+    public static string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
     public static Dictionary<string, double> ModsMultipliers = new(){
         ["NoFail"] = 0,
         ["Ghost"] = 0.0675
@@ -166,7 +164,7 @@ public struct Settings
 
 public struct Skin
 {
-    public static string[] Colors {get; set;} = new string[]{"#00ffed", "#ff8ff9"};
+    public static Color[] Colors {get; set;} = [Color.FromHtml("#00ffed"), Color.FromHtml("#ff8ff9")];
     public static string RawColors {get; set;} = "00ffed,ff8ff9";
     public static ImageTexture CursorImage {get; set;} = new();
     public static ImageTexture GridImage {get; set;} = new();
@@ -181,21 +179,12 @@ public struct Skin
     public static ImageTexture JukeboxPauseImage {get; set;} = new();
     public static ImageTexture JukeboxSkipImage {get; set;} = new();
     public static ImageTexture FavoriteImage {get; set;} = new();
-    public static byte[] HitSoundBuffer {get; set;} = System.Array.Empty<byte>();
-    public static byte[] FailSoundBuffer {get; set;} = System.Array.Empty<byte>();
+    public static byte[] HitSoundBuffer {get; set;} = [];
+    public static byte[] FailSoundBuffer {get; set;} = [];
     public static ArrayMesh NoteMesh {get; set;} = new();
 
     public static void Save()
     {
-        string data = "";
-
-        foreach (string color in Colors)
-        {
-            data += color + ",";
-        }
-        
-        RawColors = data.TrimSuffix(",");
-
         File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", RawColors);
     }
 
@@ -204,14 +193,16 @@ public struct Skin
         RawColors = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt").TrimSuffix(",");
 
         string[] split = RawColors.Split(",");
+        Color[] colors = new Color[split.Length];
 
         for (int i = 0; i < split.Length; i++)
         {
             split[i] = split[i].TrimPrefix("#").Substr(0, 6);
             split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
+            colors[i] = Color.FromHtml(split[i]);
         }
-
-        Colors = split;
+        
+        Colors = colors;
         CursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
         GridImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
         HealthImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));

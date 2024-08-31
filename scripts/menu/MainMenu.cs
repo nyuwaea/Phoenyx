@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Transactions;
 using Godot;
 using Microsoft.VisualBasic.FileIO;
@@ -899,18 +900,21 @@ public partial class MainMenu : Control
 						{
 							case "Colors":
 								string[] split = text.Split(",");
-
-								for (int i = 0; i < split.Length; i++)
-								{
-									split[i] = split[i].TrimPrefix("#").Substr(0, 6);
-								}
+								Color[] colors = new Color[split.Length];
 
 								if (split.Length == 0)
 								{
 									split = lineEdit.PlaceholderText.Split(",");
 								}
 
-								Phoenyx.Skin.Colors = split;
+								for (int i = 0; i < split.Length; i++)
+								{
+									split[i] = split[i].TrimPrefix("#").Substr(0, 6);
+									split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
+									colors[i] = Color.FromHtml(split[i]);
+								}
+
+								Phoenyx.Skin.Colors = colors;
 								Phoenyx.Skin.RawColors = text.TrimPrefix("#").Replace(" ", "").Replace("\n", ",");
 
 								break;
