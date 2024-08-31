@@ -270,6 +270,7 @@ public partial class Runner : Node3D
 
 		float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(Settings.FoV / 2)), 2) - Math.Pow(103.75, 2));
 		(VideoQuad.Mesh as QuadMesh).Size = new Vector2(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
+		Video.GetParent<SubViewport>().Size = new Vector2I((int)(1920 * Settings.VideoRenderScale / 100), (int)(1080 * Settings.VideoRenderScale / 100));
 
 		Util.DiscordRPC.Call("Set", "details", "Playing a Map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
@@ -313,7 +314,7 @@ public partial class Runner : Node3D
 			MapLength = CurrentAttempt.Map.Length + 1000;
 		}
 		
-		if (CurrentAttempt.Map.VideoBuffer != null)
+		if (Settings.VideoDim < 100 && CurrentAttempt.Map.VideoBuffer != null)
 		{
 			File.WriteAllBytes($"{Constants.UserFolder}/cache/video.mp4", CurrentAttempt.Map.VideoBuffer);
 
@@ -370,7 +371,7 @@ public partial class Runner : Node3D
 
 		if (CurrentAttempt.Map.VideoBuffer != null)
 		{
-			if (!Video.IsPlaying() && CurrentAttempt.Progress >= 0)
+			if (Settings.VideoDim < 100 && !Video.IsPlaying() && CurrentAttempt.Progress >= 0)
 			{
 				Video.Play();
 				
