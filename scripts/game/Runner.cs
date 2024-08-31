@@ -46,14 +46,14 @@ public partial class Runner : Node3D
 
 	private double LastFrame = Time.GetTicksUsec(); 	// delta arg unreliable..
 	private double LastSecond = Time.GetTicksUsec();	// better framerate calculation
-	private List<Dictionary<string, object>> LastCursorPositions = new();	// trail
+	private List<Dictionary<string, object>> LastCursorPositions = [];	// trail
 	private int FrameCount = 0;
 	private float SkipLabelAlpha = 0;
 	private float TargetSkipLabelAlpha = 0;
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
-	public static List<Note> ProcessNotes = new();
+	public static List<Note> ProcessNotes = [];
 	public static Attempt CurrentAttempt;
 	public static double MapLength;
 
@@ -64,12 +64,12 @@ public partial class Runner : Node3D
 		public double Speed = 1;
 		public string[] RawMods;
 		public Dictionary<string, bool> Mods;
-		public string[] Players = Array.Empty<string>();
+		public string[] Players = [];
 		public bool Alive = true;
 		public int Hits = 0;
-		public List<Dictionary<string, int>> HitsInfo = new();
+		public List<Dictionary<string, int>> HitsInfo = [];
 		public int Misses = 0;
-		public List<int> MissesInfo = new();
+		public List<int> MissesInfo = [];
 		public int Sum = 0;
 		public int Combo = 0;
 		public int ComboMultiplier = 1;
@@ -91,7 +91,7 @@ public partial class Runner : Node3D
 			Map = map;
 			Speed = speed;
 			Players = players ?? Array.Empty<string>();
-			Progress = -1000;
+			Progress = -1000 - Settings.ApproachTime * 1000;
 			ComboMultiplierIncrement = Map.Notes.Length / 200;
 			RawMods = mods;
 			Mods = new(){
@@ -491,7 +491,7 @@ public partial class Runner : Node3D
 		
 		if (Settings.CursorTrail)
 		{
-			List<Dictionary<string, object>> culledList = new();
+			List<Dictionary<string, object>> culledList = [];
 
 			LastCursorPositions.Add(new(){
 				["Time"] = now,
@@ -523,7 +523,7 @@ public partial class Runner : Node3D
 			foreach (Dictionary<string, object> entry in culledList)
 			{
 				ulong difference = now - (ulong)entry["Time"];
-				uint alpha = (uint)((float)(difference) / (Settings.TrailTime * 1000000) * 255);
+				uint alpha = (uint)(difference / (Settings.TrailTime * 1000000) * 255);
 
 				transform.Origin = new Vector3(((Vector2)entry["Position"]).X, ((Vector2)entry["Position"]).Y, 0);
 
@@ -625,7 +625,7 @@ public partial class Runner : Node3D
 			}
 		}
 	}
-
+	
 	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null)
 	{
 		CurrentAttempt = new Attempt(map, speed, mods, players);
