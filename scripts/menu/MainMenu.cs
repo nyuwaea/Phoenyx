@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Transactions;
 using Godot;
 using Phoenyx;
 
@@ -44,6 +45,7 @@ public partial class MainMenu : Control
 	private static VBoxContainer ChatHolder;
 
 	private static bool Initialized = false;
+	private static bool Quitting = false;
 	private static Vector2I WindowSize = DisplayServer.WindowGetSize();
 	private static double LastFrame = Time.GetTicksUsec();
 	private static string[] JukeboxQueue = Array.Empty<string>();
@@ -509,7 +511,7 @@ public partial class MainMenu : Control
 		if (Audio.Stream != null)
 		{
 			JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
-			Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
+			Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, Quitting ? -80 : -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
 		}
 
 		float prevHz = 0;
@@ -1148,9 +1150,17 @@ public partial class MainMenu : Control
 
     private static void Quit()
 	{
+		Quitting = true;
+
 		Settings.Save();
 		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 		Util.DiscordRPC.Call("Clear");
-		Control.GetTree().Quit();
+
+		Tween tween = Control.CreateTween();
+		tween.TweenProperty(Control, "modulate", Color.Color8(1, 1, 1, 0), 0.5).SetTrans(Tween.TransitionType.Quad);
+		tween.TweenCallback(Callable.From(() => {
+			Control.GetTree().Quit();
+		}));
+		tween.Play();
 	}
 }
