@@ -489,9 +489,6 @@ texture = ExtResource("9_nde5v")
 expand_mode = 1
 stretch_mode = 1
 
-[node name="SongPlayer" type="AudioStreamPlayer" parent="."]
-volume_db = -25.0
-
 [node name="FPSCounter" type="Label" parent="."]
 anchors_preset = 2
 anchor_top = 1.0

@@ -34,7 +34,6 @@ public partial class Runner : Node3D
 	private static Label SimpleMissesLabel;
 	private static Label ScoreLabel;
 	private static Label MultiplierLabel;
-	private static AudioStreamPlayer Audio;
 	private static VideoStreamPlayer Video;
 	private static Tween HitTween;
 	private static Tween MissTween;
@@ -246,7 +245,6 @@ public partial class Runner : Node3D
 		SimpleMissesLabel = PanelRight.GetNode<Label>("SimpleMisses");
 		ScoreLabel = PanelLeft.GetNode<Label>("Score");
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
-		Audio = GetNode<AudioStreamPlayer>("SongPlayer");
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
 		if (Settings.SimpleHUD)
@@ -305,9 +303,9 @@ public partial class Runner : Node3D
 
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
-			Audio.Stream = Lib.Audio.LoadStream(CurrentAttempt.Map.AudioBuffer);
-			Audio.PitchScale = (float)CurrentAttempt.Speed;
-			MapLength = (float)Audio.Stream.GetLength() * 1000;
+			SoundManager.Song.Stream = Lib.Audio.LoadStream(CurrentAttempt.Map.AudioBuffer);
+			SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
+			MapLength = (float)SoundManager.Song.Stream.GetLength() * 1000;
 		}
 		else
 		{
@@ -358,14 +356,14 @@ public partial class Runner : Node3D
 		{
 			if (CurrentAttempt.Progress >= MapLength - Constants.HitWindow)
 			{
-				if (Audio.Playing)
+				if (SoundManager.Song.Playing)
 				{
-					Audio.Stop();
+					SoundManager.Song.Stop();
 				}
 			}
-			else if (!Audio.Playing && CurrentAttempt.Progress >= 0)
+			else if (!SoundManager.Song.Playing && CurrentAttempt.Progress >= 0)
 			{
-				Audio.Play();
+				SoundManager.Song.Play();
 			}
 		}
 
@@ -607,7 +605,7 @@ public partial class Runner : Node3D
 					}
 					
 					CurrentAttempt.Speed = Math.Round((CurrentAttempt.Speed + 0.05) * 100) / 100;
-					Audio.PitchScale = (float)CurrentAttempt.Speed;
+					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
 					break;
 				case Key.Minus:
 					if (Lobby.PlayerCount > 1)
@@ -616,7 +614,7 @@ public partial class Runner : Node3D
 					}
 					
 					CurrentAttempt.Speed = Math.Max(0.05, Math.Round((CurrentAttempt.Speed - 0.05) * 100) / 100);
-					Audio.PitchScale = (float)CurrentAttempt.Speed;
+					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
 					break;
 			}
 		}
@@ -635,7 +633,7 @@ public partial class Runner : Node3D
 		{
 			if (CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length)
 			{
-				CurrentAttempt.Progress = Audio.Stream.GetLength() * 1000;
+				CurrentAttempt.Progress = SoundManager.Song.Stream.GetLength() * 1000;
 			}
 			else
 			{
@@ -645,12 +643,12 @@ public partial class Runner : Node3D
 		
 				if (CurrentAttempt.Map.AudioBuffer != null)
 				{
-					if (!Audio.Playing)
+					if (!SoundManager.Song.Playing)
 					{
-						Audio.Play();
+						SoundManager.Song.Play();
 					}
 
-					Audio.Seek((float)CurrentAttempt.Progress / 1000);
+					SoundManager.Song.Seek((float)CurrentAttempt.Progress / 1000);
 					Video.StreamPosition = (float)CurrentAttempt.Progress / 1000;
 				}
 			}
@@ -669,7 +667,7 @@ public partial class Runner : Node3D
 
 	public static void UpdateVolume()
 	{
-		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		SoundManager.Song.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 		SoundManager.HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 		SoundManager.FailSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 	}

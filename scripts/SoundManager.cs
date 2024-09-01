@@ -8,7 +8,7 @@ public partial class SoundManager : Node
     public static AudioStreamPlayer HitSound;
     public static AudioStreamPlayer MissSound;
     public static AudioStreamPlayer FailSound;
-    public static AudioStreamPlayer Jukebox;
+    public static AudioStreamPlayer Song;
 
 	public static string[] JukeboxQueue = [];
     public static Dictionary<string, int> JukeboxQueueInverse = [];
@@ -21,20 +21,26 @@ public partial class SoundManager : Node
         HitSound = new();
         MissSound = new();
         FailSound = new();
-        Jukebox = new();
+        Song = new();
 
         AddChild(HitSound);
         AddChild(MissSound);
         AddChild(FailSound);
-        AddChild(Jukebox);
+        AddChild(Song);
 
-        Jukebox.Finished += () => {
-			if (SceneManager.Scene.Name == "SceneMenu")
+        Song.Finished += () => {
+            switch (SceneManager.Scene.Name)
             {
-                JukeboxIndex++;
+                case "SceneMenu":
+                    JukeboxIndex++;
+                    PlayJukebox(JukeboxIndex);
+                    break;
+                case "SceneResults":
+                    PlayJukebox(JukeboxIndex);
+                    break;
+                default:
+                    break;
             }
-
-            PlayJukebox(JukeboxIndex);
 		};
     }
 
@@ -67,8 +73,8 @@ public partial class SoundManager : Node
             MainMenu.Control.GetNode("Jukebox").GetNode<Label>("Title").Text = map.PrettyTitle;
         }
 
-		Jukebox.Stream = Lib.Audio.LoadStream(map.AudioBuffer);
-		Jukebox.Play();
+		Song.Stream = Lib.Audio.LoadStream(map.AudioBuffer);
+		Song.Play();
 
 		if (setRichPresence)
         {

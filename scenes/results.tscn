@@ -15,7 +15,6 @@
 shader = ExtResource("2_vg5t8")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rn6l"]
-render_priority = 0
 shader = ExtResource("2_oatel")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wqycr"]

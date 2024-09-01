@@ -176,7 +176,7 @@ public partial class MainMenu : Control
 					case "Pause":
 						SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
 						button.TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
-						SoundManager.Jukebox.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+						SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
 						break;
 					case "Skip":
 						SoundManager.JukeboxIndex++;
@@ -192,7 +192,7 @@ public partial class MainMenu : Control
 						}
 						else
 						{
-							SoundManager.Jukebox.Seek(0);
+							SoundManager.Song.Seek(0);
 						}
 
 						SoundManager.LastRewind = now;
@@ -505,15 +505,23 @@ public partial class MainMenu : Control
 
 		// Finish
 
-		SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+		if (!SoundManager.Song.Playing)
+		{
+			SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+			SoundManager.JukeboxPaused = !Settings.AutoplayJukebox;
+		}
+		else
+		{
+			Jukebox.GetNode<Label>("Title").Text = Runner.CurrentAttempt.Map.PrettyTitle;
+			SoundManager.JukeboxPaused = false;
+		}
 
-		SoundManager.JukeboxPaused = !Settings.AutoplayJukebox;
-		SoundManager.Jukebox.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+		SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
 		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 
 		UpdateSpectrumSpacing();
 
-		SoundManager.Jukebox.VolumeDb = -180;
+		SoundManager.Song.VolumeDb = -180;
 	}
 
     public override void _Process(double delta)
@@ -539,10 +547,10 @@ public partial class MainMenu : Control
 			}
 		}
 		
-		if (SoundManager.Jukebox.Stream != null)
+		if (SoundManager.Song.Stream != null)
 		{
-			JukeboxProgress.AnchorRight = (float)Math.Clamp(SoundManager.Jukebox.GetPlaybackPosition() / SoundManager.Jukebox.Stream.GetLength(), 0, 1);
-			SoundManager.Jukebox.VolumeDb = Mathf.Lerp(SoundManager.Jukebox.VolumeDb, Quitting ? -80 : -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
+			JukeboxProgress.AnchorRight = (float)Math.Clamp(SoundManager.Song.GetPlaybackPosition() / SoundManager.Song.Stream.GetLength(), 0, 1);
+			SoundManager.Song.VolumeDb = Mathf.Lerp(SoundManager.Song.VolumeDb, Quitting ? -80 : -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
 		}
 
 		float prevHz = 0;
@@ -578,14 +586,14 @@ public partial class MainMenu : Control
 					{
 						Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{SelectedMap}.phxm");
 
-						SoundManager.Jukebox.Stop();
+						SoundManager.Song.Stop();
 						SceneManager.Load("res://scenes/game.tscn");
 						Runner.Play(map, Lobby.Speed, Lobby.Mods);
 					}
 					break;
 				case Key.Mediaplay:
 					SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
-					SoundManager.Jukebox.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+					SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
 					Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 					break;
 				case Key.Medianext:
@@ -602,7 +610,7 @@ public partial class MainMenu : Control
 					}
 					else
 					{
-						SoundManager.Jukebox.Seek(0);
+						SoundManager.Song.Seek(0);
 					}
 
 					SoundManager.LastRewind = now;
@@ -1146,7 +1154,7 @@ public partial class MainMenu : Control
 							{
 								Map map = MapParser.Decode(mapFile);
 
-								SoundManager.Jukebox.Stop();
+								SoundManager.Song.Stop();
 								SceneManager.Load("res://scenes/game.tscn");
 								Runner.Play(map, Lobby.Speed, Lobby.Mods);
 							}

@@ -51,10 +51,10 @@ public partial class Results : Control
 
 		if (Runner.CurrentAttempt.Map.AudioBuffer != null)
 		{
-			SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[Runner.CurrentAttempt.Map.FilePath];
-			SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
-			SoundManager.Jukebox.Seek((float)Runner.CurrentAttempt.Progress / 1000);
-			SoundManager.Jukebox.PitchScale = (float)Runner.CurrentAttempt.Speed;
+			if (!SoundManager.Song.Playing)
+			{
+				SoundManager.Song.Play();
+			}
 		}
 
 		Footer.GetNode<Button>("Back").Pressed += Stop;
@@ -102,7 +102,7 @@ public partial class Results : Control
 
 	public static void Replay()
 	{
-		SoundManager.Jukebox.Stop();
+		SoundManager.Song.Stop();
 		SceneManager.Load("res://scenes/game.tscn");
 		Runner.Play(MapParser.Decode(Runner.CurrentAttempt.Map.FilePath), Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.RawMods);
 	}
