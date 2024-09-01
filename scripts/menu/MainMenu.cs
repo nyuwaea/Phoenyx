@@ -557,6 +557,30 @@ public partial class MainMenu : Control
 						Runner.Play(map, Lobby.Speed, Lobby.Mods);
 					}
 					break;
+				case Key.Mediaplay:
+					JukeboxPaused = !JukeboxPaused;
+					Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
+					Jukebox.GetNode<TextureButton>("Pause").TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+					break;
+				case Key.Medianext:
+					JukeboxIndex++;
+					PlayJukebox(JukeboxIndex);
+					break;
+				case Key.Mediaprevious:
+					ulong now = Time.GetTicksMsec();
+
+					if (now - LastRewind < 1000)
+					{
+						JukeboxIndex--;
+						PlayJukebox(JukeboxIndex);
+					}
+					else
+					{
+						Audio.Seek(0);
+					}
+
+					LastRewind = now;
+					break;
 				default:
 					if (FocusedLineEdit == null && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
 					{
@@ -985,6 +1009,7 @@ public partial class MainMenu : Control
 
 				string title;
 				string extra;
+				int difficulty;
 				string coverFile = null;
 
 				if (!Directory.Exists($"{Constants.UserFolder}/cache/maps/{fileName}"))
@@ -1008,6 +1033,7 @@ public partial class MainMenu : Control
 
 					title = map.PrettyTitle;
 					extra = $"{map.DifficultyName} - {map.PrettyMappers}";
+					difficulty = map.Difficulty;
 				}
 				else
 				{
@@ -1030,6 +1056,7 @@ public partial class MainMenu : Control
 					mappers = mappers.Substr(0, mappers.Length - 2);
 					extra = $"{metadata["DifficultyName"]} - {mappers}";
 					title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
+					difficulty = (int)metadata["Difficulty"];
 				}
 
 				LoadedMaps.Add(fileName);
