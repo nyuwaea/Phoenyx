@@ -20,5 +20,5 @@ void fragment() {
     col += texture(TEXTURE, UV + vec2(0.0, 4.0 * TEXTURE_PIXEL_SIZE.y)).xyz * 0.025;
     col += texture(TEXTURE, UV + vec2(0.0, 4.0 * -TEXTURE_PIXEL_SIZE.y)).xyz * 0.025;
 	
-	COLOR = vec4(col, 0.1f);
+	COLOR = vec4(col, 0.15f);
 }

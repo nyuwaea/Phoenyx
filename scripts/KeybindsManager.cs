@@ -3,7 +3,7 @@ using Godot;
 using Menu;
 using Phoenyx;
 
-public partial class Keybinds : Node
+public partial class KeybindsManager : Node
 {
     private static bool PopupShown = false;
     private static ulong LastVolumeChange = 0;

@@ -22,7 +22,7 @@ public struct Map
     public byte[] CoverBuffer;
     public byte[] VideoBuffer;
     public Note[] Notes;
-
+    
     public Map(string filePath, Note[] data = null, string id = null, string artist = "", string title = "", float rating = 0, string[] mappers = null, int difficulty = 0, string difficultyName = null, int? length = null, byte[] audioBuffer = null, byte[] coverBuffer = null, byte[] videoBuffer = null)
     {
         FilePath = filePath;
@@ -30,7 +30,7 @@ public struct Map
         Title = (title ?? "").Replace("\n", "");
         PrettyTitle = artist != "" ? $"{artist} - {title}" : title;
         Rating = rating;
-        Mappers = mappers ?? new string[]{"N/A"};
+        Mappers = mappers ?? ["N/A"];
         PrettyMappers = "";
         Difficulty = difficulty;
         DifficultyName = difficultyName ?? Constants.Difficulties[Difficulty];

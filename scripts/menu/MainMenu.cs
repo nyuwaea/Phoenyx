@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Godot;
 using Phoenyx;
 
@@ -10,7 +11,8 @@ namespace Menu;
 
 public partial class MainMenu : Control
 {
-	private static Control Control;
+	public static Control Control;
+
 	private static readonly PackedScene ChatMessage = GD.Load<PackedScene>("res://prefabs/chat_message.tscn");
 	private static readonly PackedScene MapButton = GD.Load<PackedScene>("res://prefabs/map_button.tscn");
 
@@ -20,7 +22,6 @@ public partial class MainMenu : Control
 	private static Button JukeboxButton;
 	private static ColorRect JukeboxProgress;
 	private static HBoxContainer JukeboxSpectrum;
-	private static AudioStreamPlayer Audio;
 	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
 	private static Panel ContextMenu;
 
@@ -28,6 +29,7 @@ public partial class MainMenu : Control
 	private static Button UserFolderButton;
 	private static Button SettingsButton;
 	private static LineEdit SearchEdit;
+	private static LineEdit SearchAuthorEdit;
 	private static FileDialog ImportDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
@@ -44,32 +46,30 @@ public partial class MainMenu : Control
 	private static VBoxContainer ChatHolder;
 
 	private static bool Initialized = false;
+	private static bool FirstFrame = true;
+	private static bool Quitting = false;
 	private static Vector2I WindowSize = DisplayServer.WindowGetSize();
 	private static double LastFrame = Time.GetTicksUsec();
-	private static string[] JukeboxQueue = Array.Empty<string>();
-	private static int JukeboxIndex = 0;
-	private static bool JukeboxPaused = false;
-	private static ulong LastRewind = 0;
 	private static float Scroll = 0;
 	private static float TargetScroll = 0;
 	private static int MaxScroll = 0;
 	private static Vector2 MousePosition = Vector2.Zero;
 	private static bool RightMouseHeld = false;
 	private static bool RightClickingButton = false;
-	private static List<string> LoadedMaps = new();
-	private static List<string> FavoritedMaps = new();
-	private static Dictionary<string, int> OriginalMapOrder = new();
+	private static List<string> LoadedMaps = [];
+	private static List<string> FavoritedMaps = [];
+	private static Dictionary<string, int> OriginalMapOrder = [];
 	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
 	private static LineEdit FocusedLineEdit = null;
-	private static string Search = "";
+	private static string SearchTitle = "";
+	private static string SearchAuthor = "";
 	private static string ContextMenuTarget;
 
 	public override void _Ready()
 	{
 		Control = this;
-		SceneManager.Scene = this;
 	
 		Util.Setup();
 
@@ -82,6 +82,8 @@ public partial class MainMenu : Control
 
 		GetTree().AutoAcceptQuit = false;
 		WindowSize = DisplayServer.WindowGetSize();
+		VisibleMaps = 0;
+		FirstFrame = true;
 		
 		if (!Initialized)
 		{
@@ -97,9 +99,9 @@ public partial class MainMenu : Control
 			viewport.Connect("files_dropped", Callable.From((string[] files) => {
 				MapParser.Import(files);
 				UpdateMapList();
-				Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm"));
+				Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm").TrimSuffix(".sspm").TrimSuffix(".txt"));
 				
-				if (!mapButton.Name.ToString().Contains(Search))
+				if (!mapButton.Name.ToString().Contains(SearchTitle))
 				{
 					mapButton.Visible = false;
 					VisibleMaps--;
@@ -115,16 +117,20 @@ public partial class MainMenu : Control
 		JukeboxButton = Jukebox.GetNode<Button>("Button");
 		JukeboxProgress = Jukebox.GetNode("Progress").GetNode<ColorRect>("Main");
 		JukeboxSpectrum = Jukebox.GetNode<HBoxContainer>("Spectrum");
-		Audio = GetNode<AudioStreamPlayer>("AudioStreamPlayer");
 		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
 		ContextMenu = GetNode<Panel>("ContextMenu");
-		LoadedMaps = new();
+		LoadedMaps = [];
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
 
-		JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
-		JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, JukeboxQueue.Length - 1));
+		SoundManager.JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
+		SoundManager.JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, SoundManager.JukeboxQueue.Length - 1));
+
+		for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
+		{
+			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i]] = i;
+		}
 
 		JukeboxButton.MouseEntered += () => {
 			Label title = Jukebox.GetNode<Label>("Title");
@@ -139,16 +145,10 @@ public partial class MainMenu : Control
 			tween.Play();
 		};
 		JukeboxButton.Pressed += () => {
-			string[] split = JukeboxQueue[JukeboxIndex].Split("\\");
-			string fileName = split[^1].TrimSuffix(".phxm");
+			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].Split("\\")[^1].TrimSuffix(".phxm");
 			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
 
 			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
-		};
-
-		Audio.Finished += () => {
-			JukeboxIndex++;
-			PlayJukebox(JukeboxIndex);
 		};
 
 		foreach (Node child in Jukebox.GetChildren())
@@ -174,28 +174,28 @@ public partial class MainMenu : Control
 				switch (button.Name)
 				{
 					case "Pause":
-						JukeboxPaused = !JukeboxPaused;
-						button.TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
-						Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
+						SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
+						button.TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+						SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
 						break;
 					case "Skip":
-						JukeboxIndex++;
-						PlayJukebox(JukeboxIndex);
+						SoundManager.JukeboxIndex++;
+						SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
 						break;
 					case "Rewind":
 						ulong now = Time.GetTicksMsec();
 
-						if (now - LastRewind < 1000)
+						if (now - SoundManager.LastRewind < 1000)
 						{
-							JukeboxIndex--;
-							PlayJukebox(JukeboxIndex);
+							SoundManager.JukeboxIndex--;
+							SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
 						}
 						else
 						{
-							Audio.Seek(0);
+							SoundManager.Song.Seek(0);
 						}
 
-						LastRewind = now;
+						SoundManager.LastRewind = now;
 						break;
 				}
 			};
@@ -207,6 +207,7 @@ public partial class MainMenu : Control
 		UserFolderButton = TopBar.GetNode<Button>("UserFolder");
 		SettingsButton = TopBar.GetNode<Button>("Settings");
 		SearchEdit = TopBar.GetNode<LineEdit>("Search");
+		SearchAuthorEdit = TopBar.GetNode<LineEdit>("SearchAuthor");
 		ImportDialog = GetNode<FileDialog>("ImportDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
@@ -219,26 +220,24 @@ public partial class MainMenu : Control
 			ShowSettings();
 		};
  		SearchEdit.TextChanged += (string text) => {
-			Search = text.ToLower();
+			SearchTitle = text.ToLower();
 
-			if (Search == "")
+			if (SearchTitle == "")
 			{
 				SearchEdit.ReleaseFocus();
 			}
 
-			VisibleMaps = 0;
+			Search();
+		};
+		SearchAuthorEdit.TextChanged += (string text) => {
+			SearchAuthor = text.ToLower();
 
-			foreach (Panel map in MapListContainer.GetChildren())
+			if (SearchAuthor == "")
 			{
-				map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
-
-				if (map.Visible)
-				{
-					VisibleMaps++;
-				}
+				SearchAuthorEdit.ReleaseFocus();
 			}
 
-			UpdateMaxScroll();
+			Search();
 		};
 		ImportDialog.FilesSelected += (string[] files) => {
 			MapParser.Import(files);
@@ -247,19 +246,7 @@ public partial class MainMenu : Control
 
 		UpdateMapList();
 
-		if (SelectedMap != null)
-		{
-			Panel selectedMapHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
-			selectedMapHolder.GetNode<Panel>("Normal").Visible = false;
-			selectedMapHolder.GetNode<Panel>("Selected").Visible = true;
-
-			Tween selectTween = selectedMapHolder.CreateTween();
-			selectTween.TweenProperty(selectedMapHolder, "size", new Vector2(MapListContainer.Size.X - 10, selectedMapHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			selectTween.Parallel().TweenProperty(selectedMapHolder, "position", new Vector2(0, selectedMapHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			selectTween.Play();
-		}
-
-		SearchEdit.Text = Search;
+		SearchEdit.Text = SearchTitle;
 
 		foreach (Panel map in MapListContainer.GetChildren())
 		{
@@ -268,7 +255,7 @@ public partial class MainMenu : Control
 				continue;
 			}
 
-			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
+			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle);
 		}
 
 		// Settings
@@ -295,10 +282,41 @@ public partial class MainMenu : Control
 			};
 		}
 
-		OptionButton skinOptions = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+		OptionButton profiles = SettingsHolder.GetNode("Header").GetNode<OptionButton>("Profiles");
+		LineEdit profileEdit = SettingsHolder.GetNode("Header").GetNode<LineEdit>("ProfileEdit");
+		OptionButton skins = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
 
-		skinOptions.ItemSelected += (long item) => {
-			Settings.Skin = skinOptions.GetItemText((int)item);
+		SettingsHolder.GetNode("Header").GetNode<Button>("CreateProfile").Pressed += () => {
+			profileEdit.Visible = !profileEdit.Visible;
+		};
+		profileEdit.FocusEntered += () => FocusedLineEdit = profileEdit;
+		profileEdit.FocusExited += () => FocusedLineEdit = null;
+		profileEdit.TextSubmitted += (string text) => {
+			text = new Regex("[^a-zA-Z0-9_ -]").Replace(text.Replace(" ", "_"), "");
+
+			profileEdit.ReleaseFocus();
+			profileEdit.Visible = false;
+
+			if (File.Exists($"{Constants.UserFolder}/profiles/{text}.json"))
+			{
+				ToastNotification.Notify($"Profile {text} already exists!");
+				return;
+			}
+
+			File.WriteAllText($"{Constants.UserFolder}/profiles/{text}.json", File.ReadAllText($"{Constants.UserFolder}/profiles/default.json"));
+			UpdateSettings();
+		};
+		profiles.ItemSelected += (long item) => {
+			string profile = profiles.GetItemText((int)item);
+
+			Settings.Save();
+			File.WriteAllText($"{Constants.UserFolder}/current_profile.txt", profile);
+			Settings.Load(profile);
+			UpdateSettings();
+		};
+
+		skins.ItemSelected += (long item) => {
+			Settings.Skin = skins.GetItemText((int)item);
 			Phoenyx.Skin.Load();
 
 			Cursor.Texture = Phoenyx.Skin.CursorImage;
@@ -334,7 +352,7 @@ public partial class MainMenu : Control
 			MapListContainer.GetNode(ContextMenuTarget).QueueFree();
 			LoadedMaps.Remove(ContextMenuTarget);
 			
-			if (ContextMenuTarget.Contains(Search))
+			if (ContextMenuTarget.Contains(SearchTitle))
 			{
 				VisibleMaps--;
 			}
@@ -487,15 +505,23 @@ public partial class MainMenu : Control
 
 		// Finish
 
-		PlayJukebox(JukeboxIndex);
+		if (!SoundManager.Song.Playing)
+		{
+			SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+			SoundManager.JukeboxPaused = !Settings.AutoplayJukebox;
+		}
+		else
+		{
+			Jukebox.GetNode<Label>("Title").Text = Runner.CurrentAttempt.Map.PrettyTitle;
+			SoundManager.JukeboxPaused = false;
+		}
 
-		JukeboxPaused = !Settings.AutoplayJukebox;
-		Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
-		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+		SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 
 		UpdateSpectrumSpacing();
 
-		Audio.VolumeDb = -80;
+		SoundManager.Song.VolumeDb = -180;
 	}
 
     public override void _Process(double delta)
@@ -503,15 +529,28 @@ public partial class MainMenu : Control
 		ulong now = Time.GetTicksUsec();
         delta = (now - LastFrame) / 1000000;
 		LastFrame = now;
-
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
 		Cursor.Position = MousePosition - new Vector2(Cursor.Size.X / 2, Cursor.Size.Y / 2);
-		
-		if (Audio.Stream != null)
+
+		if (FirstFrame)
 		{
-			JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
-			Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
+			FirstFrame = false;
+
+			if (SelectedMap != null)
+			{
+				Panel selectedMapHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+				selectedMapHolder.GetNode<Panel>("Normal").Visible = false;
+				selectedMapHolder.GetNode<Panel>("Selected").Visible = true;
+				selectedMapHolder.Size = new Vector2(MapListContainer.Size.X, selectedMapHolder.Size.Y);
+				selectedMapHolder.Position = new Vector2(0, selectedMapHolder.Position.Y);
+			}
+		}
+		
+		if (SoundManager.Song.Stream != null)
+		{
+			JukeboxProgress.AnchorRight = (float)Math.Clamp(SoundManager.Song.GetPlaybackPosition() / SoundManager.Song.Stream.GetLength(), 0, 1);
+			SoundManager.Song.VolumeDb = Mathf.Lerp(SoundManager.Song.VolumeDb, Quitting ? -80 : -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
 		}
 
 		float prevHz = 0;
@@ -524,7 +563,7 @@ public partial class MainMenu : Control
 			prevHz = hz;
 			
 			ColorRect colorRect = JukeboxSpectrum.GetNode((i + 1).ToString()).GetNode<ColorRect>("Main");
-			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
+			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (SoundManager.JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
 		}
 
 		for (int i = 0; i < FavoritedMaps.Count; i++)
@@ -543,17 +582,41 @@ public partial class MainMenu : Control
 			switch (eventKey.Keycode)
 			{
 				case Key.Space:
-					if (SelectedMap != null)
+					if (SelectedMap != null && !SearchEdit.HasFocus() && !SearchAuthorEdit.HasFocus())
 					{
 						Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{SelectedMap}.phxm");
 
-						Audio.Stop();
+						SoundManager.Song.Stop();
 						SceneManager.Load("res://scenes/game.tscn");
 						Runner.Play(map, Lobby.Speed, Lobby.Mods);
 					}
 					break;
+				case Key.Mediaplay:
+					SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
+					SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+					Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+					break;
+				case Key.Medianext:
+					SoundManager.JukeboxIndex++;
+					SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+					break;
+				case Key.Mediaprevious:
+					ulong now = Time.GetTicksMsec();
+
+					if (now - SoundManager.LastRewind < 1000)
+					{
+						SoundManager.JukeboxIndex--;
+						SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+					}
+					else
+					{
+						SoundManager.Song.Seek(0);
+					}
+
+					SoundManager.LastRewind = now;
+					break;
 				default:
-					if (FocusedLineEdit == null && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter)
+					if (FocusedLineEdit == null && !SearchAuthorEdit.HasFocus() && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
 					{
 						SearchEdit.GrabFocus();
 					}
@@ -649,36 +712,21 @@ public partial class MainMenu : Control
 		}
     }
 
-	public static void PlayJukebox(int index)
+	public static void Search()
 	{
-		if (index >= JukeboxQueue.Length)
-		{
-			index = 0;
-		}
-		else if (index < 0)
-		{
-			index = JukeboxQueue.Length - 1;
-		}
+		VisibleMaps = 0;
 
-		if (JukeboxQueue.Length == 0)
+		foreach (Panel map in MapListContainer.GetChildren())
 		{
-			return;
+			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle) && map.GetNode("Holder").GetNode<RichTextLabel>("Extra").Text.ToLower().Contains(SearchAuthor);
+
+			if (map.Visible)
+			{
+				VisibleMaps++;
+			}
 		}
 
-		Map map = MapParser.Decode(JukeboxQueue[index], false);
-
-		if (map.AudioBuffer == null)
-		{
-			JukeboxIndex++;
-			PlayJukebox(JukeboxIndex);
-		}
-
-		Jukebox.GetNode<Label>("Title").Text = map.PrettyTitle;
-
-		Audio.Stream = Lib.Audio.LoadStream(map.AudioBuffer);
-		Audio.Play();
-
-		Util.DiscordRPC.Call("Set", "state", $"Listening to {map.PrettyTitle}");
+		UpdateMaxScroll();
 	}
 
 	public static void ShowSettings(bool show = true)
@@ -779,6 +827,9 @@ public partial class MainMenu : Control
 			case "VideoDim":
 				Settings.VideoDim = (double)value;
 				break;
+			case "VideoRenderScale":
+				Settings.VideoRenderScale = (double)value;
+				break;
 			case "SimpleHUD":
 				Settings.SimpleHUD = (bool)value;
 				break;
@@ -792,26 +843,43 @@ public partial class MainMenu : Control
 
 	public static void UpdateSettings(bool connections = false)
 	{
-		OptionButton skinOptions = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+		OptionButton skins = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+		OptionButton profiles = SettingsHolder.GetNode("Header").GetNode<OptionButton>("Profiles");
+		string currentProfile = File.ReadAllText($"{Constants.UserFolder}/current_profile.txt");
 
-		skinOptions.Clear();
+		skins.Clear();
+		profiles.Clear();
 
 		int i = 0;
 
 		foreach (string path in Directory.GetDirectories($"{Constants.UserFolder}/skins"))
 		{
-			string[] split = path.Split("\\");
-			string name = split[^1];
+			string name = path.Split("\\")[^1];
 			
-			skinOptions.AddItem(name, i);
+			skins.AddItem(name, i);
 
 			if (Settings.Skin == name)
 			{
-				skinOptions.Selected = i;
-				SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
+				skins.Selected = i;
 			}
 
 			i++;
+		}
+
+		int j = 0;
+
+		foreach (string path in Directory.GetFiles($"{Constants.UserFolder}/profiles"))
+		{
+			string name = path.Split("\\")[^1].TrimSuffix(".json");
+			
+			profiles.AddItem(name, i);
+
+			if (currentProfile == name)
+			{
+				profiles.Selected = j;
+			}
+
+			j++;
 		}
 
 		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())
@@ -826,7 +894,7 @@ public partial class MainMenu : Control
 					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
 
 					slider.Value = (double)property.GetValue(new());
-					lineEdit.Text = slider.Value.ToString();
+					lineEdit.Text = (Math.Floor(slider.Value * 1000) / 1000).ToString();
 
 					if (connections)
 					{
@@ -837,14 +905,12 @@ public partial class MainMenu : Control
 								if (text == "")
 								{
 									text = lineEdit.PlaceholderText;
-									lineEdit.Text = text;
 								}
 
-								double value = text.ToFloat();
-
-								slider.Value = value;
+								slider.Value = text.ToFloat();
+								lineEdit.Text = slider.Value.ToString();
 								
-								ApplySetting(option.Name, value);
+								ApplySetting(option.Name, slider.Value);
 							}
 							catch (Exception exception)
 							{
@@ -899,20 +965,30 @@ public partial class MainMenu : Control
 						switch (option.Name)
 						{
 							case "Colors":
-								string[] split = text.Split(",");
-
-								for (int i = 0; i < split.Length; i++)
-								{
-									split[i] = split[i].TrimPrefix("#").Substr(0, 6);
-								}
+								string[] split = text.Replace(" ", "").Replace("\n", ",").Split(",");
+								string raw = "";
+								Color[] colors = new Color[split.Length];
 
 								if (split.Length == 0)
 								{
 									split = lineEdit.PlaceholderText.Split(",");
 								}
 
-								Phoenyx.Skin.Colors = split;
-								Phoenyx.Skin.RawColors = text.TrimPrefix("#");
+								for (int i = 0; i < split.Length; i++)
+								{
+									split[i] = split[i].TrimPrefix("#").Substr(0, 6).PadRight(6, Convert.ToChar("f"));
+									split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
+									colors[i] = Color.FromHtml(split[i]);
+
+									raw += $"{split[i]},";
+								}
+
+								raw = raw.TrimSuffix(",");
+								lineEdit.Text = raw;
+
+								Phoenyx.Skin.Colors = colors;
+								Phoenyx.Skin.RawColors = raw;
+
 								break;
 						}
 
@@ -946,8 +1022,9 @@ public partial class MainMenu : Control
 	{
 		double start = Time.GetTicksUsec();
 		int i = 0;
+		Color black = Color.Color8(0, 0, 0, 1);
 		List<string> favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList();
-		FavoritedMaps = new();
+		FavoritedMaps = [];
 
 		foreach (string mapFile in Directory.GetFiles($"{Constants.UserFolder}/maps"))
 		{
@@ -968,7 +1045,9 @@ public partial class MainMenu : Control
 				}
 
 				string title;
-				string extra;
+				string difficultyName;
+				string mappers = "";
+				int difficulty;
 				string coverFile = null;
 
 				if (!Directory.Exists($"{Constants.UserFolder}/cache/maps/{fileName}"))
@@ -991,7 +1070,9 @@ public partial class MainMenu : Control
 					//}
 
 					title = map.PrettyTitle;
-					extra = $"{map.DifficultyName} - {map.PrettyMappers}";
+					difficultyName = map.DifficultyName;
+					mappers = map.PrettyMappers;
+					difficulty = map.Difficulty;
 				}
 				else
 				{
@@ -1004,16 +1085,15 @@ public partial class MainMenu : Control
 					//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
 					//}
 
-					string mappers = "";
-
 					foreach (string mapper in (string[])metadata["Mappers"])
 					{
 						mappers += $"{mapper}, ";
 					}
 
 					mappers = mappers.Substr(0, mappers.Length - 2);
-					extra = $"{metadata["DifficultyName"]} - {mappers}";
+					difficultyName = (string)metadata["DifficultyName"];
 					title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
+					difficulty = (int)metadata["Difficulty"];
 				}
 
 				LoadedMaps.Add(fileName);
@@ -1028,8 +1108,9 @@ public partial class MainMenu : Control
 				}
 
 				mapButton.Name = fileName;
+
 				holder.GetNode<Label>("Title").Text = title;
-				holder.GetNode<Label>("Extra").Text = extra.ReplaceLineEndings("");
+				holder.GetNode<RichTextLabel>("Extra").Text = $"[color={Constants.SecondaryDifficultyColours[difficulty].ToHtml(false)}]{difficultyName}[color=808080] - {mappers}".ReplaceLineEndings("");
 
 				MapListContainer.AddChild(mapButton);
 
@@ -1073,7 +1154,7 @@ public partial class MainMenu : Control
 							{
 								Map map = MapParser.Decode(mapFile);
 
-								Audio.Stop();
+								SoundManager.Song.Stop();
 								SceneManager.Load("res://scenes/game.tscn");
 								Runner.Play(map, Lobby.Speed, Lobby.Mods);
 							}
@@ -1149,9 +1230,17 @@ public partial class MainMenu : Control
 
     private static void Quit()
 	{
+		Quitting = true;
+
 		Settings.Save();
 		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 		Util.DiscordRPC.Call("Clear");
-		Control.GetTree().Quit();
+
+		Tween tween = Control.CreateTween();
+		tween.TweenProperty(Control, "modulate", Color.Color8(1, 1, 1, 0), 0.5).SetTrans(Tween.TransitionType.Quad);
+		tween.TweenCallback(Callable.From(() => {
+			Control.GetTree().Quit();
+		}));
+		tween.Play();
 	}
 }

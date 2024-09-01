@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Godot;
-using Lib;
 using Phoenyx;
 
 public partial class Runner : Node3D
@@ -35,9 +34,6 @@ public partial class Runner : Node3D
 	private static Label SimpleMissesLabel;
 	private static Label ScoreLabel;
 	private static Label MultiplierLabel;
-	private static AudioStreamPlayer Audio;
-	private static AudioStreamPlayer HitSound;
-	private static AudioStreamPlayer FailSound;
 	private static VideoStreamPlayer Video;
 	private static Tween HitTween;
 	private static Tween MissTween;
@@ -46,30 +42,30 @@ public partial class Runner : Node3D
 
 	private double LastFrame = Time.GetTicksUsec(); 	// delta arg unreliable..
 	private double LastSecond = Time.GetTicksUsec();	// better framerate calculation
-	private List<Dictionary<string, object>> LastCursorPositions = new();	// trail
+	private List<Dictionary<string, object>> LastCursorPositions = [];	// trail
 	private int FrameCount = 0;
 	private float SkipLabelAlpha = 0;
 	private float TargetSkipLabelAlpha = 0;
 
 	public static bool Playing = false;
 	public static int ToProcess = 0;
-	public static List<Note> ProcessNotes;
+	public static List<Note> ProcessNotes = [];
 	public static Attempt CurrentAttempt;
 	public static double MapLength;
 
 	public struct Attempt
 	{
 		public double Progress = 0;	// ms
-		public Map Map = new Map();
+		public Map Map = new();
 		public double Speed = 1;
 		public string[] RawMods;
 		public Dictionary<string, bool> Mods;
-		public string[] Players = Array.Empty<string>();
+		public string[] Players = [];
 		public bool Alive = true;
 		public int Hits = 0;
-		public List<Dictionary<string, int>> HitsInfo = new();
+		public List<Dictionary<string, int>> HitsInfo = [];
 		public int Misses = 0;
-		public List<int> MissesInfo = new();
+		public List<int> MissesInfo = [];
 		public int Sum = 0;
 		public int Combo = 0;
 		public int ComboMultiplier = 1;
@@ -91,7 +87,7 @@ public partial class Runner : Node3D
 			Map = map;
 			Speed = speed;
 			Players = players ?? Array.Empty<string>();
-			Progress = -1000;
+			Progress = -1000 - Settings.ApproachTime * 1000;
 			ComboMultiplierIncrement = Map.Notes.Length / 200;
 			RawMods = mods;
 			Mods = new(){
@@ -145,7 +141,7 @@ public partial class Runner : Node3D
 
 			if (!Settings.AlwaysPlayHitSound)
 			{
-				HitSound.Play();
+				SoundManager.HitSound.Play();
 			}
 
 			HitTween?.Kill();
@@ -177,7 +173,7 @@ public partial class Runner : Node3D
 				if (Alive)
 				{
 					Alive = false;
-					FailSound.Play();
+					SoundManager.FailSound.Play();
 				}
 
 				if (!Mods["NoFail"])
@@ -249,9 +245,6 @@ public partial class Runner : Node3D
 		SimpleMissesLabel = PanelRight.GetNode<Label>("SimpleMisses");
 		ScoreLabel = PanelLeft.GetNode<Label>("Score");
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
-		Audio = GetNode<AudioStreamPlayer>("SongPlayer");
-		HitSound = GetNode<AudioStreamPlayer>("HitSoundPlayer");
-		FailSound = GetNode<AudioStreamPlayer>("FailSoundPlayer");
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
 		if (Settings.SimpleHUD)
@@ -275,6 +268,7 @@ public partial class Runner : Node3D
 
 		float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(Settings.FoV / 2)), 2) - Math.Pow(103.75, 2));
 		(VideoQuad.Mesh as QuadMesh).Size = new Vector2(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
+		Video.GetParent<SubViewport>().Size = new Vector2I((int)(1920 * Settings.VideoRenderScale / 100), (int)(1080 * Settings.VideoRenderScale / 100));
 
 		Util.DiscordRPC.Call("Set", "details", "Playing a Map");
 		Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
@@ -298,8 +292,6 @@ public partial class Runner : Node3D
 			PanelRight.GetNode<TextureRect>("HitsIcon").Texture = Phoenyx.Skin.HitsImage;
 			PanelRight.GetNode<TextureRect>("MissesIcon").Texture = Phoenyx.Skin.MissesImage;
 			NotesMultimesh.Multimesh.Mesh = Phoenyx.Skin.NoteMesh;
-			HitSound.Stream = Lib.Audio.LoadStream(Phoenyx.Skin.HitSoundBuffer);
-			FailSound.Stream = Lib.Audio.LoadStream(Phoenyx.Skin.FailSoundBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -307,18 +299,20 @@ public partial class Runner : Node3D
 			throw Logger.Error($"Could not load skin; {exception.Message}");
 		}
 
+		SoundManager.UpdateSounds();
+
 		if (CurrentAttempt.Map.AudioBuffer != null)
 		{
-			Audio.Stream = Lib.Audio.LoadStream(CurrentAttempt.Map.AudioBuffer);
-			Audio.PitchScale = (float)CurrentAttempt.Speed;
-			MapLength = (float)Audio.Stream.GetLength() * 1000;
+			SoundManager.Song.Stream = Lib.Audio.LoadStream(CurrentAttempt.Map.AudioBuffer);
+			SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
+			MapLength = (float)SoundManager.Song.Stream.GetLength() * 1000;
 		}
 		else
 		{
 			MapLength = CurrentAttempt.Map.Length + 1000;
 		}
 		
-		if (CurrentAttempt.Map.VideoBuffer != null)
+		if (Settings.VideoDim < 100 && CurrentAttempt.Map.VideoBuffer != null)
 		{
 			File.WriteAllBytes($"{Constants.UserFolder}/cache/video.mp4", CurrentAttempt.Map.VideoBuffer);
 
@@ -362,20 +356,20 @@ public partial class Runner : Node3D
 		{
 			if (CurrentAttempt.Progress >= MapLength - Constants.HitWindow)
 			{
-				if (Audio.Playing)
+				if (SoundManager.Song.Playing)
 				{
-					Audio.Stop();
+					SoundManager.Song.Stop();
 				}
 			}
-			else if (!Audio.Playing && CurrentAttempt.Progress >= 0)
+			else if (!SoundManager.Song.Playing && CurrentAttempt.Progress >= 0)
 			{
-				Audio.Play();
+				SoundManager.Song.Play();
 			}
 		}
 
 		if (CurrentAttempt.Map.VideoBuffer != null)
 		{
-			if (!Video.IsPlaying() && CurrentAttempt.Progress >= 0)
+			if (Settings.VideoDim < 100 && !Video.IsPlaying() && CurrentAttempt.Progress >= 0)
 			{
 				Video.Play();
 				
@@ -399,7 +393,7 @@ public partial class Runner : Node3D
 		}
 
 		ToProcess = 0;
-		ProcessNotes = new List<Note>();
+		ProcessNotes.Clear();
 
 		// note process check
 		for (int i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)
@@ -433,7 +427,7 @@ public partial class Runner : Node3D
 			{
 				CurrentAttempt.Map.Notes[i].Hittable = true;
 				
-				HitSound.Play();
+				SoundManager.HitSound.Play();
 			}
 			
 			ToProcess++;
@@ -475,10 +469,10 @@ public partial class Runner : Node3D
 
 		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 		SpeedLabel.Modulate = Color.FromHtml($"#ffffff{(CurrentAttempt.Speed == 1 ? "00" : "20")}");
-		ProgressLabel.Text = $"{FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {FormatTime(MapLength / 1000)}";
+		ProgressLabel.Text = $"{Lib.String.FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {Lib.String.FormatTime(MapLength / 1000)}";
 		Health.Size = new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80);
 		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
-		SkipLabel.Modulate = Color.FromHtml("#ffffff" + Math.Min(255, (int)(255 * SkipLabelAlpha)).ToString("X2"));
+		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
 
 		if (StopQueued)
 		{
@@ -491,7 +485,7 @@ public partial class Runner : Node3D
 		
 		if (Settings.CursorTrail)
 		{
-			List<Dictionary<string, object>> culledList = new();
+			List<Dictionary<string, object>> culledList = [];
 
 			LastCursorPositions.Add(new(){
 				["Time"] = now,
@@ -523,7 +517,7 @@ public partial class Runner : Node3D
 			foreach (Dictionary<string, object> entry in culledList)
 			{
 				ulong difference = now - (ulong)entry["Time"];
-				uint alpha = (uint)((float)(difference) / (Settings.TrailTime * 1000000) * 255);
+				uint alpha = (uint)(difference / (Settings.TrailTime * 1000000) * 255);
 
 				transform.Origin = new Vector3(((Vector2)entry["Position"]).X, ((Vector2)entry["Position"]).Y, 0);
 
@@ -583,7 +577,7 @@ public partial class Runner : Node3D
 			{
 				case Key.Escape:
 					CurrentAttempt.Alive = false;
-					FailSound.Play();
+					SoundManager.FailSound.Play();
 					QueueStop();
 					break;
 				case Key.Quoteleft:
@@ -611,7 +605,7 @@ public partial class Runner : Node3D
 					}
 					
 					CurrentAttempt.Speed = Math.Round((CurrentAttempt.Speed + 0.05) * 100) / 100;
-					Audio.PitchScale = (float)CurrentAttempt.Speed;
+					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
 					break;
 				case Key.Minus:
 					if (Lobby.PlayerCount > 1)
@@ -620,17 +614,17 @@ public partial class Runner : Node3D
 					}
 					
 					CurrentAttempt.Speed = Math.Max(0.05, Math.Round((CurrentAttempt.Speed - 0.05) * 100) / 100);
-					Audio.PitchScale = (float)CurrentAttempt.Speed;
+					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
 					break;
 			}
 		}
 	}
-
+	
 	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null)
 	{
 		CurrentAttempt = new Attempt(map, speed, mods, players);
 		Playing = true;
-		ProcessNotes = null;
+		ProcessNotes = [];
 	}
 
 	public static void Skip()
@@ -639,7 +633,7 @@ public partial class Runner : Node3D
 		{
 			if (CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length)
 			{
-				CurrentAttempt.Progress = Audio.Stream.GetLength() * 1000;
+				CurrentAttempt.Progress = SoundManager.Song.Stream.GetLength() * 1000;
 			}
 			else
 			{
@@ -649,12 +643,13 @@ public partial class Runner : Node3D
 		
 				if (CurrentAttempt.Map.AudioBuffer != null)
 				{
-					if (!Audio.Playing)
+					if (!SoundManager.Song.Playing)
 					{
-						Audio.Play();
+						SoundManager.Song.Play();
 					}
 
-					Audio.Seek((float)CurrentAttempt.Progress / 1000);
+					SoundManager.Song.Seek((float)CurrentAttempt.Progress / 1000);
+					Video.StreamPosition = (float)CurrentAttempt.Progress / 1000;
 				}
 			}
 		}
@@ -672,9 +667,9 @@ public partial class Runner : Node3D
 
 	public static void UpdateVolume()
 	{
-		Audio.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
-		HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
-		FailSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		SoundManager.Song.VolumeDb = -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		SoundManager.HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
+		SoundManager.FailSound.VolumeDb = -80 + 80 * (float)Math.Pow(Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1);
 	}
 
 	public static void UpdateScore(string player, int score)
@@ -683,15 +678,5 @@ public partial class Runner : Node3D
 		//Label scoreLabel = playerScore.GetNode<Label>("Score");
 		//playerScore.Position = new Vector2(playerScore.Position.X, score);
 		//scoreLabel.Text = score.ToString();
-	}
-
-	private static string FormatTime(double seconds, bool padMinutes = false)
-	{
-		int minutes = (int)Math.Floor(seconds / 60);
-
-		seconds -= minutes * 60;
-		seconds = Math.Floor(seconds);
-
-		return $"{(seconds < 0 ? "-" : "")}{(padMinutes ? minutes.ToString().PadZeros(2) : minutes)}:{seconds.ToString().PadZeros(2)}";
 	}
 }

@@ -179,8 +179,7 @@ public partial class MapParser : Node
 
 	public static Map SSMapV1(string path)
 	{
-		string[] pathSplit = path.Split("\\");
-		string name = pathSplit[^1].Replace(".txt", "");
+		string name = path.Split("\\")[^1].TrimSuffix(".txt");
 		Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
 		Map map;
 
@@ -196,8 +195,8 @@ public partial class MapParser : Node
 				
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
-
-			map = new(path, notes, name);
+			
+			map = new(path, notes, null, "", name);
 		}
 		catch (Exception exception)
 		{

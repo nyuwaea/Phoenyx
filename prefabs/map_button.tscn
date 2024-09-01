@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://vgvjvbvu0qsc"]
+[gd_scene load_steps=6 format=3 uid="uid://vgvjvbvu0qsc"]
 
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="1_rhnis"]
 [ext_resource type="Texture2D" uid="uid://cacq7g5ijo7sy" path="res://skin/favorite.png" id="2_c1lr1"]
@@ -30,9 +30,6 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="LabelSettings" id="LabelSettings_fpw8h"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_ojr4i"]
-font_color = Color(0.501961, 0.501961, 0.501961, 1)
 
 [node name="MapTemplate" type="Panel"]
 clip_children = 2
@@ -104,21 +101,25 @@ vertical_alignment = 1
 clip_text = true
 text_overrun_behavior = 3
 
-[node name="Extra" type="Label" parent="Holder"]
+[node name="Extra" type="RichTextLabel" parent="Holder"]
 layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 8.0
+offset_top = 4.0
 offset_right = -8.0
-offset_bottom = -12.0
+offset_bottom = -16.0
 theme = ExtResource("1_rhnis")
-text = "hello hi"
-label_settings = SubResource("LabelSettings_ojr4i")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
+bbcode_enabled = true
+text = "[color=808080]hello hi"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
 
 [node name="Button" type="Button" parent="Holder"]
 layout_mode = 1

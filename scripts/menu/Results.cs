@@ -49,13 +49,16 @@ public partial class Results : Control
 			GetNode<TextureRect>("CoverBackground").Texture = Cover.Texture;
 		}
 
-		Footer.GetNode<Button>("Back").Pressed += () => {
-			Stop();
-		};
+		if (Runner.CurrentAttempt.Map.AudioBuffer != null)
+		{
+			if (!SoundManager.Song.Playing)
+			{
+				SoundManager.Song.Play();
+			}
+		}
 
-		Footer.GetNode<Button>("Play").Pressed += () => {
-			Replay();
-		};
+		Footer.GetNode<Button>("Back").Pressed += Stop;
+		Footer.GetNode<Button>("Play").Pressed += Replay;
 	}
 
 	public override void _Process(double delta)
@@ -99,6 +102,7 @@ public partial class Results : Control
 
 	public static void Replay()
 	{
+		SoundManager.Song.Stop();
 		SceneManager.Load("res://scenes/game.tscn");
 		Runner.Play(MapParser.Decode(Runner.CurrentAttempt.Map.FilePath), Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.RawMods);
 	}

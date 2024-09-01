@@ -17,7 +17,9 @@ public struct Constants
     public static double HitBoxSize {get;} = 0.07;
     public static double HitWindow {get;} = 55;
     public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
-    public static string[] Difficulties = new string[6]{"N/A", "Easy", "Medium", "Hard", "Expert", "Insane"};
+    public static string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
+    public static Color[] DifficultyColours = [Color.FromHtml("ffffff"), Color.FromHtml("00ff00"), Color.FromHtml("ffff00"), Color.FromHtml("ff0000"), Color.FromHtml("7f00ff"), Color.FromHtml("007fff")];
+    public static Color[] SecondaryDifficultyColours = [Color.FromHtml("808080"), Color.FromHtml("7fff7f"), Color.FromHtml("ffff7f"), Color.FromHtml("ff007f"), Color.FromHtml("ff00ff"), Color.FromHtml("007fff")];
     public static Dictionary<string, double> ModsMultipliers = new(){
         ["NoFail"] = 0,
         ["Ghost"] = 0.0675
@@ -50,6 +52,7 @@ public struct Settings
     public static double TrailDetail {get; set;} = 1;
     public static bool CursorDrift {get; set;} = true;
     public static double VideoDim {get; set;} = 80;
+    public static double VideoRenderScale {get; set;} = 100;
     public static bool SimpleHUD {get; set;} = false;
 
     public static void Save(string profile = null)
@@ -84,6 +87,7 @@ public struct Settings
             ["TrailDetail"] = TrailDetail,
             ["CursorDrift"] = CursorDrift,
             ["VideoDim"] = VideoDim,
+            ["VideoRenderScale"] = VideoRenderScale,
             ["SimpleHUD"] = SimpleHUD
         };
 
@@ -132,6 +136,7 @@ public struct Settings
             TrailDetail = (double)data["TrailDetail"];
             CursorDrift = (bool)data["CursorDrift"];
             VideoDim = (double)data["VideoDim"];
+            VideoRenderScale = (double)data["VideoRenderScale"];
             SimpleHUD = (bool)data["SimpleHUD"];
 
             if (Fullscreen)
@@ -164,7 +169,7 @@ public struct Settings
 
 public struct Skin
 {
-    public static string[] Colors {get; set;} = new string[]{"#00ffed", "#ff8ff9"};
+    public static Color[] Colors {get; set;} = [Color.FromHtml("#00ffed"), Color.FromHtml("#ff8ff9")];
     public static string RawColors {get; set;} = "00ffed,ff8ff9";
     public static ImageTexture CursorImage {get; set;} = new();
     public static ImageTexture GridImage {get; set;} = new();
@@ -179,21 +184,12 @@ public struct Skin
     public static ImageTexture JukeboxPauseImage {get; set;} = new();
     public static ImageTexture JukeboxSkipImage {get; set;} = new();
     public static ImageTexture FavoriteImage {get; set;} = new();
-    public static byte[] HitSoundBuffer {get; set;} = System.Array.Empty<byte>();
-    public static byte[] FailSoundBuffer {get; set;} = System.Array.Empty<byte>();
+    public static byte[] HitSoundBuffer {get; set;} = [];
+    public static byte[] FailSoundBuffer {get; set;} = [];
     public static ArrayMesh NoteMesh {get; set;} = new();
 
     public static void Save()
     {
-        string data = "";
-
-        foreach (string color in Colors)
-        {
-            data += color + ",";
-        }
-        
-        RawColors = data.TrimSuffix(",");
-
         File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", RawColors);
     }
 
@@ -202,14 +198,16 @@ public struct Skin
         RawColors = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt").TrimSuffix(",");
 
         string[] split = RawColors.Split(",");
+        Color[] colors = new Color[split.Length];
 
         for (int i = 0; i < split.Length; i++)
         {
             split[i] = split[i].TrimPrefix("#").Substr(0, 6);
             split[i] = new Regex("[^a-fA-F0-9$]").Replace(split[i], "f");
+            colors[i] = Color.FromHtml(split[i]);
         }
-
-        Colors = split;
+        
+        Colors = colors;
         CursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
         GridImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
         HealthImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
@@ -254,8 +252,8 @@ public struct Skin
 public class Util
 {
     private static bool Initialized = false;
-    private static string[] UserDirectories = new string[]{"maps", "profiles", "skins", "replays"};
-    private static string[] SkinFiles = new string[]{"cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "note.obj", "hit.mp3", "fail.mp3", "colors.txt"};
+    private static string[] UserDirectories = ["maps", "profiles", "skins", "replays"];
+    private static string[] SkinFiles = ["cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "hit.mp3", "fail.mp3", "colors.txt"];
     private static Dictionary<string, bool> IgnoreProperties = new Dictionary<string, bool>(){
         ["_import_path"] = true,
         ["owner"] = true,
@@ -283,11 +281,10 @@ public class Util
 
         DiscordRPC.Call("Set", "app_id", 1272588732834254878);
 		DiscordRPC.Call("Set", "large_image", "short");
-
+        
         if (!File.Exists($"{Constants.UserFolder}/favorites.txt"))
         {
-            FileStream file = File.Create($"{Constants.UserFolder}/favorites.txt");
-            file.Close();
+            File.WriteAllText($"{Constants.UserFolder}/favorites.txt", "");
         }
 
         if (!Directory.Exists($"{Constants.UserFolder}/cache"))
@@ -386,7 +383,7 @@ public class Util
 
     public static string GetProfile()
     {
-        return Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine();
+        return File.ReadAllText($"{Constants.UserFolder}/current_profile.txt");
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()
@@ -409,7 +406,7 @@ public class Util
             
             for (int i = 0; i < children.Count; i++)
             {   
-                Node childClone = (Node)typeof(Util).GetMethod("Clone", BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(children[i].GetType()).Invoke(null, new object[]{children[i], recursive});
+                Node childClone = (Node)typeof(Util).GetMethod("Clone", BindingFlags.Public | BindingFlags.Static).MakeGenericMethod(children[i].GetType()).Invoke(null, [children[i], recursive]);
 
                 clone.AddChild(childClone);
             }

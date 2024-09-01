@@ -11,24 +11,25 @@ config_version=5
 [application]
 
 config/name="Phoenyx"
-config/version="0.6.5"
-run/main_scene="res://scenes/main_menu.tscn"
+config/version="0.7"
+run/main_scene="res://scenes/loading.tscn"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="Phoenyx"
 config/features=PackedStringArray("4.3", "C#", "Forward Plus")
-boot_splash/bg_color=Color(0.0235294, 0.0196078, 0.0352941, 1)
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
 boot_splash/image="res://textures/boot_splash.png"
 config/icon="res://icon.svg"
-boot_splash/minimum_display_time=500
 
 [autoload]
 
 DiscordRPCLoader="*res://addons/discord-rpc-gd/nodes/discord_autoload.gd"
 ServerManager="*res://scripts/multiplayer/ServerManager.cs"
 ClientManager="*res://scripts/multiplayer/ClientManager.cs"
-Keybinds="*res://scripts/Keybinds.cs"
+Keybinds="*res://scripts/KeybindsManager.cs"
 ToastNotification="*res://scripts/ToastNotification.cs"
 SceneManager="*res://scripts/SceneManager.cs"
+SoundManager="*res://scripts/SoundManager.cs"
 
 [debug]
 
@@ -52,6 +53,5 @@ common/physics_ticks_per_second=120
 
 [rendering]
 
+anti_aliasing/screen_space_roughness_limiter/enabled=false
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)
-anti_aliasing/quality/msaa_2d=1
-anti_aliasing/quality/msaa_3d=1
