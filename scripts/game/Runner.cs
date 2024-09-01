@@ -474,7 +474,7 @@ public partial class Runner : Node3D
 		ProgressLabel.Text = $"{Lib.String.FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {Lib.String.FormatTime(MapLength / 1000)}";
 		Health.Size = new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80);
 		ProgressBar.Size = new Vector2(1088 * (float)(CurrentAttempt.Progress / MapLength), 80);
-		SkipLabel.Modulate = Color.FromHtml("#ffffff" + Math.Min(255, (int)(255 * SkipLabelAlpha)).ToString("X2"));
+		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
 
 		if (StopQueued)
 		{
@@ -651,6 +651,7 @@ public partial class Runner : Node3D
 					}
 
 					Audio.Seek((float)CurrentAttempt.Progress / 1000);
+					Video.StreamPosition = (float)CurrentAttempt.Progress / 1000;
 				}
 			}
 		}

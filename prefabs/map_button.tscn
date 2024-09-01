@@ -114,6 +114,12 @@ offset_bottom = -16.0
 theme = ExtResource("1_rhnis")
 bbcode_enabled = true
 text = "[color=808080]hello hi"
+fit_content = true
+scroll_active = false
+autowrap_mode = 0
+shortcut_keys_enabled = false
+deselect_on_focus_loss_enabled = false
+drag_and_drop_selection_enabled = false
 
 [node name="Button" type="Button" parent="Holder"]
 layout_mode = 1

@@ -11,7 +11,8 @@ namespace Menu;
 
 public partial class MainMenu : Control
 {
-	private static Control Control;
+	public static Control Control;
+
 	private static readonly PackedScene ChatMessage = GD.Load<PackedScene>("res://prefabs/chat_message.tscn");
 	private static readonly PackedScene MapButton = GD.Load<PackedScene>("res://prefabs/map_button.tscn");
 
@@ -21,7 +22,6 @@ public partial class MainMenu : Control
 	private static Button JukeboxButton;
 	private static ColorRect JukeboxProgress;
 	private static HBoxContainer JukeboxSpectrum;
-	private static AudioStreamPlayer Audio;
 	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
 	private static Panel ContextMenu;
 
@@ -50,10 +50,6 @@ public partial class MainMenu : Control
 	private static bool Quitting = false;
 	private static Vector2I WindowSize = DisplayServer.WindowGetSize();
 	private static double LastFrame = Time.GetTicksUsec();
-	private static string[] JukeboxQueue = Array.Empty<string>();
-	private static int JukeboxIndex = 0;
-	private static bool JukeboxPaused = false;
-	private static ulong LastRewind = 0;
 	private static float Scroll = 0;
 	private static float TargetScroll = 0;
 	private static int MaxScroll = 0;
@@ -121,7 +117,6 @@ public partial class MainMenu : Control
 		JukeboxButton = Jukebox.GetNode<Button>("Button");
 		JukeboxProgress = Jukebox.GetNode("Progress").GetNode<ColorRect>("Main");
 		JukeboxSpectrum = Jukebox.GetNode<HBoxContainer>("Spectrum");
-		Audio = GetNode<AudioStreamPlayer>("AudioStreamPlayer");
 		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
 		ContextMenu = GetNode<Panel>("ContextMenu");
 		LoadedMaps = [];
@@ -129,8 +124,13 @@ public partial class MainMenu : Control
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
 
-		JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
-		JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, JukeboxQueue.Length - 1));
+		SoundManager.JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
+		SoundManager.JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, SoundManager.JukeboxQueue.Length - 1));
+
+		for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
+		{
+			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i]] = i;
+		}
 
 		JukeboxButton.MouseEntered += () => {
 			Label title = Jukebox.GetNode<Label>("Title");
@@ -145,16 +145,10 @@ public partial class MainMenu : Control
 			tween.Play();
 		};
 		JukeboxButton.Pressed += () => {
-			string[] split = JukeboxQueue[JukeboxIndex].Split("\\");
-			string fileName = split[^1].TrimSuffix(".phxm");
+			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].Split("\\")[^1].TrimSuffix(".phxm");
 			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
 
 			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
-		};
-
-		Audio.Finished += () => {
-			JukeboxIndex++;
-			PlayJukebox(JukeboxIndex);
 		};
 
 		foreach (Node child in Jukebox.GetChildren())
@@ -180,28 +174,28 @@ public partial class MainMenu : Control
 				switch (button.Name)
 				{
 					case "Pause":
-						JukeboxPaused = !JukeboxPaused;
-						button.TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
-						Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
+						SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
+						button.TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+						SoundManager.Jukebox.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
 						break;
 					case "Skip":
-						JukeboxIndex++;
-						PlayJukebox(JukeboxIndex);
+						SoundManager.JukeboxIndex++;
+						SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
 						break;
 					case "Rewind":
 						ulong now = Time.GetTicksMsec();
 
-						if (now - LastRewind < 1000)
+						if (now - SoundManager.LastRewind < 1000)
 						{
-							JukeboxIndex--;
-							PlayJukebox(JukeboxIndex);
+							SoundManager.JukeboxIndex--;
+							SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
 						}
 						else
 						{
-							Audio.Seek(0);
+							SoundManager.Jukebox.Seek(0);
 						}
 
-						LastRewind = now;
+						SoundManager.LastRewind = now;
 						break;
 				}
 			};
@@ -511,15 +505,15 @@ public partial class MainMenu : Control
 
 		// Finish
 
-		PlayJukebox(JukeboxIndex);
+		SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
 
-		JukeboxPaused = !Settings.AutoplayJukebox;
-		Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
-		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+		SoundManager.JukeboxPaused = !Settings.AutoplayJukebox;
+		SoundManager.Jukebox.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 
 		UpdateSpectrumSpacing();
 
-		Audio.VolumeDb = -180;
+		SoundManager.Jukebox.VolumeDb = -180;
 	}
 
     public override void _Process(double delta)
@@ -545,10 +539,10 @@ public partial class MainMenu : Control
 			}
 		}
 		
-		if (Audio.Stream != null)
+		if (SoundManager.Jukebox.Stream != null)
 		{
-			JukeboxProgress.AnchorRight = (float)Math.Clamp(Audio.GetPlaybackPosition() / Audio.Stream.GetLength(), 0, 1);
-			Audio.VolumeDb = Mathf.Lerp(Audio.VolumeDb, Quitting ? -80 : -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
+			JukeboxProgress.AnchorRight = (float)Math.Clamp(SoundManager.Jukebox.GetPlaybackPosition() / SoundManager.Jukebox.Stream.GetLength(), 0, 1);
+			SoundManager.Jukebox.VolumeDb = Mathf.Lerp(SoundManager.Jukebox.VolumeDb, Quitting ? -80 : -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
 		}
 
 		float prevHz = 0;
@@ -561,7 +555,7 @@ public partial class MainMenu : Control
 			prevHz = hz;
 			
 			ColorRect colorRect = JukeboxSpectrum.GetNode((i + 1).ToString()).GetNode<ColorRect>("Main");
-			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
+			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (SoundManager.JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
 		}
 
 		for (int i = 0; i < FavoritedMaps.Count; i++)
@@ -584,34 +578,34 @@ public partial class MainMenu : Control
 					{
 						Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{SelectedMap}.phxm");
 
-						Audio.Stop();
+						SoundManager.Jukebox.Stop();
 						SceneManager.Load("res://scenes/game.tscn");
 						Runner.Play(map, Lobby.Speed, Lobby.Mods);
 					}
 					break;
 				case Key.Mediaplay:
-					JukeboxPaused = !JukeboxPaused;
-					Audio.PitchScale = JukeboxPaused ? 0.00000000001f : 1;	// bruh
-					Jukebox.GetNode<TextureButton>("Pause").TextureNormal = JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+					SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
+					SoundManager.Jukebox.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+					Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 					break;
 				case Key.Medianext:
-					JukeboxIndex++;
-					PlayJukebox(JukeboxIndex);
+					SoundManager.JukeboxIndex++;
+					SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
 					break;
 				case Key.Mediaprevious:
 					ulong now = Time.GetTicksMsec();
 
-					if (now - LastRewind < 1000)
+					if (now - SoundManager.LastRewind < 1000)
 					{
-						JukeboxIndex--;
-						PlayJukebox(JukeboxIndex);
+						SoundManager.JukeboxIndex--;
+						SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
 					}
 					else
 					{
-						Audio.Seek(0);
+						SoundManager.Jukebox.Seek(0);
 					}
 
-					LastRewind = now;
+					SoundManager.LastRewind = now;
 					break;
 				default:
 					if (FocusedLineEdit == null && !SearchAuthorEdit.HasFocus() && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
@@ -725,38 +719,6 @@ public partial class MainMenu : Control
 		}
 
 		UpdateMaxScroll();
-	}
-
-	public static void PlayJukebox(int index)
-	{
-		if (index >= JukeboxQueue.Length)
-		{
-			index = 0;
-		}
-		else if (index < 0)
-		{
-			index = JukeboxQueue.Length - 1;
-		}
-
-		if (JukeboxQueue.Length == 0)
-		{
-			return;
-		}
-
-		Map map = MapParser.Decode(JukeboxQueue[index], false);
-
-		if (map.AudioBuffer == null)
-		{
-			JukeboxIndex++;
-			PlayJukebox(JukeboxIndex);
-		}
-
-		Jukebox.GetNode<Label>("Title").Text = map.PrettyTitle;
-
-		Audio.Stream = Lib.Audio.LoadStream(map.AudioBuffer);
-		Audio.Play();
-
-		Util.DiscordRPC.Call("Set", "state", $"Listening to {map.PrettyTitle}");
 	}
 
 	public static void ShowSettings(bool show = true)
@@ -1184,7 +1146,7 @@ public partial class MainMenu : Control
 							{
 								Map map = MapParser.Decode(mapFile);
 
-								Audio.Stop();
+								SoundManager.Jukebox.Stop();
 								SceneManager.Load("res://scenes/game.tscn");
 								Runner.Play(map, Lobby.Speed, Lobby.Mods);
 							}

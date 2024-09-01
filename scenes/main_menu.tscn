@@ -77,9 +77,6 @@ grow_vertical = 2
 mouse_filter = 2
 script = ExtResource("1_wfqfe")
 
-[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
-volume_db = -80.0
-
 [node name="ImportDialog" type="FileDialog" parent="."]
 title = "Open File(s)"
 initial_position = 2

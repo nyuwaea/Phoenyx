@@ -49,13 +49,16 @@ public partial class Results : Control
 			GetNode<TextureRect>("CoverBackground").Texture = Cover.Texture;
 		}
 
-		Footer.GetNode<Button>("Back").Pressed += () => {
-			Stop();
-		};
+		if (Runner.CurrentAttempt.Map.AudioBuffer != null)
+		{
+			SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[Runner.CurrentAttempt.Map.FilePath];
+			SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+			SoundManager.Jukebox.Seek((float)Runner.CurrentAttempt.Progress / 1000);
+			SoundManager.Jukebox.PitchScale = (float)Runner.CurrentAttempt.Speed;
+		}
 
-		Footer.GetNode<Button>("Play").Pressed += () => {
-			Replay();
-		};
+		Footer.GetNode<Button>("Back").Pressed += Stop;
+		Footer.GetNode<Button>("Play").Pressed += Replay;
 	}
 
 	public override void _Process(double delta)
@@ -99,6 +102,7 @@ public partial class Results : Control
 
 	public static void Replay()
 	{
+		SoundManager.Jukebox.Stop();
 		SceneManager.Load("res://scenes/game.tscn");
 		Runner.Play(MapParser.Decode(Runner.CurrentAttempt.Map.FilePath), Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.RawMods);
 	}
