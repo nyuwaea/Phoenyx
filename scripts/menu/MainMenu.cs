@@ -288,10 +288,41 @@ public partial class MainMenu : Control
 			};
 		}
 
-		OptionButton skinOptions = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+		OptionButton profiles = SettingsHolder.GetNode("Header").GetNode<OptionButton>("Profiles");
+		LineEdit profileEdit = SettingsHolder.GetNode("Header").GetNode<LineEdit>("ProfileEdit");
+		OptionButton skins = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
 
-		skinOptions.ItemSelected += (long item) => {
-			Settings.Skin = skinOptions.GetItemText((int)item);
+		SettingsHolder.GetNode("Header").GetNode<Button>("CreateProfile").Pressed += () => {
+			profileEdit.Visible = !profileEdit.Visible;
+		};
+		profileEdit.FocusEntered += () => FocusedLineEdit = profileEdit;
+		profileEdit.FocusExited += () => FocusedLineEdit = null;
+		profileEdit.TextSubmitted += (string text) => {
+			text = new Regex("[^a-zA-Z0-9_ -]").Replace(text.Replace(" ", "_"), "");
+
+			profileEdit.ReleaseFocus();
+			profileEdit.Visible = false;
+
+			if (File.Exists($"{Constants.UserFolder}/profiles/{text}.json"))
+			{
+				ToastNotification.Notify($"Profile {text} already exists!");
+				return;
+			}
+
+			File.WriteAllText($"{Constants.UserFolder}/profiles/{text}.json", File.ReadAllText($"{Constants.UserFolder}/profiles/default.json"));
+			UpdateSettings();
+		};
+		profiles.ItemSelected += (long item) => {
+			string profile = profiles.GetItemText((int)item);
+
+			Settings.Save();
+			File.WriteAllText($"{Constants.UserFolder}/current_profile.txt", profile);
+			Settings.Load(profile);
+			UpdateSettings();
+		};
+
+		skins.ItemSelected += (long item) => {
+			Settings.Skin = skins.GetItemText((int)item);
 			Phoenyx.Skin.Load();
 
 			Cursor.Texture = Phoenyx.Skin.CursorImage;
@@ -842,26 +873,43 @@ public partial class MainMenu : Control
 
 	public static void UpdateSettings(bool connections = false)
 	{
-		OptionButton skinOptions = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+		OptionButton skins = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+		OptionButton profiles = SettingsHolder.GetNode("Header").GetNode<OptionButton>("Profiles");
+		string currentProfile = File.ReadAllText($"{Constants.UserFolder}/current_profile.txt");
 
-		skinOptions.Clear();
+		skins.Clear();
+		profiles.Clear();
 
 		int i = 0;
 
 		foreach (string path in Directory.GetDirectories($"{Constants.UserFolder}/skins"))
 		{
-			string[] split = path.Split("\\");
-			string name = split[^1];
+			string name = path.Split("\\")[^1];
 			
-			skinOptions.AddItem(name, i);
+			skins.AddItem(name, i);
 
 			if (Settings.Skin == name)
 			{
-				skinOptions.Selected = i;
-				SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
+				skins.Selected = i;
 			}
 
 			i++;
+		}
+
+		int j = 0;
+
+		foreach (string path in Directory.GetFiles($"{Constants.UserFolder}/profiles"))
+		{
+			string name = path.Split("\\")[^1].TrimSuffix(".json");
+			
+			profiles.AddItem(name, i);
+
+			if (currentProfile == name)
+			{
+				profiles.Selected = j;
+			}
+
+			j++;
 		}
 
 		foreach (ScrollContainer category in SettingsHolder.GetNode("Categories").GetChildren())

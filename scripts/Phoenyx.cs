@@ -383,7 +383,7 @@ public class Util
 
     public static string GetProfile()
     {
-        return Godot.FileAccess.Open($"{Constants.UserFolder}/current_profile.txt", Godot.FileAccess.ModeFlags.Read).GetLine();
+        return File.ReadAllText($"{Constants.UserFolder}/current_profile.txt");
     }
 
     public static T Clone<T>(T reference, bool recursive = true) where T : Node, new()

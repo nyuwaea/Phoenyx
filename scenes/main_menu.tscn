@@ -1,4 +1,4 @@
-[gd_scene load_steps=29 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=31 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -13,6 +13,7 @@
 [ext_resource type="Texture2D" uid="uid://8du82a5dxjdk" path="res://skin/jukebox_play.png" id="9_wc4q0"]
 [ext_resource type="Texture2D" uid="uid://bpsvcunhigs6c" path="res://skin/jukebox_skip.png" id="10_i0l4j"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="10_j4s1w"]
+[ext_resource type="Texture2D" uid="uid://men3chmi3esy" path="res://textures/add.png" id="13_h750m"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -51,8 +52,13 @@ bg_color = Color(0.0235294, 0.0196078, 0.0352941, 1)
 [sub_resource type="LabelSettings" id="LabelSettings_txd3p"]
 font_size = 26
 
-[sub_resource type="LabelSettings" id="LabelSettings_mc5fm"]
-font = ExtResource("10_j4s1w")
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4u8wr"]
+bg_color = Color(0.117647, 0.117647, 0.117647, 1)
+border_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pr6rv"]
+bg_color = Color(0, 0, 0, 1)
+border_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0ne5a"]
 
@@ -2409,28 +2415,14 @@ text = "SETTINGS"
 label_settings = SubResource("LabelSettings_txd3p")
 vertical_alignment = 1
 
-[node name="Label" type="Label" parent="Settings/Holder/Header"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.7
-anchor_right = 0.8
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("2_46xtp")
-text = "Profile"
-label_settings = SubResource("LabelSettings_mc5fm")
-horizontal_alignment = 2
-vertical_alignment = 1
-
 [node name="Profiles" type="OptionButton" parent="Settings/Holder/Header"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.8
+anchor_left = 0.75
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 8.0
-offset_right = -8.0
+offset_right = -32.0
 offset_bottom = -8.0
 focus_mode = 0
 theme = ExtResource("2_46xtp")
@@ -2441,6 +2433,42 @@ selected = 0
 fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "default"
+
+[node name="CreateProfile" type="Button" parent="Settings/Holder/Header"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -28.0
+offset_top = 10.0
+offset_right = -8.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+tooltip_text = "Create Profile"
+focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_4u8wr")
+theme_override_styles/normal = SubResource("StyleBoxFlat_pr6rv")
+icon = ExtResource("13_h750m")
+icon_alignment = 1
+
+[node name="ProfileEdit" type="LineEdit" parent="Settings/Holder/Header"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = 128.0
+offset_bottom = -8.0
+tooltip_text = "Create Profile"
+focus_mode = 1
+mouse_default_cursor_shape = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_pr6rv")
+placeholder_text = "profile name"
+caret_blink = true
 
 [node name="Volume" type="Panel" parent="."]
 modulate = Color(1, 1, 1, 0)
