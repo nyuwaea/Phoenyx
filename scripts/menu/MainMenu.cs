@@ -29,6 +29,7 @@ public partial class MainMenu : Control
 	private static Button UserFolderButton;
 	private static Button SettingsButton;
 	private static LineEdit SearchEdit;
+	private static LineEdit SearchAuthorEdit;
 	private static FileDialog ImportDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
@@ -66,7 +67,8 @@ public partial class MainMenu : Control
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
 	private static LineEdit FocusedLineEdit = null;
-	private static string Search = "";
+	private static string SearchTitle = "";
+	private static string SearchAuthor = "";
 	private static string ContextMenuTarget;
 
 	public override void _Ready()
@@ -103,7 +105,7 @@ public partial class MainMenu : Control
 				UpdateMapList();
 				Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm").TrimSuffix(".sspm").TrimSuffix(".txt"));
 				
-				if (!mapButton.Name.ToString().Contains(Search))
+				if (!mapButton.Name.ToString().Contains(SearchTitle))
 				{
 					mapButton.Visible = false;
 					VisibleMaps--;
@@ -211,6 +213,7 @@ public partial class MainMenu : Control
 		UserFolderButton = TopBar.GetNode<Button>("UserFolder");
 		SettingsButton = TopBar.GetNode<Button>("Settings");
 		SearchEdit = TopBar.GetNode<LineEdit>("Search");
+		SearchAuthorEdit = TopBar.GetNode<LineEdit>("SearchAuthor");
 		ImportDialog = GetNode<FileDialog>("ImportDialog"); 
 		MapList = GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
@@ -223,26 +226,24 @@ public partial class MainMenu : Control
 			ShowSettings();
 		};
  		SearchEdit.TextChanged += (string text) => {
-			Search = text.ToLower();
+			SearchTitle = text.ToLower();
 
-			if (Search == "")
+			if (SearchTitle == "")
 			{
 				SearchEdit.ReleaseFocus();
 			}
 
-			VisibleMaps = 0;
+			Search();
+		};
+		SearchAuthorEdit.TextChanged += (string text) => {
+			SearchAuthor = text.ToLower();
 
-			foreach (Panel map in MapListContainer.GetChildren())
+			if (SearchAuthor == "")
 			{
-				map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
-
-				if (map.Visible)
-				{
-					VisibleMaps++;
-				}
+				SearchAuthorEdit.ReleaseFocus();
 			}
 
-			UpdateMaxScroll();
+			Search();
 		};
 		ImportDialog.FilesSelected += (string[] files) => {
 			MapParser.Import(files);
@@ -251,7 +252,7 @@ public partial class MainMenu : Control
 
 		UpdateMapList();
 
-		SearchEdit.Text = Search;
+		SearchEdit.Text = SearchTitle;
 
 		foreach (Panel map in MapListContainer.GetChildren())
 		{
@@ -260,7 +261,7 @@ public partial class MainMenu : Control
 				continue;
 			}
 
-			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(Search);
+			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle);
 		}
 
 		// Settings
@@ -326,7 +327,7 @@ public partial class MainMenu : Control
 			MapListContainer.GetNode(ContextMenuTarget).QueueFree();
 			LoadedMaps.Remove(ContextMenuTarget);
 			
-			if (ContextMenuTarget.Contains(Search))
+			if (ContextMenuTarget.Contains(SearchTitle))
 			{
 				VisibleMaps--;
 			}
@@ -548,7 +549,7 @@ public partial class MainMenu : Control
 			switch (eventKey.Keycode)
 			{
 				case Key.Space:
-					if (SelectedMap != null && !SearchEdit.HasFocus())
+					if (SelectedMap != null && !SearchEdit.HasFocus() && !SearchAuthorEdit.HasFocus())
 					{
 						Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{SelectedMap}.phxm");
 
@@ -582,7 +583,7 @@ public partial class MainMenu : Control
 					LastRewind = now;
 					break;
 				default:
-					if (FocusedLineEdit == null && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
+					if (FocusedLineEdit == null && !SearchAuthorEdit.HasFocus() && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
 					{
 						SearchEdit.GrabFocus();
 					}
@@ -677,6 +678,23 @@ public partial class MainMenu : Control
 			Quit();
 		}
     }
+
+	public static void Search()
+	{
+		VisibleMaps = 0;
+
+		foreach (Panel map in MapListContainer.GetChildren())
+		{
+			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle) && map.GetNode("Holder").GetNode<RichTextLabel>("Extra").Text.ToLower().Contains(SearchAuthor);
+
+			if (map.Visible)
+			{
+				VisibleMaps++;
+			}
+		}
+
+		UpdateMaxScroll();
+	}
 
 	public static void PlayJukebox(int index)
 	{
