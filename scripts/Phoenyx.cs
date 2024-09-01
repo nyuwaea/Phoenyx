@@ -18,6 +18,8 @@ public struct Constants
     public static double HitWindow {get;} = 55;
     public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
     public static string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
+    public static Color[] DifficultyColours = [Color.FromHtml("ffffff"), Color.FromHtml("00ff00"), Color.FromHtml("ffff00"), Color.FromHtml("ff0000"), Color.FromHtml("7f00ff"), Color.FromHtml("007fff")];
+    public static Color[] SecondaryDifficultyColours = [Color.FromHtml("808080"), Color.FromHtml("7fff7f"), Color.FromHtml("ffff7f"), Color.FromHtml("ff007f"), Color.FromHtml("ff00ff"), Color.FromHtml("007fff")];
     public static Dictionary<string, double> ModsMultipliers = new(){
         ["NoFail"] = 0,
         ["Ghost"] = 0.0675

@@ -986,6 +986,7 @@ public partial class MainMenu : Control
 	{
 		double start = Time.GetTicksUsec();
 		int i = 0;
+		Color black = Color.Color8(0, 0, 0, 1);
 		List<string> favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList();
 		FavoritedMaps = [];
 
@@ -1008,7 +1009,8 @@ public partial class MainMenu : Control
 				}
 
 				string title;
-				string extra;
+				string difficultyName;
+				string mappers = "";
 				int difficulty;
 				string coverFile = null;
 
@@ -1032,7 +1034,8 @@ public partial class MainMenu : Control
 					//}
 
 					title = map.PrettyTitle;
-					extra = $"{map.DifficultyName} - {map.PrettyMappers}";
+					difficultyName = map.DifficultyName;
+					mappers = map.PrettyMappers;
 					difficulty = map.Difficulty;
 				}
 				else
@@ -1046,15 +1049,13 @@ public partial class MainMenu : Control
 					//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
 					//}
 
-					string mappers = "";
-
 					foreach (string mapper in (string[])metadata["Mappers"])
 					{
 						mappers += $"{mapper}, ";
 					}
 
 					mappers = mappers.Substr(0, mappers.Length - 2);
-					extra = $"{metadata["DifficultyName"]} - {mappers}";
+					difficultyName = (string)metadata["DifficultyName"];
 					title = (string)metadata["Artist"] != "" ? $"{(string)metadata["Artist"]} - {(string)metadata["Title"]}" : (string)metadata["Title"];
 					difficulty = (int)metadata["Difficulty"];
 				}
@@ -1071,8 +1072,9 @@ public partial class MainMenu : Control
 				}
 
 				mapButton.Name = fileName;
+
 				holder.GetNode<Label>("Title").Text = title;
-				holder.GetNode<Label>("Extra").Text = extra.ReplaceLineEndings("");
+				holder.GetNode<RichTextLabel>("Extra").Text = $"[color={Constants.SecondaryDifficultyColours[difficulty].ToHtml(false)}]{difficultyName}[color=808080] - {mappers}".ReplaceLineEndings("");
 
 				MapListContainer.AddChild(mapButton);
 
