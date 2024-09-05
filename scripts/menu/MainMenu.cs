@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using Godot;
-using Phoenyx;
 
 namespace Menu;
 
@@ -18,6 +17,10 @@ public partial class MainMenu : Control
 
 	private static TextureRect Cursor;
 	private static Panel TopBar;
+	private static ColorRect Background;
+	private static Node[] BackgroundTiles;
+	private static Panel Menus;
+	private static Panel Main;
 	private static Panel Jukebox;
 	private static Button JukeboxButton;
 	private static ColorRect JukeboxProgress;
@@ -25,6 +28,8 @@ public partial class MainMenu : Control
 	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
 	private static Panel ContextMenu;
 
+	private static Panel PlayMenu;
+	private static Panel SubTopBar;
 	private static Button ImportButton;
 	private static Button UserFolderButton;
 	private static Button SettingsButton;
@@ -35,6 +40,8 @@ public partial class MainMenu : Control
 	private static VBoxContainer MapListContainer;
 
 	private static Panel SettingsHolder;
+
+	private static Panel Extras;
 
 	private static Panel MultiplayerHolder;
 	private static LineEdit IPLine;
@@ -47,7 +54,6 @@ public partial class MainMenu : Control
 
 	private static bool Initialized = false;
 	private static bool FirstFrame = true;
-	private static bool Quitting = false;
 	private static Vector2I WindowSize = DisplayServer.WindowGetSize();
 	private static double LastFrame = Time.GetTicksUsec();
 	private static float Scroll = 0;
@@ -62,20 +68,23 @@ public partial class MainMenu : Control
 	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
 	private static bool SettingsShown = false;
+	private static string CurrentMenu = "Main";
 	private static LineEdit FocusedLineEdit = null;
 	private static string SearchTitle = "";
 	private static string SearchAuthor = "";
 	private static string ContextMenuTarget;
+	private static Map CurrentMap;
+	private static int PassedNotes = 0;
 
 	public override void _Ready()
 	{
 		Control = this;
 	
-		Util.Setup();
+		Phoenyx.Util.Setup();
 
-		Util.DiscordRPC.Call("Set", "details", "Browsing Maps");
-		Util.DiscordRPC.Call("Set", "state", "");
-		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
+		Phoenyx.Util.DiscordRPC.Call("Set", "details", "Browsing Maps");
+		Phoenyx.Util.DiscordRPC.Call("Set", "state", "");
+		Phoenyx.Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Mailbox);
@@ -113,6 +122,11 @@ public partial class MainMenu : Control
 
 		Cursor = GetNode<TextureRect>("Cursor");
 		TopBar = GetNode<Panel>("TopBar");
+		Background = GetNode<ColorRect>("Background");
+		BackgroundTiles = Background.GetNode("TileHolder").GetChildren().ToArray();
+		Menus = GetNode<Panel>("Menus");
+		Main = Menus.GetNode<Panel>("Main");
+		Extras = Menus.GetNode<Panel>("Extras");
 		Jukebox = GetNode<Panel>("Jukebox");
 		JukeboxButton = Jukebox.GetNode<Button>("Button");
 		JukeboxProgress = Jukebox.GetNode("Progress").GetNode<ColorRect>("Main");
@@ -122,10 +136,107 @@ public partial class MainMenu : Control
 		LoadedMaps = [];
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
-		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
+		Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
 
-		SoundManager.JukeboxQueue = Directory.GetFiles($"{Constants.UserFolder}/maps");
+		VBoxContainer buttons = Main.GetNode<VBoxContainer>("Buttons");
+
+		buttons.GetNode<Button>("Play").Pressed += () => {
+			Transition("Play");
+		};
+		buttons.GetNode<Button>("Settings").Pressed += () => {
+			ShowSettings();
+		};
+		buttons.GetNode<Button>("Extras").Pressed += () => {
+			foreach (Panel holder in Extras.GetNode("Stats").GetNode("ScrollContainer").GetNode("VBoxContainer").GetChildren())
+			{
+				string value = "";
+
+				switch (holder.Name)
+				{
+					case "GamePlaytime":
+						value = $"{Math.Floor((double)Phoenyx.Stats.GamePlaytime / 36) / 100} h";
+						break;
+					case "TotalPlaytime":
+						value = $"{Math.Floor((double)Phoenyx.Stats.TotalPlaytime / 36) / 100} h";
+						break;
+					case "GamesOpened":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.GamesOpened.ToString());
+						break;
+					case "TotalDistance":
+						value = $"{Lib.String.PadMagnitude(((double)Phoenyx.Stats.TotalDistance / 1000).ToString())} m";
+						break;
+					case "NotesHit":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.NotesHit.ToString());
+						break;
+					case "NotesMissed":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.NotesMissed.ToString());
+						break;
+					case "HighestCombo":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.HighestCombo.ToString());
+						break;
+					case "Attempts":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.Attempts.ToString());
+						break;
+					case "Passes":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.Passes.ToString());
+						break;
+					case "FullCombos":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.FullCombos.ToString());
+						break;
+					case "HighestScore":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.HighestScore.ToString());
+						break;
+					case "TotalScore":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.TotalScore.ToString());
+						break;
+					case "AverageAccuracy":
+						double sum = 0;
+
+						foreach (double accuracy in Phoenyx.Stats.PassAccuracies)
+						{
+							sum += accuracy;
+						}
+
+						value = $"{(Math.Floor(sum / Phoenyx.Stats.PassAccuracies.Count * 100) / 100).ToString().PadDecimals(2)}%";
+						break;
+					case "RageQuits":
+						value = Lib.String.PadMagnitude(Phoenyx.Stats.RageQuits.ToString());
+						break;
+					case "FavouriteMap":
+						string mostPlayedID = null;
+						ulong mostPlayedCount = 0;
+
+						foreach (KeyValuePair<string, ulong> entry in Phoenyx.Stats.FavouriteMaps)
+						{
+							if (entry.Value > mostPlayedCount)
+							{
+								mostPlayedID = entry.Key;
+							}
+						}
+
+						value = mostPlayedID != null ? MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{mostPlayedID}.phxm").PrettyTitle : "None";
+						break;
+				}
+
+				holder.GetNode<Label>("Value").Text = value;
+			}
+
+			Transition("Extras");
+		};
+		buttons.GetNode<Button>("Quit").Pressed += () => {
+			Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+		};
+
+		TopBar.GetNode<TextureButton>("Discord").Pressed += () => {
+			OS.ShellOpen("https://discord.gg/aSyC7btWDX");
+		};
+
+		SoundManager.JukeboxQueue = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
 		SoundManager.JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, SoundManager.JukeboxQueue.Length - 1));
+		SoundManager.JukeboxPlayed += (Map map) => {
+			PassedNotes = 0;
+			CurrentMap = map;
+		};
 
 		for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
 		{
@@ -175,8 +286,8 @@ public partial class MainMenu : Control
 				{
 					case "Pause":
 						SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
-						button.TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 						SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+						button.TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 						break;
 					case "Skip":
 						SoundManager.JukeboxIndex++;
@@ -203,18 +314,20 @@ public partial class MainMenu : Control
 
 		// Map selection
 
-		ImportButton = TopBar.GetNode<Button>("Import");
-		UserFolderButton = TopBar.GetNode<Button>("UserFolder");
-		SettingsButton = TopBar.GetNode<Button>("Settings");
-		SearchEdit = TopBar.GetNode<LineEdit>("Search");
-		SearchAuthorEdit = TopBar.GetNode<LineEdit>("SearchAuthor");
+		PlayMenu = Menus.GetNode<Panel>("Play");
+		SubTopBar = PlayMenu.GetNode<Panel>("SubTopBar");
+		ImportButton = SubTopBar.GetNode<Button>("Import");
+		UserFolderButton = SubTopBar.GetNode<Button>("UserFolder");
+		SettingsButton = SubTopBar.GetNode<Button>("Settings");
+		SearchEdit = SubTopBar.GetNode<LineEdit>("Search");
+		SearchAuthorEdit = SubTopBar.GetNode<LineEdit>("SearchAuthor");
 		ImportDialog = GetNode<FileDialog>("ImportDialog"); 
-		MapList = GetNode<ScrollContainer>("MapList");
+		MapList = PlayMenu.GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
 		
 		ImportButton.Pressed += ImportDialog.Show;
 		UserFolderButton.Pressed += () => {
-			OS.ShellOpen($"{Constants.UserFolder}");
+			OS.ShellOpen($"{Phoenyx.Constants.UserFolder}");
 		};
 		SettingsButton.Pressed += () => {
 			ShowSettings();
@@ -297,26 +410,26 @@ public partial class MainMenu : Control
 			profileEdit.ReleaseFocus();
 			profileEdit.Visible = false;
 
-			if (File.Exists($"{Constants.UserFolder}/profiles/{text}.json"))
+			if (File.Exists($"{Phoenyx.Constants.UserFolder}/profiles/{text}.json"))
 			{
 				ToastNotification.Notify($"Profile {text} already exists!");
 				return;
 			}
 
-			File.WriteAllText($"{Constants.UserFolder}/profiles/{text}.json", File.ReadAllText($"{Constants.UserFolder}/profiles/default.json"));
+			File.WriteAllText($"{Phoenyx.Constants.UserFolder}/profiles/{text}.json", File.ReadAllText($"{Phoenyx.Constants.UserFolder}/profiles/default.json"));
 			UpdateSettings();
 		};
 		profiles.ItemSelected += (long item) => {
 			string profile = profiles.GetItemText((int)item);
 
-			Settings.Save();
-			File.WriteAllText($"{Constants.UserFolder}/current_profile.txt", profile);
-			Settings.Load(profile);
+			Phoenyx.Settings.Save();
+			File.WriteAllText($"{Phoenyx.Constants.UserFolder}/current_profile.txt", profile);
+			Phoenyx.Settings.Load(profile);
 			UpdateSettings();
 		};
 
 		skins.ItemSelected += (long item) => {
-			Settings.Skin = skins.GetItemText((int)item);
+			Phoenyx.Settings.Skin = skins.GetItemText((int)item);
 			Phoenyx.Skin.Load();
 
 			Cursor.Texture = Phoenyx.Skin.CursorImage;
@@ -326,20 +439,20 @@ public partial class MainMenu : Control
 		ContextMenu.GetNode("Container").GetNode<Button>("Favorite").Pressed += () => {
 			ContextMenu.Visible = false;
 
-			string favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt");
+			string favorites = File.ReadAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt");
 			bool favorited = favorites.Split("\n").ToList().Contains(ContextMenuTarget);
 			TextureRect favorite = MapListContainer.GetNode(ContextMenuTarget).GetNode("Holder").GetNode<TextureRect>("Favorited");
 			favorite.Visible = !favorited;
 
 			if (favorited)
 			{
-				File.WriteAllText($"{Constants.UserFolder}/favorites.txt", favorites.Replace($"{ContextMenuTarget}\n", ""));
+				File.WriteAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt", favorites.Replace($"{ContextMenuTarget}\n", ""));
 				FavoritedMaps.Remove(ContextMenuTarget);
 			}
 			else
 			{
 				favorite.Texture = Phoenyx.Skin.FavoriteImage;
-				File.WriteAllText($"{Constants.UserFolder}/favorites.txt", $"{favorites}{ContextMenuTarget}\n");
+				File.WriteAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt", $"{favorites}{ContextMenuTarget}\n");
 				FavoritedMaps.Add(ContextMenuTarget);
 			}
 			
@@ -357,16 +470,16 @@ public partial class MainMenu : Control
 				VisibleMaps--;
 			}
 
-			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+			File.Delete($"{Phoenyx.Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
 			
-			if (Directory.Exists($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+			if (Directory.Exists($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
 			{
-				foreach (string file in Directory.GetFiles($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+				foreach (string file in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
 				{
 					File.Delete(file);
 				}
 
-				Directory.Delete($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
+				Directory.Delete($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
 			}
 
 			ToastNotification.Notify("Successfuly deleted map");
@@ -377,22 +490,22 @@ public partial class MainMenu : Control
 		};
 		ContextMenu.GetNode("Container").GetNode<Button>("VideoRemove").Pressed += () => {
 			ContextMenu.Visible = false;
-			Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+			Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
 
-			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+			File.Delete($"{Phoenyx.Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
 
 			map.VideoBuffer = null;
 
 			MapParser.Encode(map);
 
-			if (Directory.Exists($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+			if (Directory.Exists($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
 			{
-				foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+				foreach (string filePath in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
 				{
 					File.Delete(filePath);
 				}
 
-				Directory.Delete($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
+				Directory.Delete($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
 			}
 
 			ToastNotification.Notify("Successfully removed video from map");
@@ -407,29 +520,29 @@ public partial class MainMenu : Control
 			Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
 			byte[] videoBuffer = file.GetBuffer((long)file.GetLength());
 			file.Close();
-			Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+			Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
 
-			File.Delete($"{Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
+			File.Delete($"{Phoenyx.Constants.UserFolder}/maps/{ContextMenuTarget}.phxm");
 
 			map.VideoBuffer = videoBuffer;
 
 			MapParser.Encode(map);
 
-			if (Directory.Exists($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+			if (Directory.Exists($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
 			{
-				foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
+				foreach (string filePath in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}"))
 				{
 					File.Delete(filePath);
 				}
 
-				Directory.Delete($"{Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
+				Directory.Delete($"{Phoenyx.Constants.UserFolder}/cache/maps/{ContextMenuTarget}");
 			}
 
 			ToastNotification.Notify("Successfully added video to map");
 		};
 
 		SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<Button>("SkinFolder").Pressed += () => {
-			OS.ShellOpen($"{Constants.UserFolder}/skins/{Settings.Skin}");
+			OS.ShellOpen($"{Phoenyx.Constants.UserFolder}/skins/{Phoenyx.Settings.Skin}");
 		};
 		SettingsHolder.GetNode("Categories").GetNode("Other").GetNode("Container").GetNode("RhythiaImport").GetNode<Button>("Button").Pressed += () => {
 			if (!Directory.Exists($"{OS.GetDataDir()}/SoundSpacePlus") || !File.Exists($"{OS.GetDataDir()}/SoundSpacePlus/settings.json"))
@@ -441,20 +554,20 @@ public partial class MainMenu : Control
 			Godot.FileAccess file = Godot.FileAccess.Open($"{OS.GetDataDir()}/SoundSpacePlus/settings.json", Godot.FileAccess.ModeFlags.Read);
             Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)Json.ParseString(file.GetAsText());
 
-			Settings.ApproachRate = (float)data["approach_rate"];
-			Settings.ApproachDistance = (float)data["spawn_distance"];
-			Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
-			Settings.FoV = (float)data["fov"];
-			Settings.Sensitivity = (float)data["sensitivity"] * 2;
-			Settings.Parallax = (float)data["parallax"] / 50;
-			Settings.FadeIn = (float)data["fade_length"] * 100;
-			Settings.FadeOut = (bool)data["half_ghost"];
-			Settings.Pushback = (bool)data["do_note_pushback"];
-			Settings.NoteSize = (float)data["note_size"] * 0.875f;
-			Settings.CursorScale = (float)data["cursor_scale"];
-			Settings.CursorTrail = (bool)data["cursor_trail"];
-			Settings.TrailTime = (float)data["trail_time"];
-			Settings.SimpleHUD = (bool)data["simple_hud"];
+			Phoenyx.Settings.ApproachRate = (float)data["approach_rate"];
+			Phoenyx.Settings.ApproachDistance = (float)data["spawn_distance"];
+			Phoenyx.Settings.ApproachTime = Phoenyx.Settings.ApproachDistance / Phoenyx.Settings.ApproachRate;
+			Phoenyx.Settings.FoV = (float)data["fov"];
+			Phoenyx.Settings.Sensitivity = (float)data["sensitivity"] * 2;
+			Phoenyx.Settings.Parallax = (float)data["parallax"] / 50;
+			Phoenyx.Settings.FadeIn = (float)data["fade_length"] * 100;
+			Phoenyx.Settings.FadeOut = (bool)data["half_ghost"];
+			Phoenyx.Settings.Pushback = (bool)data["do_note_pushback"];
+			Phoenyx.Settings.NoteSize = (float)data["note_size"] * 0.875f;
+			Phoenyx.Settings.CursorScale = (float)data["cursor_scale"];
+			Phoenyx.Settings.CursorTrail = (bool)data["cursor_trail"];
+			Phoenyx.Settings.TrailTime = (float)data["trail_time"];
+			Phoenyx.Settings.SimpleHUD = (bool)data["simple_hud"];
 
 			UpdateSettings();
 
@@ -463,9 +576,23 @@ public partial class MainMenu : Control
 
 		UpdateSettings(true);
 
+		// Extras
+
+		Button soundSpace = Extras.GetNode<Button>("SoundSpace");
+		
+		soundSpace.MouseEntered += () => {
+			soundSpace.GetNode<RichTextLabel>("RichTextLabel").Text = "[center][color=ffffff40]Inspired by [color=ffffff80]Sound Space";
+		};
+		soundSpace.MouseExited += () => {
+			soundSpace.GetNode<RichTextLabel>("RichTextLabel").Text = "[center][color=ffffff40]Inspired by Sound Space";
+		};
+		soundSpace.Pressed += () => {
+			OS.ShellOpen("https://www.roblox.com/games/2677609345");
+		};
+
 		// Multiplayer
 
-		MultiplayerHolder = GetNode<Panel>("Multiplayer");
+		MultiplayerHolder = PlayMenu.GetNode<Panel>("Multiplayer");
 		IPLine = MultiplayerHolder.GetNode<LineEdit>("IP");
 		PortLine = MultiplayerHolder.GetNode<LineEdit>("Port");
 		ChatLine = MultiplayerHolder.GetNode<LineEdit>("ChatInput");
@@ -508,12 +635,15 @@ public partial class MainMenu : Control
 		if (!SoundManager.Song.Playing)
 		{
 			SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
-			SoundManager.JukeboxPaused = !Settings.AutoplayJukebox;
+			SoundManager.JukeboxPaused = !Phoenyx.Settings.AutoplayJukebox;
 		}
 		else
 		{
 			Jukebox.GetNode<Label>("Title").Text = Runner.CurrentAttempt.Map.PrettyTitle;
 			SoundManager.JukeboxPaused = false;
+			CurrentMap = Runner.CurrentAttempt.Map;
+
+			Transition("Play", true);
 		}
 
 		SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
@@ -550,11 +680,11 @@ public partial class MainMenu : Control
 		if (SoundManager.Song.Stream != null)
 		{
 			JukeboxProgress.AnchorRight = (float)Math.Clamp(SoundManager.Song.GetPlaybackPosition() / SoundManager.Song.Stream.GetLength(), 0, 1);
-			SoundManager.Song.VolumeDb = Mathf.Lerp(SoundManager.Song.VolumeDb, Quitting ? -80 : -80 + 70 * (float)Math.Pow(Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
+			SoundManager.Song.VolumeDb = Mathf.Lerp(SoundManager.Song.VolumeDb, Phoenyx.Util.Quitting ? -80 : -80 + 70 * (float)Math.Pow(Phoenyx.Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Phoenyx.Settings.VolumeMaster / 100, 0.1), (float)Math.Clamp(delta * 2, 0, 1));
 		}
 
 		float prevHz = 0;
-
+		
 		for (int i = 0; i < 32; i++)
 		{
 			float hz = (i + 1) * 4000 / 32;
@@ -563,7 +693,7 @@ public partial class MainMenu : Control
 			prevHz = hz;
 			
 			ColorRect colorRect = JukeboxSpectrum.GetNode((i + 1).ToString()).GetNode<ColorRect>("Main");
-			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (SoundManager.JukeboxPaused ? 0 : 1), (float)delta * 12), 0, 1);
+			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (SoundManager.JukeboxPaused ? 0.0000000001f : 1), (float)delta * 12), 0, 1);	// oh god not again
 		}
 
 		for (int i = 0; i < FavoritedMaps.Count; i++)
@@ -573,6 +703,32 @@ public partial class MainMenu : Control
 			favoriteRect.Rotation = (float)now / 1000000;
 			favoriteRect.Modulate = modulate;
 		}
+
+		foreach (ColorRect tile in BackgroundTiles)
+		{
+			tile.Color = tile.Color.Lerp(Color.Color8(255, 255, 255, 0), (float)delta * 8);
+		}
+
+		for (int i = PassedNotes; i < CurrentMap.Notes.Length; i++)
+		{
+			if (CurrentMap.Notes[i].Millisecond > SoundManager.Song.GetPlaybackPosition() * 1000)
+			{
+				break;
+			}
+
+			Vector2I pos = new(Math.Sign(CurrentMap.Notes[i].X) + 1, Math.Sign(CurrentMap.Notes[i].Y) + 1);
+			int tile = 0;
+			
+			tile += pos.X;
+			tile += 3 * pos.Y;
+
+			(BackgroundTiles[tile] as ColorRect).Color = Color.Color8(255, 255, 255, 12);
+
+			PassedNotes = i + 1;
+		}
+
+		Main.Position = Main.Position.Lerp((Size / 2 - MousePosition) * (4 / Size.Y), Math.Min(1, (float)delta * 16));
+		Extras.Position = Main.Position;
     }
 
     public override void _Input(InputEvent @event)
@@ -584,7 +740,7 @@ public partial class MainMenu : Control
 				case Key.Space:
 					if (SelectedMap != null && !SearchEdit.HasFocus() && !SearchAuthorEdit.HasFocus())
 					{
-						Map map = MapParser.Decode($"{Constants.UserFolder}/maps/{SelectedMap}.phxm");
+						Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{SelectedMap}.phxm");
 
 						SoundManager.Song.Stop();
 						SceneManager.Load("res://scenes/game.tscn");
@@ -651,6 +807,12 @@ public partial class MainMenu : Control
 						ContextMenu.Visible = false;
 						TargetScroll = Math.Min(MaxScroll, TargetScroll + 80);
 						break;
+					case MouseButton.Xbutton1:
+						if (eventMouseButton.Pressed && CurrentMenu != "Main")
+						{
+							Transition("Main");
+						}
+						break;
 				}
 			}
 		}
@@ -688,7 +850,14 @@ public partial class MainMenu : Control
 					}
 					else
 					{
-						Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+						if (CurrentMenu != "Main")
+						{
+							Transition("Main");
+						}
+						else
+						{
+							Control.GetTree().Root.PropagateNotification((int)NotificationWMCloseRequest);
+						}
 					}
 					break;
 			}
@@ -701,14 +870,6 @@ public partial class MainMenu : Control
 					ContextMenu.Visible = false;
 					break;
 			}
-		}
-    }
-
-    public override void _Notification(int what)
-    {
-        if (what == NotificationWMCloseRequest)
-		{
-			Quit();
 		}
     }
 
@@ -761,80 +922,80 @@ public partial class MainMenu : Control
 		switch (setting)
 		{
 			case "Sensitivity":
-				Settings.Sensitivity = (double)value;
+				Phoenyx.Settings.Sensitivity = (double)value;
 				break;
 			case "ApproachRate":
-				Settings.ApproachRate = (double)value;
-				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+				Phoenyx.Settings.ApproachRate = (double)value;
+				Phoenyx.Settings.ApproachTime = Phoenyx.Settings.ApproachDistance / Phoenyx.Settings.ApproachRate;
 				break;
 			case "ApproachDistance":
-				Settings.ApproachDistance = (double)value;
-				Settings.ApproachTime = Settings.ApproachDistance / Settings.ApproachRate;
+				Phoenyx.Settings.ApproachDistance = (double)value;
+				Phoenyx.Settings.ApproachTime = Phoenyx.Settings.ApproachDistance / Phoenyx.Settings.ApproachRate;
 				break;
 			case "FadeIn":
-				Settings.FadeIn = (double)value;
+				Phoenyx.Settings.FadeIn = (double)value;
 				break;
 			case "Parallax":
-				Settings.Parallax = (double)value;
+				Phoenyx.Settings.Parallax = (double)value;
 				break;
 			case "FoV":
-				Settings.FoV = (double)value;
+				Phoenyx.Settings.FoV = (double)value;
 				break;
 			case "VolumeMaster":
-				Settings.VolumeMaster = (double)value;
+				Phoenyx.Settings.VolumeMaster = (double)value;
 				break;
 			case "VolumeMusic":
-				Settings.VolumeMusic = (double)value;
+				Phoenyx.Settings.VolumeMusic = (double)value;
 				break;
 			case "VolumeSFX":
-				Settings.VolumeSFX = (double)value;
+				Phoenyx.Settings.VolumeSFX = (double)value;
 				break;
 			case "AlwaysPlayHitSound":
-				Settings.AlwaysPlayHitSound = (bool)value;
+				Phoenyx.Settings.AlwaysPlayHitSound = (bool)value;
 				break;
 			case "NoteSize":
-				Settings.NoteSize = (double)value;
+				Phoenyx.Settings.NoteSize = (double)value;
 				break;
 			case "CursorScale":
-				Settings.CursorScale = (double)value;
-				Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
+				Phoenyx.Settings.CursorScale = (double)value;
+				Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
 				break;
 			case "CameraLock":
-				Settings.CameraLock = (bool)value;
+				Phoenyx.Settings.CameraLock = (bool)value;
 				break;
 			case "FadeOut":
-				Settings.FadeOut = (bool)value;
+				Phoenyx.Settings.FadeOut = (bool)value;
 				break;
 			case "Pushback":
-				Settings.Pushback = (bool)value;
+				Phoenyx.Settings.Pushback = (bool)value;
 				break;
 			case "Fullscreen":
-				Settings.Fullscreen = (bool)value;
+				Phoenyx.Settings.Fullscreen = (bool)value;
 				DisplayServer.WindowSetMode((bool)value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
 				break;
 			case "CursorTrail":
-				Settings.CursorTrail = (bool)value;
+				Phoenyx.Settings.CursorTrail = (bool)value;
 				break;
 			case "TrailTime":
-				Settings.TrailTime = (double)value;
+				Phoenyx.Settings.TrailTime = (double)value;
 				break;
 			case "TrailDetail":
-				Settings.TrailDetail = (double)value;
+				Phoenyx.Settings.TrailDetail = (double)value;
 				break;
 			case "CursorDrift":
-				Settings.CursorDrift = (bool)value;
+				Phoenyx.Settings.CursorDrift = (bool)value;
 				break;
 			case "VideoDim":
-				Settings.VideoDim = (double)value;
+				Phoenyx.Settings.VideoDim = (double)value;
 				break;
 			case "VideoRenderScale":
-				Settings.VideoRenderScale = (double)value;
+				Phoenyx.Settings.VideoRenderScale = (double)value;
 				break;
 			case "SimpleHUD":
-				Settings.SimpleHUD = (bool)value;
+				Phoenyx.Settings.SimpleHUD = (bool)value;
 				break;
 			case "AutoplayJukebox":
-				Settings.AutoplayJukebox = (bool)value;
+				Phoenyx.Settings.AutoplayJukebox = (bool)value;
 				break;
 		}
 
@@ -845,20 +1006,20 @@ public partial class MainMenu : Control
 	{
 		OptionButton skins = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
 		OptionButton profiles = SettingsHolder.GetNode("Header").GetNode<OptionButton>("Profiles");
-		string currentProfile = File.ReadAllText($"{Constants.UserFolder}/current_profile.txt");
+		string currentProfile = File.ReadAllText($"{Phoenyx.Constants.UserFolder}/current_profile.txt");
 
 		skins.Clear();
 		profiles.Clear();
 
 		int i = 0;
 
-		foreach (string path in Directory.GetDirectories($"{Constants.UserFolder}/skins"))
+		foreach (string path in Directory.GetDirectories($"{Phoenyx.Constants.UserFolder}/skins"))
 		{
 			string name = path.Split("\\")[^1];
 			
 			skins.AddItem(name, i);
 
-			if (Settings.Skin == name)
+			if (Phoenyx.Settings.Skin == name)
 			{
 				skins.Selected = i;
 			}
@@ -868,7 +1029,7 @@ public partial class MainMenu : Control
 
 		int j = 0;
 
-		foreach (string path in Directory.GetFiles($"{Constants.UserFolder}/profiles"))
+		foreach (string path in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/profiles"))
 		{
 			string name = path.Split("\\")[^1].TrimSuffix(".json");
 			
@@ -886,7 +1047,7 @@ public partial class MainMenu : Control
 		{
 			foreach (Panel option in category.GetNode("Container").GetChildren())
 			{
-				var property = new Settings().GetType().GetProperty(option.Name);
+				var property = new Phoenyx.Settings().GetType().GetProperty(option.Name);
 				
 				if (option.FindChild("HSlider") != null)
 				{
@@ -1015,7 +1176,7 @@ public partial class MainMenu : Control
 
 	public static void UpdateVolume()
 	{
-		SettingsHolder.GetNode("Categories").GetNode("Audio").GetNode("Container").GetNode("VolumeMaster").GetNode<HSlider>("HSlider").Value = Settings.VolumeMaster;
+		SettingsHolder.GetNode("Categories").GetNode("Audio").GetNode("Container").GetNode("VolumeMaster").GetNode<HSlider>("HSlider").Value = Phoenyx.Settings.VolumeMaster;
 	}
 
     public static void UpdateMapList()
@@ -1023,10 +1184,10 @@ public partial class MainMenu : Control
 		double start = Time.GetTicksUsec();
 		int i = 0;
 		Color black = Color.Color8(0, 0, 0, 1);
-		List<string> favorites = File.ReadAllText($"{Constants.UserFolder}/favorites.txt").Split("\n").ToList();
+		List<string> favorites = File.ReadAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt").Split("\n").ToList();
 		FavoritedMaps = [];
 
-		foreach (string mapFile in Directory.GetFiles($"{Constants.UserFolder}/maps"))
+		foreach (string mapFile in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps"))
 		{
 			try
 			{
@@ -1050,23 +1211,23 @@ public partial class MainMenu : Control
 				int difficulty;
 				string coverFile = null;
 
-				if (!Directory.Exists($"{Constants.UserFolder}/cache/maps/{fileName}"))
+				if (!Directory.Exists($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}"))
 				{
-					Directory.CreateDirectory($"{Constants.UserFolder}/cache/maps/{fileName}");
+					Directory.CreateDirectory($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}");
 					Map map = MapParser.Decode(mapFile, false);
 
-					File.WriteAllText($"{Constants.UserFolder}/cache/maps/{fileName}/metadata.json", map.EncodeMeta());
+					File.WriteAllText($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/metadata.json", map.EncodeMeta());
 
 					//if (map.CoverBuffer != null)
 					//{
-					//	Godot.FileAccess cover = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png", Godot.FileAccess.ModeFlags.Write);
+					//	Godot.FileAccess cover = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/cover.png", Godot.FileAccess.ModeFlags.Write);
 					//	cover.StoreBuffer(map.CoverBuffer);
 					//	cover.Close();
 					//	
-					//	Image coverImage = Image.LoadFromFile($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png");
+					//	Image coverImage = Image.LoadFromFile($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/cover.png");
 					//	coverImage.Resize(128, 128);
-					//	coverImage.SavePng($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png");
-					//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
+					//	coverImage.SavePng($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/cover.png");
+					//	coverFile = $"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/cover.png";
 					//}
 
 					title = map.PrettyTitle;
@@ -1076,13 +1237,13 @@ public partial class MainMenu : Control
 				}
 				else
 				{
-					Godot.FileAccess metaFile = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/maps/{fileName}/metadata.json", Godot.FileAccess.ModeFlags.Read);
+					Godot.FileAccess metaFile = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/metadata.json", Godot.FileAccess.ModeFlags.Read);
 					Godot.Collections.Dictionary metadata = (Godot.Collections.Dictionary)Json.ParseString(Encoding.UTF8.GetString(metaFile.GetBuffer((long)metaFile.GetLength())));
 					metaFile.Close();
 
-					//if (File.Exists($"{Constants.UserFolder}/cache/maps/{fileName}/cover.png"))
+					//if (File.Exists($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/cover.png"))
 					//{
-					//	coverFile = $"{Constants.UserFolder}/cache/maps/{fileName}/cover.png";
+					//	coverFile = $"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/cover.png";
 					//}
 
 					foreach (string mapper in (string[])metadata["Mappers"])
@@ -1110,7 +1271,7 @@ public partial class MainMenu : Control
 				mapButton.Name = fileName;
 
 				holder.GetNode<Label>("Title").Text = title;
-				holder.GetNode<RichTextLabel>("Extra").Text = $"[color={Constants.SecondaryDifficultyColours[difficulty].ToHtml(false)}]{difficultyName}[color=808080] - {mappers}".ReplaceLineEndings("");
+				holder.GetNode<RichTextLabel>("Extra").Text = $"[color={Phoenyx.Constants.SecondaryDifficultyColours[difficulty].ToHtml(false)}]{difficultyName}[color=808080] - {mappers}".ReplaceLineEndings("");
 
 				MapListContainer.AddChild(mapButton);
 
@@ -1228,19 +1389,43 @@ public partial class MainMenu : Control
 		ChatLine.Text = "";
 	}
 
-    private static void Quit()
+	private static void Transition(string menuName, bool instant = false)
 	{
-		Quitting = true;
+		CurrentMenu = menuName;
 
-		Settings.Save();
-		Util.DiscordRPC.Call("Set", "end_timestamp", 0);
-		Util.DiscordRPC.Call("Clear");
+		if (FocusedLineEdit != null)
+		{
+			FocusedLineEdit.ReleaseFocus();
+		}
 
-		Tween tween = Control.CreateTween();
-		tween.TweenProperty(Control, "modulate", Color.Color8(1, 1, 1, 0), 0.5).SetTrans(Tween.TransitionType.Quad);
-		tween.TweenCallback(Callable.From(() => {
-			Control.GetTree().Quit();
+		Tween outTween = Control.CreateTween();
+		
+		foreach (Panel menu in Menus.GetChildren())
+		{
+			if (menu.Name == CurrentMenu)
+			{
+				continue;
+			}
+			outTween.Parallel().TweenProperty(menu, "modulate", Color.Color8(255, 255, 255, 0), instant ? 0 : 0.15).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+		}
+
+		outTween.TweenCallback(Callable.From(() => {
+			foreach (Panel menu in Menus.GetChildren())
+			{
+				if (menu.Name == CurrentMenu)
+				{
+					continue;
+				}
+				menu.Visible = false;
+			}
 		}));
-		tween.Play();
+		outTween.Play();
+
+		Panel inMenu = Menus.GetNode<Panel>(menuName);
+		inMenu.Visible = true;
+
+		Tween inTween = Control.CreateTween();
+		inTween.TweenProperty(inMenu, "modulate", Color.Color8(255, 255, 255, 255), instant ? 0 : 0.15).SetTrans(Tween.TransitionType.Quad);
+		inTween.Play();
 	}
 }

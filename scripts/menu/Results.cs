@@ -1,13 +1,9 @@
 using Godot;
-using Phoenyx;
 using System;
 
 public partial class Results : Control
 {
-	private static Control Control;
-
 	private static TextureRect Cursor;
-	private static Panel TopBar;
 	private static Panel Footer;
 	private static Panel Holder;
 	private static TextureRect Cover;
@@ -17,10 +13,7 @@ public partial class Results : Control
 
 	public override void _Ready()
 	{
-		Control = this;
-		
 		Cursor = GetNode<TextureRect>("Cursor");
-		TopBar = GetNode<Panel>("TopBar");
 		Footer = GetNode<Panel>("Footer");
 		Holder = GetNode<Panel>("Holder");
 		Cover = GetNode<TextureRect>("Cover");
@@ -29,7 +22,7 @@ public partial class Results : Control
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Mailbox);
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
-		Cursor.Size = new Vector2(32 * (float)Settings.CursorScale, 32 * (float)Settings.CursorScale);
+		Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
 
 		Holder.GetNode<Label>("Title").Text = Runner.CurrentAttempt.Map.PrettyTitle;
 		Holder.GetNode<Label>("Difficulty").Text = Runner.CurrentAttempt.Map.DifficultyName;
@@ -41,11 +34,11 @@ public partial class Results : Control
 
 		if (Runner.CurrentAttempt.Map.CoverBuffer != null)
 		{
-			FileAccess file = FileAccess.Open($"{Constants.UserFolder}/cache/cover.png", FileAccess.ModeFlags.Write);
+			FileAccess file = FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/cover.png", FileAccess.ModeFlags.Write);
 			file.StoreBuffer(Runner.CurrentAttempt.Map.CoverBuffer);
 			file.Close();
 
-			Cover.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/cache/cover.png"));
+			Cover.Texture = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Phoenyx.Constants.UserFolder}/cache/cover.png"));
 			GetNode<TextureRect>("CoverBackground").Texture = Cover.Texture;
 		}
 
@@ -75,12 +68,12 @@ public partial class Results : Control
 	{
 		if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
-			switch (eventKey.Keycode)
+			switch (eventKey.PhysicalKeycode)
 			{
 				case Key.Escape:
 					Stop();
 					break;
-				case Key.Space:
+				case Key.Quoteleft:
 					Replay();
 					break;
 			}

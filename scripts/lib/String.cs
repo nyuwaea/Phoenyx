@@ -18,17 +18,20 @@ public class String
     public static string PadMagnitude(string str, string pad = ",")
     {
         string formatted = "";
+        string[] split = str.Split(".");
+        string whole = split[0];
+        string decimals = split.Length > 1 ? "." + split[1] : "";
 
-        for (int i = 0; i < str.Length; i++)
+        for (int i = 0; i < whole.Length; i++)
         {
-            formatted += str[i];
+            formatted += whole[i];
 
-            if ((str.Length - i - 1) % 3 == 0)
+            if ((whole.Length - i - 1) % 3 == 0)
             {
                 formatted += pad;
             }
         }
 
-        return formatted.TrimSuffix(pad);
+        return formatted.TrimSuffix(pad) + decimals;
     }
 }

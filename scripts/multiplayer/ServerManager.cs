@@ -1,6 +1,5 @@
 using System;
 using Godot;
-using Phoenyx;
 
 public partial class ServerManager : Node
 {
@@ -77,7 +76,7 @@ public partial class ServerManager : Node
 			return;
 		}
 
-		FileAccess file = FileAccess.Open($"{Constants.UserFolder}/maps/{fileName}", FileAccess.ModeFlags.Read);
+		FileAccess file = FileAccess.Open($"{Phoenyx.Constants.UserFolder}/maps/{fileName}", FileAccess.ModeFlags.Read);
 
 		ClientManager.Node.RpcId(id, "ReceiveMapBuffer", fileName, file.GetBuffer((long)file.GetLength()));
 

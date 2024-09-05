@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=53 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -10,6 +10,7 @@
 [ext_resource type="Texture2D" uid="uid://cxv6ey5xb6b0f" path="res://skin/health_background.png" id="6_bbly8"]
 [ext_resource type="Texture2D" uid="uid://4x2vfpyjkri6" path="res://skin/health.png" id="7_wjg6i"]
 [ext_resource type="Texture2D" uid="uid://dmc5f6ajp8xv1" path="res://skin/progress_background.png" id="8_eu3ux"]
+[ext_resource type="Shader" path="res://scripts/shaders/video_background.gdshader" id="8_ocxsu"]
 [ext_resource type="Texture2D" uid="uid://d3s17ehomjscd" path="res://skin/progress.png" id="9_nde5v"]
 [ext_resource type="Texture2D" uid="uid://80bitp5weqrb" path="res://skin/panel_left_background.png" id="11_sdncv"]
 [ext_resource type="Texture2D" uid="uid://diba7c3s8as4s" path="res://skin/panel_right_background.png" id="12_whe6p"]
@@ -148,6 +149,9 @@ shading_mode = 0
 albedo_texture = SubResource("ViewportTexture_crm1r")
 texture_repeat = false
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4qlgx"]
+shader = ExtResource("8_ocxsu")
+
 [sub_resource type="FFmpegVideoStream" id="FFmpegVideoStream_aj2pp"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
@@ -276,10 +280,10 @@ transparent_bg = true
 size = Vector2i(1920, 1080)
 
 [node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VideoViewport"]
+material = SubResource("ShaderMaterial_4qlgx")
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_bottom = 8.0
 grow_horizontal = 2
 grow_vertical = 2
 stream = SubResource("FFmpegVideoStream_aj2pp")

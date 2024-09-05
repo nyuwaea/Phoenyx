@@ -1,7 +1,8 @@
-[gd_scene load_steps=31 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=50 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
+[ext_resource type="FontFile" uid="uid://dotb3skhwouha" path="res://fonts/Roboto-Bold.ttf" id="2_nj0d7"]
 [ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="3_cp44m"]
 [ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="4_iqqm8"]
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
@@ -13,7 +14,10 @@
 [ext_resource type="Texture2D" uid="uid://8du82a5dxjdk" path="res://skin/jukebox_play.png" id="9_wc4q0"]
 [ext_resource type="Texture2D" uid="uid://bpsvcunhigs6c" path="res://skin/jukebox_skip.png" id="10_i0l4j"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="10_j4s1w"]
+[ext_resource type="Texture2D" uid="uid://ct67kupv6bmny" path="res://textures/discord.png" id="11_vckcj"]
+[ext_resource type="Texture2D" uid="uid://cf5g2fnlyyyn7" path="res://textures/discord_hover.png" id="12_e83hu"]
 [ext_resource type="Texture2D" uid="uid://men3chmi3esy" path="res://textures/add.png" id="13_h750m"]
+[ext_resource type="Texture2D" uid="uid://d3buklvnhgqcy" path="res://textures/discord_hovered.png" id="13_lpi1s"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -23,7 +27,67 @@ subpixel_positioning = 0
 resource_name = "Phoenix"
 default_font = SubResource("SystemFont_lsskb")
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yiicd"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bl404"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tkeab"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wc1go"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(1, 1, 1, 0.0235294)
+border_width_top = 8
+border_width_bottom = 8
+border_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5ycqf"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(1, 1, 1, 0)
+border_width_top = 8
+border_width_bottom = 8
+border_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_keb1d"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(1, 1, 1, 0.0470588)
+border_width_top = 8
+border_width_bottom = 8
+border_color = Color(1, 1, 1, 0)
+
+[sub_resource type="Theme" id="Theme_m671i"]
+Button/font_sizes/font_size = 24
+Button/fonts/font = ExtResource("2_nj0d7")
+Button/styles/focus = SubResource("StyleBoxFlat_wc1go")
+Button/styles/hover = SubResource("StyleBoxFlat_wc1go")
+Button/styles/normal = SubResource("StyleBoxFlat_5ycqf")
+Button/styles/pressed = SubResource("StyleBoxFlat_keb1d")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6pifw"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_18lcc"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooiyf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ruka0"]
+bg_color = Color(1, 1, 1, 0.0313726)
+
+[sub_resource type="LabelSettings" id="LabelSettings_5g0q6"]
+font = ExtResource("2_nj0d7")
+font_size = 32
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3x0tp"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_fsvfi"]
+font = ExtResource("10_j4s1w")
+
+[sub_resource type="LabelSettings" id="LabelSettings_5pcip"]
+font = ExtResource("8_jfynb")
+
+[sub_resource type="LabelSettings" id="LabelSettings_1o5ig"]
+font_color = Color(1, 1, 1, 0.188235)
 
 [sub_resource type="LabelSettings" id="LabelSettings_wksxa"]
 font = ExtResource("8_jfynb")
@@ -109,7 +173,254 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.0235294, 0.0196078, 0.0352941, 1)
 
-[node name="Multiplayer" type="Panel" parent="."]
+[node name="TileHolder" type="Panel" parent="Background"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 64.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yiicd")
+
+[node name="0" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.667
+anchor_right = 0.333
+anchor_bottom = 1.0
+color = Color(1, 1, 1, 0)
+
+[node name="1" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.333
+anchor_top = 0.667
+anchor_right = 0.667
+anchor_bottom = 1.0
+color = Color(1, 1, 1, 0)
+
+[node name="2" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.667
+anchor_top = 0.667
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(1, 1, 1, 0)
+
+[node name="3" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.333
+anchor_right = 0.333
+anchor_bottom = 0.667
+color = Color(1, 1, 1, 0)
+
+[node name="4" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.333
+anchor_top = 0.333
+anchor_right = 0.667
+anchor_bottom = 0.667
+color = Color(1, 1, 1, 0)
+
+[node name="5" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.667
+anchor_top = 0.333
+anchor_right = 1.0
+anchor_bottom = 0.667
+color = Color(1, 1, 1, 0)
+
+[node name="6" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.333
+anchor_bottom = 0.333
+color = Color(1, 1, 1, 0)
+
+[node name="7" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.333
+anchor_right = 0.667
+anchor_bottom = 0.333
+color = Color(1, 1, 1, 0)
+
+[node name="8" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.667
+anchor_right = 1.0
+anchor_bottom = 0.333
+color = Color(1, 1, 1, 0)
+
+[node name="Menus" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bl404")
+
+[node name="Main" type="Panel" parent="Menus"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_tkeab")
+
+[node name="Buttons" type="VBoxContainer" parent="Menus/Main"]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 80.0
+offset_right = 512.0
+offset_bottom = -80.0
+alignment = 1
+
+[node name="Play" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "PLAY"
+alignment = 0
+
+[node name="Settings" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "SETTINGS"
+alignment = 0
+
+[node name="Extras" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "EXTRAS"
+alignment = 0
+
+[node name="Quit" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "QUIT"
+alignment = 0
+
+[node name="Play" type="Panel" parent="Menus"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_6pifw")
+
+[node name="SubTopBar" type="Panel" parent="Menus/Play"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 4.0
+offset_top = 64.0
+offset_right = -4.0
+offset_bottom = 128.0
+theme = ExtResource("2_46xtp")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+
+[node name="Import" type="Button" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -448.0
+offset_top = 14.0
+offset_right = -374.0
+offset_bottom = 46.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Import"
+
+[node name="UserFolder" type="Button" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -556.0
+offset_top = 14.0
+offset_right = -456.0
+offset_bottom = 46.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "User Folder"
+
+[node name="Settings" type="Button" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -644.0
+offset_top = 14.0
+offset_right = -564.0
+offset_bottom = 46.0
+grow_horizontal = 0
+tooltip_text = "CTRL + O"
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Settings"
+
+[node name="Search" type="LineEdit" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -258.0
+offset_top = 14.0
+offset_right = -8.0
+offset_bottom = 46.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = ExtResource("6_6ryry")
+placeholder_text = "Search"
+caret_blink = true
+
+[node name="SearchAuthor" type="LineEdit" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -366.0
+offset_top = 14.0
+offset_right = -266.0
+offset_bottom = 46.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = ExtResource("6_6ryry")
+placeholder_text = "Author"
+caret_blink = true
+
+[node name="Multiplayer" type="Panel" parent="Menus/Play"]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -120,7 +431,7 @@ anchor_bottom = 0.9
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Host" type="Button" parent="Multiplayer"]
+[node name="Host" type="Button" parent="Menus/Play/Multiplayer"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -138,7 +449,7 @@ theme_override_styles/pressed = ExtResource("4_iqqm8")
 theme_override_styles/normal = ExtResource("3_cp44m")
 text = "Host"
 
-[node name="Join" type="Button" parent="Multiplayer"]
+[node name="Join" type="Button" parent="Menus/Play/Multiplayer"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -156,7 +467,7 @@ theme_override_styles/pressed = ExtResource("4_iqqm8")
 theme_override_styles/normal = ExtResource("3_cp44m")
 text = "Join"
 
-[node name="Port" type="LineEdit" parent="Multiplayer"]
+[node name="Port" type="LineEdit" parent="Menus/Play/Multiplayer"]
 layout_mode = 0
 offset_left = 155.0
 offset_top = 10.0
@@ -166,7 +477,7 @@ tooltip_text = "Don't forget to port forward!"
 theme = ExtResource("2_46xtp")
 placeholder_text = "44220"
 
-[node name="IP" type="LineEdit" parent="Multiplayer"]
+[node name="IP" type="LineEdit" parent="Menus/Play/Multiplayer"]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0
@@ -176,7 +487,7 @@ tooltip_text = "Set this to your local IPv4 (192.168.X.XXX) "
 theme = ExtResource("2_46xtp")
 placeholder_text = "127.0.0.1"
 
-[node name="ChatInput" type="LineEdit" parent="Multiplayer"]
+[node name="ChatInput" type="LineEdit" parent="Menus/Play/Multiplayer"]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 152.4
@@ -185,7 +496,7 @@ offset_bottom = 183.4
 tooltip_text = "Chat"
 theme = ExtResource("2_46xtp")
 
-[node name="Chat" type="ScrollContainer" parent="Multiplayer"]
+[node name="Chat" type="ScrollContainer" parent="Menus/Play/Multiplayer"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -198,10 +509,562 @@ offset_bottom = -43.4
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Holder" type="VBoxContainer" parent="Multiplayer/Chat"]
+[node name="Holder" type="VBoxContainer" parent="Menus/Play/Multiplayer/Chat"]
 custom_minimum_size = Vector2(440.8, 100)
 layout_mode = 2
 size_flags_horizontal = 4
+
+[node name="MapList" type="ScrollContainer" parent="Menus/Play"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 128.0
+offset_bottom = -72.0
+grow_horizontal = 0
+mouse_filter = 2
+theme = ExtResource("2_46xtp")
+horizontal_scroll_mode = 0
+
+[node name="Container" type="VBoxContainer" parent="Menus/Play/MapList"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+theme = ExtResource("2_46xtp")
+
+[node name="Extras" type="Panel" parent="Menus"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ooiyf")
+
+[node name="Logo" type="TextureRect" parent="Menus/Extras"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -32.0
+offset_top = 72.0
+offset_right = 32.0
+offset_bottom = 172.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("7_8ivsy")
+expand_mode = 3
+
+[node name="SoundSpace" type="Button" parent="Menus/Extras"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -96.0
+offset_top = 64.0
+offset_right = 96.0
+offset_bottom = 204.0
+grow_horizontal = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 1, 0.25098)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+flat = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Menus/Extras/SoundSpace"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_fonts/normal_font = ExtResource("10_j4s1w")
+bbcode_enabled = true
+text = "[center][color=ffffff40]Inspired by Sound Space"
+scroll_active = false
+
+[node name="Stats" type="Panel" parent="Menus/Extras"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.4
+anchor_bottom = 1.0
+offset_left = 196.0
+offset_top = 204.0
+offset_bottom = -80.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ruka0")
+
+[node name="Header" type="Label" parent="Menus/Extras/Stats"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 8.0
+grow_horizontal = 2
+text = "STATISTICS"
+label_settings = SubResource("LabelSettings_5g0q6")
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Menus/Extras/Stats"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 54.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_46xtp")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Menus/Extras/Stats/ScrollContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="GamePlaytime" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Time spent strictly being in a map"
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamePlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Game Playtime"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamePlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0h"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="TotalPlaytime" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalPlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Total Playtime"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalPlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0h"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="GamesOpened" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamesOpened"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Games Opened"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamesOpened"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="TotalDistance" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Adjusted to 1000 DPI"
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalDistance"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Total Distance"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalDistance"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0m"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="NotesHit" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesHit"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Notes Hit"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesHit"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="NotesMissed" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesMissed"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Notes Missed"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesMissed"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="HighestCombo" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestCombo"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Highest Combo"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestCombo"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="Attempts" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Attempts"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Attempts"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Attempts"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="Passes" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Passes"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Passes"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Passes"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="FullCombos" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FullCombos"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Full Combos"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FullCombos"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="HighestScore" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Highest Score"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="TotalScore" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Total Score"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="AverageAccuracy" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/AverageAccuracy"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Average Accuracy"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/AverageAccuracy"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0%"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="RageQuits" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/RageQuits"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Rage Quits"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/RageQuits"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="FavouriteMap" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FavouriteMap"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = 6.0
+offset_right = -4.0
+text = "Favourite Map"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FavouriteMap"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 6.0
+label_settings = SubResource("LabelSettings_5pcip")
+autowrap_mode = 3
 
 [node name="TopBar" type="Panel" parent="."]
 layout_mode = 1
@@ -223,86 +1086,6 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0.0313726)
 
-[node name="Import" type="Button" parent="TopBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -448.0
-offset_top = 14.0
-offset_right = -374.0
-offset_bottom = 46.0
-grow_horizontal = 0
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Import"
-
-[node name="UserFolder" type="Button" parent="TopBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -556.0
-offset_top = 14.0
-offset_right = -456.0
-offset_bottom = 46.0
-grow_horizontal = 0
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "User Folder"
-
-[node name="Settings" type="Button" parent="TopBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -644.0
-offset_top = 14.0
-offset_right = -564.0
-offset_bottom = 46.0
-grow_horizontal = 0
-tooltip_text = "CTRL + O"
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Settings"
-
-[node name="Search" type="LineEdit" parent="TopBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -258.0
-offset_top = 14.0
-offset_right = -8.0
-offset_bottom = 46.0
-grow_horizontal = 0
-mouse_default_cursor_shape = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_styles/focus = ExtResource("6_6ryry")
-placeholder_text = "Search"
-caret_blink = true
-
-[node name="SearchAuthor" type="LineEdit" parent="TopBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -366.0
-offset_top = 14.0
-offset_right = -266.0
-offset_bottom = 46.0
-grow_horizontal = 0
-mouse_default_cursor_shape = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_styles/focus = ExtResource("6_6ryry")
-placeholder_text = "Author"
-caret_blink = true
-
 [node name="Logo" type="TextureRect" parent="TopBar"]
 layout_mode = 0
 offset_left = 6.0
@@ -312,6 +1095,32 @@ offset_bottom = 54.0
 texture = ExtResource("7_8ivsy")
 expand_mode = 2
 stretch_mode = 5
+
+[node name="Version" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 64.0
+grow_vertical = 2
+text = "Phoenyx EARLY-v0.8"
+label_settings = SubResource("LabelSettings_1o5ig")
+vertical_alignment = 1
+
+[node name="Discord" type="TextureButton" parent="TopBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 224.0
+offset_top = -16.0
+offset_right = 256.0
+offset_bottom = 16.0
+grow_vertical = 2
+focus_mode = 0
+texture_normal = ExtResource("11_vckcj")
+texture_pressed = ExtResource("12_e83hu")
+texture_hover = ExtResource("13_lpi1s")
 
 [node name="Jukebox" type="Panel" parent="."]
 layout_mode = 1
@@ -930,6 +1739,7 @@ offset_left = -17.0
 offset_top = 13.0
 offset_right = 17.0
 offset_bottom = -13.0
+focus_mode = 1
 texture_normal = ExtResource("9_wc4q0")
 ignore_texture_size = true
 stretch_mode = 0
@@ -945,6 +1755,7 @@ offset_left = 20.0
 offset_top = 13.0
 offset_right = 54.0
 offset_bottom = -13.0
+focus_mode = 1
 texture_normal = ExtResource("10_i0l4j")
 ignore_texture_size = true
 stretch_mode = 0
@@ -960,6 +1771,7 @@ offset_left = -54.0
 offset_top = 13.0
 offset_right = -20.0
 offset_bottom = -13.0
+focus_mode = 1
 texture_normal = ExtResource("10_i0l4j")
 ignore_texture_size = true
 stretch_mode = 0
@@ -1001,32 +1813,12 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -210.0
-offset_top = -110.0
+offset_top = -172.0
 offset_right = -10.0
-offset_bottom = -10.0
+offset_bottom = -72.0
 grow_horizontal = 0
 grow_vertical = 0
 alignment = 2
-
-[node name="MapList" type="ScrollContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 72.0
-offset_bottom = -72.0
-grow_horizontal = 0
-mouse_filter = 2
-theme = ExtResource("2_46xtp")
-horizontal_scroll_mode = 0
-
-[node name="Container" type="VBoxContainer" parent="MapList"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.0
-theme = ExtResource("2_46xtp")
 
 [node name="ContextMenu" type="Panel" parent="."]
 visible = false

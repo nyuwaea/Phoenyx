@@ -2,7 +2,6 @@ using System;
 using System.Text;
 using System.Text.RegularExpressions;
 using Godot;
-using Phoenyx;
 
 public struct Map
 {
@@ -33,7 +32,7 @@ public struct Map
         Mappers = mappers ?? ["N/A"];
         PrettyMappers = "";
         Difficulty = difficulty;
-        DifficultyName = difficultyName ?? Constants.Difficulties[Difficulty];
+        DifficultyName = difficultyName ?? Phoenyx.Constants.Difficulties[Difficulty];
         AudioBuffer = audioBuffer;
         CoverBuffer = coverBuffer;
         VideoBuffer = videoBuffer;
