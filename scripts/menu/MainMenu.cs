@@ -27,6 +27,7 @@ public partial class MainMenu : Control
 	private static HBoxContainer JukeboxSpectrum;
 	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
 	private static Panel ContextMenu;
+	private static TextureRect Peruchor;
 
 	private static Panel PlayMenu;
 	private static Panel SubTopBar;
@@ -75,6 +76,8 @@ public partial class MainMenu : Control
 	private static string ContextMenuTarget;
 	private static Map CurrentMap;
 	private static int PassedNotes = 0;
+	private static int PeruSequenceIndex = 0;
+	private static string[] PeruSequence = ["P", "E", "R", "U"];
 
 	public override void _Ready()
 	{
@@ -133,6 +136,7 @@ public partial class MainMenu : Control
 		JukeboxSpectrum = Jukebox.GetNode<HBoxContainer>("Spectrum");
 		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
 		ContextMenu = GetNode<Panel>("ContextMenu");
+		Peruchor = Main.GetNode<TextureRect>("Peruchor");
 		LoadedMaps = [];
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
@@ -735,6 +739,25 @@ public partial class MainMenu : Control
     {
 		if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
+			if (eventKey.AsText() == PeruSequence[PeruSequenceIndex])
+			{
+				PeruSequenceIndex++;
+				
+				if (PeruSequenceIndex >= 4)
+				{
+					PeruSequenceIndex = 0;
+					Peruchor.Visible = true;
+
+					Tween tween = Peruchor.CreateTween();
+					tween.TweenProperty(Peruchor, "modulate", Color.Color8(255, 255, 255, 255), 3);
+					tween.Play();
+				}
+			}
+			else
+			{
+				PeruSequenceIndex = 0;
+			}
+
 			switch (eventKey.Keycode)
 			{
 				case Key.Space:

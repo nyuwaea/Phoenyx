@@ -1,9 +1,11 @@
-[gd_scene load_steps=50 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=53 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
 [ext_resource type="FontFile" uid="uid://dotb3skhwouha" path="res://fonts/Roboto-Bold.ttf" id="2_nj0d7"]
 [ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="3_cp44m"]
+[ext_resource type="Shader" path="res://scripts/shaders/p.gdshader" id="3_gfhy0"]
+[ext_resource type="Texture2D" uid="uid://dqr46iek4sfxo" path="res://textures/p.png" id="4_dbx8x"]
 [ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="4_iqqm8"]
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
 [ext_resource type="StyleBox" uid="uid://bfimbyi3x5h0n" path="res://theme/line_edit_stylebox_normal.tres" id="6_6ryry"]
@@ -33,6 +35,9 @@ default_font = SubResource("SystemFont_lsskb")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tkeab"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_osb3p"]
+shader = ExtResource("3_gfhy0")
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wc1go"]
 content_margin_left = 8.0
 content_margin_right = 8.0
@@ -58,7 +63,7 @@ border_width_bottom = 8
 border_color = Color(1, 1, 1, 0)
 
 [sub_resource type="Theme" id="Theme_m671i"]
-Button/font_sizes/font_size = 24
+Button/font_sizes/font_size = 32
 Button/fonts/font = ExtResource("2_nj0d7")
 Button/styles/focus = SubResource("StyleBoxFlat_wc1go")
 Button/styles/hover = SubResource("StyleBoxFlat_wc1go")
@@ -72,7 +77,7 @@ Button/styles/pressed = SubResource("StyleBoxFlat_keb1d")
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooiyf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ruka0"]
-bg_color = Color(1, 1, 1, 0.0313726)
+bg_color = Color(0.054902, 0.0509804, 0.0666667, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_5g0q6"]
 font = ExtResource("2_nj0d7")
@@ -278,6 +283,20 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_tkeab")
+
+[node name="Peruchor" type="TextureRect" parent="Menus/Main"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_osb3p")
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 0.8
+texture = ExtResource("4_dbx8x")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="Buttons" type="VBoxContainer" parent="Menus/Main"]
 layout_mode = 1
