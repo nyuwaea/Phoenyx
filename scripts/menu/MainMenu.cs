@@ -215,6 +215,7 @@ public partial class MainMenu : Control
 							if (entry.Value > mostPlayedCount)
 							{
 								mostPlayedID = entry.Key;
+								mostPlayedCount = entry.Value;
 							}
 						}
 

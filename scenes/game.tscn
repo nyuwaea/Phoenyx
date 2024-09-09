@@ -6,13 +6,14 @@
 [ext_resource type="Script" path="res://scripts/game/Renderer.cs" id="3_ew8wr"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="3_negii"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="4_rvp5o"]
-[ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="5_pxgh4"]
 [ext_resource type="Texture2D" uid="uid://cxv6ey5xb6b0f" path="res://skin/health_background.png" id="6_bbly8"]
 [ext_resource type="Texture2D" uid="uid://4x2vfpyjkri6" path="res://skin/health.png" id="7_wjg6i"]
 [ext_resource type="Texture2D" uid="uid://dmc5f6ajp8xv1" path="res://skin/progress_background.png" id="8_eu3ux"]
 [ext_resource type="Shader" path="res://scripts/shaders/video_background.gdshader" id="8_ocxsu"]
 [ext_resource type="Texture2D" uid="uid://d3s17ehomjscd" path="res://skin/progress.png" id="9_nde5v"]
+[ext_resource type="FontFile" uid="uid://cmjos3o0k2f6t" path="res://fonts/Comfortaa-Medium.ttf" id="11_o37lt"]
 [ext_resource type="Texture2D" uid="uid://80bitp5weqrb" path="res://skin/panel_left_background.png" id="11_sdncv"]
+[ext_resource type="FontFile" uid="uid://b6hgjef6s6oly" path="res://fonts/Comfortaa-Bold.ttf" id="12_axsek"]
 [ext_resource type="Texture2D" uid="uid://diba7c3s8as4s" path="res://skin/panel_right_background.png" id="12_whe6p"]
 [ext_resource type="Texture2D" uid="uid://dw2gxd3m24h4m" path="res://skin/hits.png" id="13_6rhgc"]
 [ext_resource type="Texture2D" uid="uid://c3x2cp3tx4vqt" path="res://skin/misses.png" id="14_bqf11"]
@@ -77,6 +78,9 @@ mesh = SubResource("QuadMesh_5p2n8")
 transparency = 1
 shading_mode = 0
 albedo_texture = ExtResource("3_negii")
+texture_filter = 5
+texture_repeat = false
+distance_fade_min_distance = 1076.07
 
 [sub_resource type="QuadMesh" id="QuadMesh_xij4d"]
 material = SubResource("StandardMaterial3D_lvhmj")
@@ -155,22 +159,21 @@ shader = ExtResource("8_ocxsu")
 [sub_resource type="FFmpegVideoStream" id="FFmpegVideoStream_aj2pp"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_usmyc"]
-font = ExtResource("5_pxgh4")
+font = ExtResource("12_axsek")
 font_size = 50
 
 [sub_resource type="LabelSettings" id="LabelSettings_5bid2"]
-font_size = 30
-font_color = Color(1, 1, 1, 0.627451)
-
-[sub_resource type="LabelSettings" id="LabelSettings_4qhw1"]
+font = ExtResource("12_axsek")
 font_size = 30
 font_color = Color(1, 1, 1, 0.627451)
 
 [sub_resource type="LabelSettings" id="LabelSettings_g4ffu"]
+font = ExtResource("11_o37lt")
 font_size = 50
 font_color = Color(1, 1, 1, 0.768627)
 
 [sub_resource type="LabelSettings" id="LabelSettings_s1j5a"]
+font = ExtResource("12_axsek")
 font_size = 50
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t86sn"]
@@ -237,14 +240,14 @@ pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0.25098)
 outline_modulate = Color(0, 0, 0, 0)
 text = "0:00 / 0:00"
-font = ExtResource("5_pxgh4")
+font = ExtResource("12_axsek")
 font_size = 64
 
 [node name="Title" type="Label3D" parent="."]
 transform = Transform3D(2, 0, 0, 0, 1.93185, -0.517638, 0, 0.517638, 1.93185, 0, 8.25, -10)
 outline_modulate = Color(0, 0, 0, 0)
 text = "N/A - N/A"
-font = ExtResource("5_pxgh4")
+font = ExtResource("12_axsek")
 font_size = 64
 autowrap_mode = 3
 width = 2500.0
@@ -255,7 +258,7 @@ pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0)
 outline_modulate = Color(1, 1, 1, 0.0941176)
 text = "0"
-font = ExtResource("5_pxgh4")
+font = ExtResource("12_axsek")
 font_size = 64
 outline_size = 4
 
@@ -265,7 +268,7 @@ pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0.12549)
 outline_modulate = Color(0, 0, 0, 0)
 text = "1.00x"
-font = ExtResource("5_pxgh4")
+font = ExtResource("12_axsek")
 
 [node name="Skip" type="Label3D" parent="."]
 transform = Transform3D(7, 0, 0, 0, 6.76148, 1.81173, 0, -1.81173, 6.76148, 0, -5, -10)
@@ -273,10 +276,11 @@ pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0)
 outline_modulate = Color(0, 0, 0, 0)
 text = "Press Space to skip"
-font = ExtResource("5_pxgh4")
+font = ExtResource("12_axsek")
 
 [node name="VideoViewport" type="SubViewport" parent="."]
 transparent_bg = true
+canvas_item_default_texture_filter = 2
 size = Vector2i(1920, 1080)
 
 [node name="VideoStreamPlayer" type="VideoStreamPlayer" parent="VideoViewport"]
@@ -294,6 +298,7 @@ expand = true
 process_mode = 3
 disable_3d = true
 transparent_bg = true
+canvas_item_default_texture_filter = 2
 size = Vector2i(250, 625)
 
 [node name="Background" type="TextureRect" parent="PanelRightViewport"]
@@ -324,7 +329,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
+offset_left = -43.0
+offset_top = -14.5
 offset_right = -26.0
+offset_bottom = 20.5
 grow_horizontal = 0
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -340,11 +348,14 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = 26.0
+offset_top = -14.5
+offset_right = 43.0
+offset_bottom = 20.5
 grow_vertical = 2
 size_flags_horizontal = 4
 theme = ExtResource("4_rvp5o")
 text = "0"
-label_settings = SubResource("LabelSettings_4qhw1")
+label_settings = SubResource("LabelSettings_5bid2")
 
 [node name="SimpleMisses" type="Label" parent="PanelRightViewport"]
 visible = false
@@ -366,7 +377,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_top = 100.0
+offset_left = -14.5
+offset_top = 25.5
+offset_right = 14.5
+offset_bottom = 82.5
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -419,6 +433,7 @@ grow_vertical = 2
 [node name="PanelLeftViewport" type="SubViewport" parent="."]
 disable_3d = true
 transparent_bg = true
+canvas_item_default_texture_filter = 2
 size = Vector2i(250, 625)
 
 [node name="Background" type="TextureRect" parent="PanelLeftViewport"]
@@ -460,6 +475,7 @@ horizontal_alignment = 1
 [node name="HealthViewport" type="SubViewport" parent="."]
 disable_3d = true
 transparent_bg = true
+canvas_item_default_texture_filter = 2
 size = Vector2i(1088, 80)
 render_target_update_mode = 4
 
@@ -478,6 +494,7 @@ stretch_mode = 1
 [node name="ProgressBarViewport" type="SubViewport" parent="."]
 disable_3d = true
 transparent_bg = true
+canvas_item_default_texture_filter = 2
 size = Vector2i(1088, 80)
 render_target_update_mode = 4
 

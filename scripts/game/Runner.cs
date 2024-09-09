@@ -63,18 +63,18 @@ public partial class Runner : Node3D
 		public Dictionary<string, bool> Mods;
 		public string[] Players = [];
 		public bool Alive = true;
-		public int Hits = 0;
+		public uint Hits = 0;
 		public List<Dictionary<string, int>> HitsInfo = [];
-		public int Misses = 0;
+		public uint Misses = 0;
 		public List<int> MissesInfo = [];
-		public int Sum = 0;
-		public int Combo = 0;
-		public int ComboMultiplier = 1;
-		public int ComboMultiplierProgress = 0;
-		public int ComboMultiplierIncrement = 0;
+		public uint Sum = 0;
+		public uint Combo = 0;
+		public uint ComboMultiplier = 1;
+		public uint ComboMultiplierProgress = 0;
+		public uint ComboMultiplierIncrement = 0;
 		public double ModsMultiplier = 1;
-		public int Score = 0;
-		public int PassedNotes = 0;
+		public uint Score = 0;
+		public uint PassedNotes = 0;
 		public double Accuracy = 100;
 		public double Health = 100;
 		public double HealthStep = 15;
@@ -88,9 +88,9 @@ public partial class Runner : Node3D
 		{
 			Map = map;
 			Speed = speed;
-			Players = players ?? Array.Empty<string>();
+			Players = players ?? [];
 			Progress = -1000 - Phoenyx.Settings.ApproachTime * 1000;
-			ComboMultiplierIncrement = Map.Notes.Length / 200;
+			ComboMultiplierIncrement = (uint)Map.Notes.Length / 200;
 			RawMods = mods;
 			Mods = new(){
 				["NoFail"] = mods.Contains("NoFail"),
@@ -134,7 +134,7 @@ public partial class Runner : Node3D
 				ComboMultiplier = Math.Min(8, ComboMultiplier + 1);
 			}
 
-			Score += (int)(100 * ComboMultiplier * ModsMultiplier * factor);
+			Score += (uint)(100 * ComboMultiplier * ModsMultiplier * factor);
 			HealthStep = Math.Max(HealthStep / 1.45f, 15);
 			Health = Math.Min(100, Health + HealthStep / 1.75f);
 			Map.Notes[index].Hit = true;
@@ -142,7 +142,7 @@ public partial class Runner : Node3D
 			ScoreLabel.Text = Lib.String.PadMagnitude(Score.ToString());
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			HitsLabel.Text = $"{Hits}";
-			HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			HitsLabel.LabelSettings.FontColor = Color.Color8(255, 255, 255, 255);
 			SumLabel.Text = Lib.String.PadMagnitude(Sum.ToString());
 			AccuracyLabel.Text = $"{(Hits + Misses == 0 ? "100.00" : Accuracy.ToString().PadDecimals(2))}%";
 			ComboLabel.Text = Combo.ToString();
@@ -154,7 +154,7 @@ public partial class Runner : Node3D
 
 			HitTween?.Kill();
 			HitTween = HitsLabel.CreateTween();
-			HitTween.TweenProperty(HitsLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
+			HitTween.TweenProperty(HitsLabel.LabelSettings, "font_color", Color.Color8(255, 255, 255, 160), 1);
 			HitTween.Play();
 
 			if (Lobby.PlayerCount > 1)
@@ -195,14 +195,14 @@ public partial class Runner : Node3D
 			MultiplierLabel.Text = $"{ComboMultiplier}x";
 			MissesLabel.Text = $"{Misses}";
 			SimpleMissesLabel.Text = $"{Misses}";
-			MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffff");
+			MissesLabel.LabelSettings.FontColor = Color.Color8(255, 255, 255, 255);
 			SumLabel.Text = Lib.String.PadMagnitude(Sum.ToString());
 			AccuracyLabel.Text = $"{(Hits + Misses == 0 ? "100.00" : Accuracy.ToString().PadDecimals(2))}%";
 			ComboLabel.Text = Combo.ToString();
 
 			MissTween?.Kill();
 			MissTween = MissesLabel.CreateTween();
-			MissTween.TweenProperty(MissesLabel.LabelSettings, "font_color", Color.FromHtml("#ffffffa0"), 1);
+			MissTween.TweenProperty(MissesLabel.LabelSettings, "font_color", Color.Color8(255, 255, 255, 160), 1);
 			MissTween.Play();
 
 			if (MissIcons >= 64)
@@ -408,7 +408,7 @@ public partial class Runner : Node3D
 		ProcessNotes.Clear();
 
 		// note process check
-		for (int i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)
+		for (uint i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)
 		{
 			Note note = CurrentAttempt.Map.Notes[i];
 
