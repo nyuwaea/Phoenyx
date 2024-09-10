@@ -33,8 +33,10 @@ public partial class Runner : Node3D
 	private static Label SimpleMissesLabel;
 	private static Label ScoreLabel;
 	private static Label MultiplierLabel;
-	private static Panel MultiplierProgress;
+	private static Panel MultiplierProgressPanel;
 	private static ShaderMaterial MultiplierProgressMaterial;
+	private static float MultiplierProgress = 0;	// more efficient than spamming material.GetShaderParameter()
+	private static Color MultiplierColour = Color.Color8(255, 255, 255);
 	private static VideoStreamPlayer Video;
 	private static Tween HitTween;
 	private static Tween MissTween;
@@ -66,9 +68,10 @@ public partial class Runner : Node3D
 		public string[] Players = [];
 		public bool Alive = true;
 		public uint Hits = 0;
-		public List<Dictionary<string, int>> HitsInfo = [];
+		public List<Dictionary<string, float>> HitsInfo = [];
 		public uint Misses = 0;
 		public List<int> MissesInfo = [];
+		public double DeathTime = -1;
 		public uint Sum = 0;
 		public uint Combo = 0;
 		public uint ComboMultiplier = 1;
@@ -122,7 +125,7 @@ public partial class Runner : Node3D
 				Phoenyx.Stats.HighestCombo = Combo;
 			}
 
-			int lateness = (int)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed);
+			float lateness = (float)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed);
 			float factor = 1 - Math.Max(0, lateness - 25) / 150f;
 
 			HitsInfo.Add(new(){
@@ -139,7 +142,7 @@ public partial class Runner : Node3D
 				}
 				else
 				{
-					MultiplierProgressMaterial.SetShaderParameter("colour", Color.Color8(255, 128, 0));
+					MultiplierColour = Color.Color8(255, 140, 0);
 				}
 			}
 
@@ -192,6 +195,7 @@ public partial class Runner : Node3D
 				{
 					Alive = false;
 					Qualifies = false;
+					DeathTime = Progress;
 					SoundManager.FailSound.Play();
 				}
 
@@ -264,8 +268,8 @@ public partial class Runner : Node3D
 		SimpleMissesLabel = PanelRight.GetNode<Label>("SimpleMisses");
 		ScoreLabel = PanelLeft.GetNode<Label>("Score");
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
-		MultiplierProgress = PanelLeft.GetNode<Panel>("MultiplierProgress");
-		MultiplierProgressMaterial = MultiplierProgress.Material as ShaderMaterial;
+		MultiplierProgressPanel = PanelLeft.GetNode<Panel>("MultiplierProgress");
+		MultiplierProgressMaterial = MultiplierProgressPanel.Material as ShaderMaterial;
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
 		if (Phoenyx.Settings.SimpleHUD)
@@ -288,8 +292,11 @@ public partial class Runner : Node3D
 		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
 
 		float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(Phoenyx.Settings.FoV / 2)), 2) - Math.Pow(103.75, 2));
-		(VideoQuad.Mesh as QuadMesh).Size = new Vector2(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
-		Video.GetParent<SubViewport>().Size = new Vector2I((int)(1920 * Phoenyx.Settings.VideoRenderScale / 100), (int)(1080 * Phoenyx.Settings.VideoRenderScale / 100));
+		(VideoQuad.Mesh as QuadMesh).Size = new(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
+		Video.GetParent<SubViewport>().Size = new((int)(1920 * Phoenyx.Settings.VideoRenderScale / 100), (int)(1080 * Phoenyx.Settings.VideoRenderScale / 100));
+
+		MultiplierProgressMaterial.SetShaderParameter("progress", 0);
+		MultiplierProgressMaterial.SetShaderParameter("colour", Color.Color8(255, 255, 255));
 
 		Phoenyx.Util.DiscordRPC.Call("Set", "details", "Playing a Map");
 		Phoenyx.Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
@@ -352,7 +359,19 @@ public partial class Runner : Node3D
 		UpdateVolume();
 	}
 
-	public override void _Process(double delta)
+    public override void _PhysicsProcess(double delta)
+    {
+        MultiplierProgress = Mathf.Lerp(MultiplierProgress, (float)CurrentAttempt.ComboMultiplierProgress / CurrentAttempt.ComboMultiplierIncrement, (float)delta * 16);
+		MultiplierColour = MultiplierColour.Lerp(Color.Color8(255, 255, 255), (float)delta * 2);
+		MultiplierProgressMaterial.SetShaderParameter("progress", MultiplierProgress);
+	
+		if (MultiplierColour.B < 255)	// fuck
+		{
+			MultiplierProgressMaterial.SetShaderParameter("colour", MultiplierColour);	// this loves causing lag spikes, keep track
+		}
+    }
+
+    public override void _Process(double delta)
 	{
 		ulong now = Time.GetTicksUsec();
 		delta = (now - LastFrame) / 1000000;	// more reliable
@@ -496,8 +515,6 @@ public partial class Runner : Node3D
 		Health.Size = Health.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), (float)delta * 64);
 		ProgressBar.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
 		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
-		//MultiplierProgressMaterial.SetShaderParameter("progress", Mathf.Lerp((float)MultiplierProgressMaterial.GetShaderParameter("progress"), (float)CurrentAttempt.ComboMultiplierProgress / CurrentAttempt.ComboMultiplierIncrement, (float)delta * 16));
-		//MultiplierProgressMaterial.SetShaderParameter("colour", MultiplierProgressMaterial.GetShaderParameter("colour").AsColor().Lerp(Color.Color8(255, 255, 255), (float)delta * 2));
 
 		if (StopQueued)
 		{

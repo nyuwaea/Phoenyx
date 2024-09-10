@@ -1,4 +1,4 @@
-[gd_scene load_steps=53 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=57 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -20,6 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://cf5g2fnlyyyn7" path="res://textures/discord_hover.png" id="12_e83hu"]
 [ext_resource type="Texture2D" uid="uid://men3chmi3esy" path="res://textures/add.png" id="13_h750m"]
 [ext_resource type="Texture2D" uid="uid://d3buklvnhgqcy" path="res://textures/discord_hovered.png" id="13_lpi1s"]
+[ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="21_bm8r1"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -76,8 +77,12 @@ Button/styles/pressed = SubResource("StyleBoxFlat_keb1d")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooiyf"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dr6yk"]
+shader = ExtResource("21_bm8r1")
+shader_parameter/brightness = 2.0
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ruka0"]
-bg_color = Color(0.054902, 0.0509804, 0.0666667, 1)
+bg_color = Color(1, 1, 1, 1)
 
 [sub_resource type="LabelSettings" id="LabelSettings_5g0q6"]
 font = ExtResource("2_nj0d7")
@@ -91,8 +96,16 @@ font = ExtResource("10_j4s1w")
 [sub_resource type="LabelSettings" id="LabelSettings_5pcip"]
 font = ExtResource("8_jfynb")
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l7ueg"]
+shader = ExtResource("21_bm8r1")
+shader_parameter/brightness = 2.0
+
 [sub_resource type="LabelSettings" id="LabelSettings_1o5ig"]
 font_color = Color(1, 1, 1, 0.188235)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h3j6r"]
+shader = ExtResource("21_bm8r1")
+shader_parameter/brightness = 2.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_wksxa"]
 font = ExtResource("8_jfynb")
@@ -619,6 +632,7 @@ text = "[center][color=ffffff40]Inspired by Sound Space"
 scroll_active = false
 
 [node name="Stats" type="Panel" parent="Menus/Extras"]
+material = SubResource("ShaderMaterial_dr6yk")
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.4
@@ -1106,13 +1120,13 @@ theme = ExtResource("2_46xtp")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
 
 [node name="Background" type="ColorRect" parent="TopBar"]
+material = SubResource("ShaderMaterial_l7ueg")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.0313726)
 
 [node name="Logo" type="TextureRect" parent="TopBar"]
 layout_mode = 0
@@ -1164,13 +1178,13 @@ theme = ExtResource("2_46xtp")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
 
 [node name="Background" type="ColorRect" parent="Jukebox"]
+material = SubResource("ShaderMaterial_h3j6r")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.0313726)
 
 [node name="Spectrum" type="HBoxContainer" parent="Jukebox"]
 layout_mode = 1

@@ -4,7 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://cacq7g5ijo7sy" path="res://skin/favorite.png" id="2_c1lr1"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_jhkog"]
-bg_color = Color(0.0383972, 0.0383972, 0.0383972, 0.768627)
+bg_color = Color(0.0235294, 0.0196078, 0.0352941, 0.768627)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2
@@ -17,7 +17,7 @@ corner_radius_bottom_right = 4
 corner_radius_bottom_left = 4
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_b6lsb"]
-bg_color = Color(0.0605303, 0.0605304, 0.0605303, 0.768627)
+bg_color = Color(0.0235294, 0.0196078, 0.0352941, 0.768627)
 border_width_left = 2
 border_width_top = 2
 border_width_right = 2

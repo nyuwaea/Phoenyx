@@ -12,12 +12,18 @@ public partial class Graph : ColorRect
 		foreach (int miss in Runner.CurrentAttempt.MissesInfo)
 		{
 			int position = (int)(Size.X * miss / Runner.CurrentAttempt.Map.Length);
-			DrawLine(Vector2.Right * position, new Vector2(position, Size.Y), missColor, 1);
+			DrawLine(Vector2.Right * position, new(position, Size.Y), missColor, 1);
 		}
 
-		foreach (Dictionary<string, int> hit in Runner.CurrentAttempt.HitsInfo)
+		foreach (Dictionary<string, float> hit in Runner.CurrentAttempt.HitsInfo)
 		{
-			DrawRect(new(Size.X * (hit["Time"] / (float)Runner.CurrentAttempt.Map.Length), Size.Y * (hit["Offset"] / 55f), Vector2.One), hitColor);
+			DrawRect(new(Size.X * (hit["Time"] / Runner.CurrentAttempt.Map.Length), Size.Y * (hit["Offset"] / 55), Vector2.One), hitColor);
+		}
+
+		if (Runner.CurrentAttempt.DeathTime >= 0)
+		{
+			int position = (int)(Size.X * Runner.CurrentAttempt.DeathTime / Runner.CurrentAttempt.Map.Length);
+			DrawLine(Vector2.Right * position, new(position, Size.Y), Color.Color8(255, 255, 0), 3);
 		}
 
 		Logger.Log($"RESULTS GRAPH: {(Time.GetTicksUsec() - start) / 1000}ms");

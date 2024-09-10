@@ -1,4 +1,4 @@
-[gd_scene load_steps=57 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=58 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://scripts/game/Renderer.cs" id="3_ew8wr"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="3_negii"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="4_rvp5o"]
+[ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="5_pxgh4"]
 [ext_resource type="Texture2D" uid="uid://cxv6ey5xb6b0f" path="res://skin/health_background.png" id="6_bbly8"]
 [ext_resource type="Texture2D" uid="uid://4x2vfpyjkri6" path="res://skin/health.png" id="7_wjg6i"]
 [ext_resource type="Texture2D" uid="uid://dmc5f6ajp8xv1" path="res://skin/progress_background.png" id="8_eu3ux"]
@@ -282,7 +283,7 @@ pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0)
 outline_modulate = Color(1, 1, 1, 0.0941176)
 text = "0"
-font = ExtResource("12_axsek")
+font = ExtResource("5_pxgh4")
 font_size = 64
 outline_size = 4
 
@@ -292,7 +293,7 @@ pixel_size = 0.0025
 modulate = Color(1, 1, 1, 0.12549)
 outline_modulate = Color(0, 0, 0, 0)
 text = "1.00x"
-font = ExtResource("12_axsek")
+font = ExtResource("5_pxgh4")
 
 [node name="Skip" type="Label3D" parent="."]
 transform = Transform3D(7, 0, 0, 0, 6.76148, 1.81173, 0, -1.81173, 6.76148, 0, -5, -10)

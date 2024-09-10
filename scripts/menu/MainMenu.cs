@@ -85,7 +85,7 @@ public partial class MainMenu : Control
 	
 		Phoenyx.Util.Setup();
 
-		Phoenyx.Util.DiscordRPC.Call("Set", "details", "Browsing Maps");
+		Phoenyx.Util.DiscordRPC.Call("Set", "details", "Main Menu");
 		Phoenyx.Util.DiscordRPC.Call("Set", "state", "");
 		Phoenyx.Util.DiscordRPC.Call("Set", "end_timestamp", 0);
 
@@ -721,7 +721,7 @@ public partial class MainMenu : Control
 				break;
 			}
 
-			Vector2I pos = new((int)Math.Floor(CurrentMap.Notes[i].X + 1.5), (int)Math.Floor(CurrentMap.Notes[i].Y + 1.5));
+			Vector2I pos = new(Math.Clamp((int)Math.Floor(CurrentMap.Notes[i].X + 1.5), 0, 2), Math.Clamp((int)Math.Floor(CurrentMap.Notes[i].Y + 1.5), 0, 2));
 			int tile = 0;
 			
 			tile += pos.X;
@@ -1431,6 +1431,19 @@ public partial class MainMenu : Control
 	private static void Transition(string menuName, bool instant = false)
 	{
 		CurrentMenu = menuName;
+
+		switch (CurrentMenu)
+		{
+			case "Main":
+				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Main Menu");
+				break;
+			case "Play":
+				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Browsing Maps");
+				break;
+			case "Extras":
+				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Extras");
+				break;
+		}
 
 		if (FocusedLineEdit != null)
 		{

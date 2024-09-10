@@ -31,6 +31,7 @@ public partial class Results : Control
 		Holder.GetNode<Label>("Score").Text = $"{Lib.String.PadMagnitude(Runner.CurrentAttempt.Score.ToString())}";
 		Holder.GetNode<Label>("Hits").Text = $"{Lib.String.PadMagnitude(Runner.CurrentAttempt.Hits.ToString())} / {Lib.String.PadMagnitude(Runner.CurrentAttempt.Sum.ToString())}";
 		Holder.GetNode<Label>("Status").Text = Runner.CurrentAttempt.Alive ? (Runner.CurrentAttempt.Qualifies ? "PASSED" : "DISQUALIFIED") : "FAILED";
+		Holder.GetNode<Label>("Speed").Text = $"{Runner.CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 
 		if (Runner.CurrentAttempt.Map.CoverBuffer != null)
 		{
@@ -91,6 +92,11 @@ public partial class Results : Control
 					break;
 			}
 		}
+	}
+
+	public static void UpdateVolume()
+	{
+		SoundManager.Song.VolumeDb = -80 + 70 * (float)Math.Pow(Phoenyx.Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Phoenyx.Settings.VolumeMaster / 100, 0.1);
 	}
 
 	public static void Replay()

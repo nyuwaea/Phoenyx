@@ -33,7 +33,12 @@ public partial class KeybindsManager : Node
 
                 Phoenyx.Settings.Fullscreen = value;
                 DisplayServer.WindowSetMode(value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
-                MainMenu.UpdateSettings();
+                
+                if (SceneManager.Scene.Name == "SceneMenu")
+                {
+                    MainMenu.UpdateSettings();
+                    MainMenu.UpdateSpectrumSpacing();
+                }
             }
         }
     }
@@ -75,7 +80,8 @@ public partial class KeybindsManager : Node
                     case "SceneGame":
                         Runner.UpdateVolume();
                         break;
-                    default:
+                    case "SceneResults":
+                        Results.UpdateVolume();
                         break;
                 }
 			}
