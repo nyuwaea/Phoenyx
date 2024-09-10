@@ -54,5 +54,5 @@ common/physics_ticks_per_second=120
 
 [rendering]
 
-anti_aliasing/screen_space_roughness_limiter/enabled=false
 environment/defaults/default_clear_color=Color(0, 0, 0, 1)
+anti_aliasing/quality/msaa_2d=1

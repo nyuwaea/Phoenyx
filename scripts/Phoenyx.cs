@@ -38,12 +38,12 @@ public partial class Phoenyx : Node
         public static string Skin {get; set;} = "default";
         public static bool CameraLock {get; set;} = true;
         public static double FoV {get; set;} = 70;
-        public static double Sensitivity {get; set;} = 0.66;
+        public static double Sensitivity {get; set;} = 0.5;
         public static double Parallax {get; set;} = 0.1;
-        public static double ApproachRate {get; set;} = 35;
-        public static double ApproachDistance {get; set;} = 16;
+        public static double ApproachRate {get; set;} = 32;
+        public static double ApproachDistance {get; set;} = 20;
         public static double ApproachTime {get; set;} = ApproachDistance / ApproachRate;
-        public static double FadeIn {get; set;} = 0;
+        public static double FadeIn {get; set;} = 15;
         public static bool FadeOut {get; set;} = true;
         public static bool Pushback {get; set;} = true;
         public static double NoteSize {get; set;} = 0.875;

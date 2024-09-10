@@ -47,8 +47,10 @@ public partial class SoundManager : Node
 		};
     }
 
-    public static void PlayJukebox(int index, bool setRichPresence = true)
+    public static void PlayJukebox(int index = -1, bool setRichPresence = true)
 	{
+        index = index == -1 ? JukeboxIndex : index;
+
 		if (index >= JukeboxQueue.Length)
 		{
 			index = 0;

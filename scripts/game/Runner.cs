@@ -33,6 +33,8 @@ public partial class Runner : Node3D
 	private static Label SimpleMissesLabel;
 	private static Label ScoreLabel;
 	private static Label MultiplierLabel;
+	private static Panel MultiplierProgress;
+	private static ShaderMaterial MultiplierProgressMaterial;
 	private static VideoStreamPlayer Video;
 	private static Tween HitTween;
 	private static Tween MissTween;
@@ -115,28 +117,35 @@ public partial class Runner : Node3D
 			ComboMultiplierProgress++;
 			Phoenyx.Stats.NotesHit++;
 
-			if ((ulong)Combo > Phoenyx.Stats.HighestCombo)
+			if (Combo > Phoenyx.Stats.HighestCombo)
 			{
-				Phoenyx.Stats.HighestCombo = (ulong)Combo;
+				Phoenyx.Stats.HighestCombo = Combo;
 			}
 
 			int lateness = (int)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed);
-			float factor = 1 - Math.Max(0, lateness - 20) / 100f;
+			float factor = 1 - Math.Max(0, lateness - 25) / 150f;
 
 			HitsInfo.Add(new(){
 				["Time"] = Map.Notes[index].Millisecond,
 				["Offset"] = lateness,
 			});
 
-			if (ComboMultiplierProgress >= ComboMultiplierIncrement && ComboMultiplier < 8)
+			if (ComboMultiplierProgress == ComboMultiplierIncrement)
 			{
-				ComboMultiplierProgress = 0;
-				ComboMultiplier = Math.Min(8, ComboMultiplier + 1);
+				if (ComboMultiplier < 8)
+				{
+					ComboMultiplierProgress = 0;
+					ComboMultiplier++;
+				}
+				else
+				{
+					MultiplierProgressMaterial.SetShaderParameter("colour", Color.Color8(255, 128, 0));
+				}
 			}
 
 			Score += (uint)(100 * ComboMultiplier * ModsMultiplier * factor);
-			HealthStep = Math.Max(HealthStep / 1.45f, 15);
-			Health = Math.Min(100, Health + HealthStep / 1.75f);
+			HealthStep = Math.Max(HealthStep / 1.45, 15);
+			Health = Math.Min(100, Health + HealthStep / 1.75);
 			Map.Notes[index].Hit = true;
 
 			ScoreLabel.Text = Lib.String.PadMagnitude(Score.ToString());
@@ -172,7 +181,7 @@ public partial class Runner : Node3D
 			ComboMultiplierProgress = 0;
 			ComboMultiplier = Math.Max(1, ComboMultiplier - 1);
 			Health = Math.Max(0, Health - HealthStep);
-			HealthStep = Math.Min(HealthStep * 1.2f, 100);
+			HealthStep = Math.Min(HealthStep * 1.2, 100);
 			Phoenyx.Stats.NotesMissed++;
 
 			MissesInfo.Add(Map.Notes[index].Millisecond);
@@ -255,6 +264,8 @@ public partial class Runner : Node3D
 		SimpleMissesLabel = PanelRight.GetNode<Label>("SimpleMisses");
 		ScoreLabel = PanelLeft.GetNode<Label>("Score");
 		MultiplierLabel = PanelLeft.GetNode<Label>("Multiplier");
+		MultiplierProgress = PanelLeft.GetNode<Panel>("MultiplierProgress");
+		MultiplierProgressMaterial = MultiplierProgress.Material as ShaderMaterial;
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
 		if (Phoenyx.Settings.SimpleHUD)
@@ -482,9 +493,11 @@ public partial class Runner : Node3D
 		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 		SpeedLabel.Modulate = Color.FromHtml($"#ffffff{(CurrentAttempt.Speed == 1 ? "00" : "20")}");
 		ProgressLabel.Text = $"{Lib.String.FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {Lib.String.FormatTime(MapLength / 1000)}";
-		Health.Size = new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80);
+		Health.Size = Health.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), (float)delta * 64);
 		ProgressBar.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
 		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
+		MultiplierProgressMaterial.SetShaderParameter("progress", Mathf.Lerp((float)MultiplierProgressMaterial.GetShaderParameter("progress"), (float)CurrentAttempt.ComboMultiplierProgress / CurrentAttempt.ComboMultiplierIncrement, (float)delta * 16));
+		MultiplierProgressMaterial.SetShaderParameter("colour", MultiplierProgressMaterial.GetShaderParameter("colour").AsColor().Lerp(Color.Color8(255, 255, 255), (float)delta * 2));
 
 		if (StopQueued)
 		{

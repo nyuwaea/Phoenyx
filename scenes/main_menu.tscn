@@ -195,6 +195,7 @@ anchors_preset = -1
 anchor_top = 0.667
 anchor_right = 0.333
 anchor_bottom = 1.0
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="1" type="ColorRect" parent="Background/TileHolder"]
@@ -204,6 +205,7 @@ anchor_left = 0.333
 anchor_top = 0.667
 anchor_right = 0.667
 anchor_bottom = 1.0
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="2" type="ColorRect" parent="Background/TileHolder"]
@@ -213,6 +215,7 @@ anchor_left = 0.667
 anchor_top = 0.667
 anchor_right = 1.0
 anchor_bottom = 1.0
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="3" type="ColorRect" parent="Background/TileHolder"]
@@ -221,6 +224,7 @@ anchors_preset = -1
 anchor_top = 0.333
 anchor_right = 0.333
 anchor_bottom = 0.667
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="4" type="ColorRect" parent="Background/TileHolder"]
@@ -230,6 +234,7 @@ anchor_left = 0.333
 anchor_top = 0.333
 anchor_right = 0.667
 anchor_bottom = 0.667
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="5" type="ColorRect" parent="Background/TileHolder"]
@@ -239,6 +244,7 @@ anchor_left = 0.667
 anchor_top = 0.333
 anchor_right = 1.0
 anchor_bottom = 0.667
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="6" type="ColorRect" parent="Background/TileHolder"]
@@ -246,6 +252,7 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.333
 anchor_bottom = 0.333
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="7" type="ColorRect" parent="Background/TileHolder"]
@@ -254,6 +261,7 @@ anchors_preset = -1
 anchor_left = 0.333
 anchor_right = 0.667
 anchor_bottom = 0.333
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="8" type="ColorRect" parent="Background/TileHolder"]
@@ -262,6 +270,7 @@ anchors_preset = -1
 anchor_left = 0.667
 anchor_right = 1.0
 anchor_bottom = 0.333
+offset_right = -1.0
 color = Color(1, 1, 1, 0)
 
 [node name="Menus" type="Panel" parent="."]

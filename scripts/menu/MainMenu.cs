@@ -245,7 +245,7 @@ public partial class MainMenu : Control
 
 		for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
 		{
-			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i]] = i;
+			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i].GetFile().GetBaseName()] = i;
 		}
 
 		JukeboxButton.MouseEntered += () => {
@@ -292,11 +292,11 @@ public partial class MainMenu : Control
 					case "Pause":
 						SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
 						SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
-						button.TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+						UpdateJukeboxButtons();
 						break;
 					case "Skip":
 						SoundManager.JukeboxIndex++;
-						SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+						SoundManager.PlayJukebox();
 						break;
 					case "Rewind":
 						ulong now = Time.GetTicksMsec();
@@ -304,7 +304,7 @@ public partial class MainMenu : Control
 						if (now - SoundManager.LastRewind < 1000)
 						{
 							SoundManager.JukeboxIndex--;
-							SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+							SoundManager.PlayJukebox();
 						}
 						else
 						{
@@ -639,7 +639,7 @@ public partial class MainMenu : Control
 
 		if (!SoundManager.Song.Playing)
 		{
-			SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+			SoundManager.PlayJukebox();
 			SoundManager.JukeboxPaused = !Phoenyx.Settings.AutoplayJukebox;
 		}
 		else
@@ -652,8 +652,8 @@ public partial class MainMenu : Control
 		}
 
 		SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
-		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
-
+		
+		UpdateJukeboxButtons();
 		UpdateSpectrumSpacing();
 
 		SoundManager.Song.VolumeDb = -180;
@@ -721,7 +721,7 @@ public partial class MainMenu : Control
 				break;
 			}
 
-			Vector2I pos = new(Math.Sign(CurrentMap.Notes[i].X) + 1, Math.Sign(CurrentMap.Notes[i].Y) + 1);
+			Vector2I pos = new((int)Math.Floor(CurrentMap.Notes[i].X + 1.5), (int)Math.Floor(CurrentMap.Notes[i].Y + 1.5));
 			int tile = 0;
 			
 			tile += pos.X;
@@ -774,11 +774,11 @@ public partial class MainMenu : Control
 				case Key.Mediaplay:
 					SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
 					SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
-					Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
+					UpdateJukeboxButtons();
 					break;
 				case Key.Medianext:
 					SoundManager.JukeboxIndex++;
-					SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+					SoundManager.PlayJukebox();
 					break;
 				case Key.Mediaprevious:
 					ulong now = Time.GetTicksMsec();
@@ -786,7 +786,7 @@ public partial class MainMenu : Control
 					if (now - SoundManager.LastRewind < 1000)
 					{
 						SoundManager.JukeboxIndex--;
-						SoundManager.PlayJukebox(SoundManager.JukeboxIndex);
+						SoundManager.PlayJukebox();
 					}
 					else
 					{
@@ -1077,7 +1077,7 @@ public partial class MainMenu : Control
 				{
 					HSlider slider = option.GetNode<HSlider>("HSlider");
 					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
-
+					
 					slider.Value = (double)property.GetValue(new());
 					lineEdit.Text = (Math.Floor(slider.Value * 1000) / 1000).ToString();
 
@@ -1330,9 +1330,9 @@ public partial class MainMenu : Control
 							selectedHolder.GetNode<Panel>("Normal").Visible = true;
 							selectedHolder.GetNode<Panel>("Selected").Visible = false;
 
-							Tween deselectTween = selectedHolder.CreateTween();
+							Tween deselectTween = selectedHolder.CreateTween().SetParallel();
 							deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-							deselectTween.Parallel().TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+							deselectTween.TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
 							deselectTween.Play();
 
 							if (MapListContainer.GetNode(SelectedMap) == mapButton)
@@ -1348,13 +1348,19 @@ public partial class MainMenu : Control
 						holder.GetNode<Panel>("Normal").Visible = false;
 						holder.GetNode<Panel>("Selected").Visible = true;
 						
-						Tween selectTween = holder.CreateTween();
+						Tween selectTween = holder.CreateTween().SetParallel();
 						selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-						selectTween.Parallel().TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+						selectTween.TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
 						selectTween.Play();
 
 						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
 						SelectedMap = mapButton.Name;
+
+						SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[SelectedMap];
+						SoundManager.JukeboxPaused = false;
+						SoundManager.Song.PitchScale = 1;
+						SoundManager.PlayJukebox();
+						UpdateJukeboxButtons();
 					}
 					else
 					{
@@ -1391,6 +1397,11 @@ public partial class MainMenu : Control
 	public static void UpdateSpectrumSpacing()
 	{
 		JukeboxSpectrum.AddThemeConstantOverride("separation", ((int)JukeboxSpectrum.Size.X - 32 * 6) / 48);
+	}
+
+	public static void UpdateJukeboxButtons()
+	{
+		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
 	}
 
 	public static void Chat(string message)
