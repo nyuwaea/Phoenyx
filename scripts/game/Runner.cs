@@ -496,8 +496,8 @@ public partial class Runner : Node3D
 		Health.Size = Health.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), (float)delta * 64);
 		ProgressBar.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
 		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
-		MultiplierProgressMaterial.SetShaderParameter("progress", Mathf.Lerp((float)MultiplierProgressMaterial.GetShaderParameter("progress"), (float)CurrentAttempt.ComboMultiplierProgress / CurrentAttempt.ComboMultiplierIncrement, (float)delta * 16));
-		MultiplierProgressMaterial.SetShaderParameter("colour", MultiplierProgressMaterial.GetShaderParameter("colour").AsColor().Lerp(Color.Color8(255, 255, 255), (float)delta * 2));
+		//MultiplierProgressMaterial.SetShaderParameter("progress", Mathf.Lerp((float)MultiplierProgressMaterial.GetShaderParameter("progress"), (float)CurrentAttempt.ComboMultiplierProgress / CurrentAttempt.ComboMultiplierIncrement, (float)delta * 16));
+		//MultiplierProgressMaterial.SetShaderParameter("colour", MultiplierProgressMaterial.GetShaderParameter("colour").AsColor().Lerp(Color.Color8(255, 255, 255), (float)delta * 2));
 
 		if (StopQueued)
 		{

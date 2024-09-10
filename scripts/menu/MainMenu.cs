@@ -1354,13 +1354,17 @@ public partial class MainMenu : Control
 						selectTween.Play();
 
 						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
-						SelectedMap = mapButton.Name;
 
-						SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[SelectedMap];
-						SoundManager.JukeboxPaused = false;
-						SoundManager.Song.PitchScale = 1;
-						SoundManager.PlayJukebox();
-						UpdateJukeboxButtons();
+						if (SelectedMap != mapButton.Name)
+						{
+							SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[mapButton.Name];
+							SoundManager.JukeboxPaused = false;
+							SoundManager.Song.PitchScale = 1;
+							SoundManager.PlayJukebox();
+							UpdateJukeboxButtons();
+						}
+
+						SelectedMap = mapButton.Name;
 					}
 					else
 					{
