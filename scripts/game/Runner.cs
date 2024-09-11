@@ -17,6 +17,7 @@ public partial class Runner : Node3D
 	private static Label3D SpeedLabel;
 	private static Label3D SkipLabel;
 	private static Label3D ProgressLabel;
+	private static TextureRect Jesus;
 	private static MeshInstance3D Cursor;
 	private static MeshInstance3D Grid;
 	private static MeshInstance3D VideoQuad;
@@ -26,6 +27,7 @@ public partial class Runner : Node3D
 	private static TextureRect ProgressBar;
 	private static SubViewport PanelLeft;
 	private static SubViewport PanelRight;
+	private static AudioStreamPlayer Bell;
 	private static Label AccuracyLabel;
 	private static Label HitsLabel;
 	private static Label MissesLabel;
@@ -56,6 +58,7 @@ public partial class Runner : Node3D
 	public static List<Note> ProcessNotes = [];
 	public static Attempt CurrentAttempt;
 	public static double MapLength;
+	public static Tween JesusTween;
 
 	public struct Attempt
 	{
@@ -67,8 +70,11 @@ public partial class Runner : Node3D
 		public Dictionary<string, bool> Mods;
 		public string[] Players = [];
 		public bool Alive = true;
+		public bool Skippable = false;
+		public bool Qualifies = true;
 		public uint Hits = 0;
 		public List<Dictionary<string, float>> HitsInfo = [];
+		public Color LastHitColour = Phoenyx.Skin.Colors[^1];
 		public uint Misses = 0;
 		public List<int> MissesInfo = [];
 		public double DeathTime = -1;
@@ -86,8 +92,6 @@ public partial class Runner : Node3D
 		public Vector2 CursorPosition = Vector2.Zero;
 		public Vector2 RawCursorPosition = Vector2.Zero;
 		public double DistanceMM = 0;
-		public bool Skippable = false;
-		public bool Qualifies = true;
 
 		public Attempt(Map map, double speed, string[] mods, string[] players = null, bool replay = false)
 		{
@@ -124,6 +128,8 @@ public partial class Runner : Node3D
 			{
 				Phoenyx.Stats.HighestCombo = Combo;
 			}
+
+			LastHitColour = Phoenyx.Skin.Colors[index % Phoenyx.Skin.Colors.Length];
 
 			float lateness = (float)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed);
 			float factor = 1 - Math.Max(0, lateness - 25) / 150f;
@@ -189,6 +195,17 @@ public partial class Runner : Node3D
 
 			MissesInfo.Add(Map.Notes[index].Millisecond);
 
+			if (Health - HealthStep <= 0)
+			{
+				Bell.Play();
+				Jesus.Modulate = Color.Color8(255, 255, 255, 196);
+
+				JesusTween?.Kill();
+				JesusTween = Jesus.CreateTween();
+				JesusTween.TweenProperty(Jesus, "modulate", Color.Color8(255, 255, 255, 0), 1);
+				JesusTween.Play();
+			}
+
 			if (Health <= 0)
 			{
 				if (Alive)
@@ -252,6 +269,7 @@ public partial class Runner : Node3D
 		SpeedLabel = GetNode<Label3D>("Speed");
 		SkipLabel = GetNode<Label3D>("Skip");
 		ProgressLabel = GetNode<Label3D>("Progress");
+		Jesus = GetNode<TextureRect>("Jesus");
 		Cursor = GetNode<MeshInstance3D>("Cursor");
 		Grid = GetNode<MeshInstance3D>("Grid");
 		VideoQuad = GetNode<MeshInstance3D>("Video");
@@ -261,6 +279,7 @@ public partial class Runner : Node3D
 		ProgressBar = GetNode("ProgressBarViewport").GetNode<TextureRect>("Main");
 		PanelLeft = GetNode<SubViewport>("PanelLeftViewport");
 		PanelRight = GetNode<SubViewport>("PanelRightViewport");
+		Bell = GetNode<AudioStreamPlayer>("Bell");
 		AccuracyLabel = PanelRight.GetNode<Label>("Accuracy");
 		HitsLabel = PanelRight.GetNode<Label>("Hits");
 		MissesLabel = PanelRight.GetNode<Label>("Misses");
@@ -327,6 +346,13 @@ public partial class Runner : Node3D
 		{
 			ToastNotification.Notify("Could not load skin", 2);
 			throw Logger.Error($"Could not load skin; {exception.Message}");
+		}
+
+		string space = Phoenyx.Settings.Space == "skin" ? Phoenyx.Skin.Space : Phoenyx.Settings.Space;
+
+		if (space != "void")
+		{
+			Node3D.AddChild(GD.Load<PackedScene>($"res://prefabs/spaces/{space}.tscn").Instantiate<Node3D>());
 		}
 
 		SoundManager.UpdateSounds();
@@ -582,11 +608,11 @@ public partial class Runner : Node3D
 			{
 				if (Phoenyx.Settings.CursorDrift)
 				{
-					CurrentAttempt.CursorPosition = (CurrentAttempt.CursorPosition + new Vector2(1, -1) * eventMouseMotion.Relative / 100 * (float)Phoenyx.Settings.Sensitivity).Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
+					CurrentAttempt.CursorPosition = (CurrentAttempt.CursorPosition + new Vector2(1, -1) * eventMouseMotion.Relative / 120 * (float)Phoenyx.Settings.Sensitivity).Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
 				}
 				else
 				{
-					CurrentAttempt.RawCursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 100 * (float)Phoenyx.Settings.Sensitivity;
+					CurrentAttempt.RawCursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 120 * (float)Phoenyx.Settings.Sensitivity;
 					CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
 				}
 
@@ -645,6 +671,14 @@ public partial class Runner : Node3D
 					break;
 				case Key.P:
 					Phoenyx.Settings.Pushback = !Phoenyx.Settings.Pushback;
+					break;
+				case Key.C:
+					Bell.Play();
+					Jesus.Modulate = Color.Color8(255, 255, 255, 196);
+					JesusTween?.Kill();
+					JesusTween = Jesus.CreateTween();
+					JesusTween.TweenProperty(Jesus, "modulate", Color.Color8(255, 255, 255, 0), 1);
+					JesusTween.Play();
 					break;
 				case Key.Equal:
 					if (Lobby.PlayerCount > 1)
@@ -734,16 +768,16 @@ public partial class Runner : Node3D
 		if (CurrentAttempt.StartOffset == 0 && CurrentAttempt.Qualifies)
 		{
 			Phoenyx.Stats.Passes++;
-			Phoenyx.Stats.TotalScore += (ulong)CurrentAttempt.Score;
+			Phoenyx.Stats.TotalScore += CurrentAttempt.Score;
 
 			if (CurrentAttempt.Accuracy == 100)
 			{
 				Phoenyx.Stats.FullCombos++;
 			}
 
-			if ((ulong)CurrentAttempt.Score > Phoenyx.Stats.HighestScore)
+			if (CurrentAttempt.Score > Phoenyx.Stats.HighestScore)
 			{
-				Phoenyx.Stats.HighestScore = (ulong)CurrentAttempt.Score;
+				Phoenyx.Stats.HighestScore = CurrentAttempt.Score;
 			}
 
 			Phoenyx.Stats.PassAccuracies.Add(CurrentAttempt.Accuracy);

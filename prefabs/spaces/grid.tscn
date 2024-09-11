@@ -1,0 +1,49 @@
+[gd_scene load_steps=8 format=3 uid="uid://dtkff13bgd1u4"]
+
+[ext_resource type="Script" path="res://scripts/spaces/Grid.cs" id="1_3f34m"]
+[ext_resource type="Texture2D" uid="uid://cuin7kbcxrl1i" path="res://textures/grid_tile.png" id="2_mnxl2"]
+
+[sub_resource type="Environment" id="Environment_ge866"]
+fog_enabled = true
+fog_mode = 1
+fog_light_color = Color(0.0941176, 0.0941176, 0.0941176, 1)
+fog_density = 1.0
+fog_depth_curve = 2.0
+fog_depth_end = 50.0
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_n0yhb"]
+shading_mode = 0
+disable_ambient_light = true
+albedo_texture = ExtResource("2_mnxl2")
+uv1_scale = Vector3(48, 48, 48)
+texture_filter = 5
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_yclqf"]
+material = SubResource("StandardMaterial3D_n0yhb")
+size = Vector2(100, 100)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_31ska"]
+shading_mode = 0
+albedo_color = Color(0, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_ytxqq"]
+material = SubResource("StandardMaterial3D_31ska")
+flip_faces = true
+size = Vector3(100, 21, 100)
+
+[node name="Space" type="Node3D"]
+script = ExtResource("1_3f34m")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_ge866")
+
+[node name="Bottom" type="MeshInstance3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -10, 0)
+mesh = SubResource("PlaneMesh_yclqf")
+
+[node name="Top" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -1, 8.74228e-08, 0, -8.74228e-08, -1, 0, 10, 0)
+mesh = SubResource("PlaneMesh_yclqf")
+
+[node name="Shell" type="MeshInstance3D" parent="."]
+mesh = SubResource("BoxMesh_ytxqq")

@@ -77,7 +77,7 @@ public partial class MainMenu : Control
 	private static Map CurrentMap;
 	private static int PassedNotes = 0;
 	private static int PeruSequenceIndex = 0;
-	private static string[] PeruSequence = ["P", "E", "R", "U"];
+	private static readonly string[] PeruSequence = ["P", "E", "R", "U"];
 
 	public override void _Ready()
 	{
@@ -245,7 +245,7 @@ public partial class MainMenu : Control
 
 		for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
 		{
-			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i].GetFile().GetBaseName()] = i;
+			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i].GetFile().GetBaseName().Replace(".", "_")] = i;
 		}
 
 		JukeboxButton.MouseEntered += () => {
@@ -261,7 +261,7 @@ public partial class MainMenu : Control
 			tween.Play();
 		};
 		JukeboxButton.Pressed += () => {
-			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].Split("\\")[^1].TrimSuffix(".phxm");
+			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].Split("\\")[^1].TrimSuffix(".phxm").Replace(".", "_");
 			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
 
 			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
@@ -403,6 +403,7 @@ public partial class MainMenu : Control
 		OptionButton profiles = SettingsHolder.GetNode("Header").GetNode<OptionButton>("Profiles");
 		LineEdit profileEdit = SettingsHolder.GetNode("Header").GetNode<LineEdit>("ProfileEdit");
 		OptionButton skins = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
+		OptionButton spaces = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Space").GetNode<OptionButton>("OptionsButton");
 
 		SettingsHolder.GetNode("Header").GetNode<Button>("CreateProfile").Pressed += () => {
 			profileEdit.Visible = !profileEdit.Visible;
@@ -439,6 +440,10 @@ public partial class MainMenu : Control
 
 			Cursor.Texture = Phoenyx.Skin.CursorImage;
 			SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
+		};
+
+		spaces.ItemSelected += (long item) => {
+			Phoenyx.Settings.Space = spaces.GetItemText((int)item);
 		};
 
 		ContextMenu.GetNode("Container").GetNode<Button>("Favorite").Pressed += () => {
@@ -1028,6 +1033,7 @@ public partial class MainMenu : Control
 
 	public static void UpdateSettings(bool connections = false)
 	{
+		OptionButton spaces = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Space").GetNode<OptionButton>("OptionsButton");
 		OptionButton skins = SettingsHolder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<OptionButton>("OptionsButton");
 		OptionButton profiles = SettingsHolder.GetNode("Header").GetNode<OptionButton>("Profiles");
 		string currentProfile = File.ReadAllText($"{Phoenyx.Constants.UserFolder}/current_profile.txt");
@@ -1035,29 +1041,38 @@ public partial class MainMenu : Control
 		skins.Clear();
 		profiles.Clear();
 
-		int i = 0;
+		for (int i = 0; i < spaces.ItemCount; i++)
+		{
+			if (spaces.GetItemText(i) == Phoenyx.Settings.Space)
+			{
+				spaces.Selected = i;
+				break;
+			}
+		}
+
+		int j = 0;
 
 		foreach (string path in Directory.GetDirectories($"{Phoenyx.Constants.UserFolder}/skins"))
 		{
 			string name = path.Split("\\")[^1];
 			
-			skins.AddItem(name, i);
+			skins.AddItem(name, j);
 
 			if (Phoenyx.Settings.Skin == name)
 			{
-				skins.Selected = i;
+				skins.Selected = j;
 			}
 
-			i++;
+			j++;
 		}
 
-		int j = 0;
+		j = 0;
 
 		foreach (string path in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/profiles"))
 		{
 			string name = path.Split("\\")[^1].TrimSuffix(".json");
 			
-			profiles.AddItem(name, i);
+			profiles.AddItem(name, j);
 
 			if (currentProfile == name)
 			{
@@ -1355,9 +1370,11 @@ public partial class MainMenu : Control
 
 						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
 
-						if (SelectedMap != mapButton.Name)
+						int index = SoundManager.JukeboxQueueInverse[mapButton.Name];
+
+						if (SoundManager.JukeboxIndex != index)
 						{
-							SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[mapButton.Name];
+							SoundManager.JukeboxIndex = index;
 							SoundManager.JukeboxPaused = false;
 							SoundManager.Song.PitchScale = 1;
 							SoundManager.PlayJukebox();

@@ -217,12 +217,12 @@ public partial class MapParser : Node
 		{
 			if (file.GetString(4) != "SS+m")
 			{
-				throw new Exception("Incorrect file signature");
+				throw new("Incorrect file signature");
 			}
 
 			if (file.GetUInt16() != 2)
 			{
-				throw new Exception("Old SSPM format");
+				throw new("Old SSPM format");
 			}
 
 			file.Skip(4);	// reserved
@@ -361,7 +361,7 @@ public partial class MapParser : Node
 				notes[i].Index = i;
 			}
 			
-			map = new Map(path, notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
+			map = new(path, notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{

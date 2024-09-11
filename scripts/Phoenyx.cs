@@ -55,6 +55,7 @@ public partial class Phoenyx : Node
         public static double VideoDim {get; set;} = 80;
         public static double VideoRenderScale {get; set;} = 100;
         public static bool SimpleHUD {get; set;} = false;
+        public static string Space {get; set;} = "skin";
 
         public static void Save(string profile = null)
         {
@@ -89,7 +90,8 @@ public partial class Phoenyx : Node
                 ["CursorDrift"] = CursorDrift,
                 ["VideoDim"] = VideoDim,
                 ["VideoRenderScale"] = VideoRenderScale,
-                ["SimpleHUD"] = SimpleHUD
+                ["SimpleHUD"] = SimpleHUD,
+                ["Space"] = Space
             };
 
             File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
@@ -139,6 +141,7 @@ public partial class Phoenyx : Node
                 VideoDim = (double)data["VideoDim"];
                 VideoRenderScale = (double)data["VideoRenderScale"];
                 SimpleHUD = (bool)data["SimpleHUD"];
+                Space = (string)data["Space"];
 
                 if (Fullscreen)
                 {
@@ -190,10 +193,12 @@ public partial class Phoenyx : Node
         public static byte[] HitSoundBuffer {get; set;} = [];
         public static byte[] FailSoundBuffer {get; set;} = [];
         public static ArrayMesh NoteMesh {get; set;} = new();
+        public static string Space {get; set;} = "grid";
 
         public static void Save()
         {
             File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", RawColors);
+            File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/space.txt", Space);
         }
 
         public static void Load()
@@ -226,6 +231,7 @@ public partial class Phoenyx : Node
             JukeboxPauseImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_pause.png"));
             JukeboxSkipImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_skip.png"));
             FavoriteImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/favorite.png"));
+            Space = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/space.txt");
 
             if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))
             {

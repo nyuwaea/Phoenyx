@@ -1,4 +1,4 @@
-[gd_scene load_steps=58 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=56 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -19,29 +19,14 @@
 [ext_resource type="Texture2D" uid="uid://dw2gxd3m24h4m" path="res://skin/hits.png" id="13_6rhgc"]
 [ext_resource type="Texture2D" uid="uid://c3x2cp3tx4vqt" path="res://skin/misses.png" id="14_bqf11"]
 [ext_resource type="Shader" path="res://scripts/shaders/combo_progress.gdshader" id="14_y51pe"]
-
-[sub_resource type="ViewportTexture" id="ViewportTexture_2wd1o"]
-viewport_path = NodePath("Camera3D/SubViewport")
-
-[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_f6huk"]
-panorama = SubResource("ViewportTexture_2wd1o")
-filter = false
-
-[sub_resource type="Sky" id="Sky_30au6"]
-sky_material = SubResource("PanoramaSkyMaterial_f6huk")
-
-[sub_resource type="Environment" id="Environment_dn4lr"]
-background_mode = 1
-background_canvas_max_layer = -1
-sky = SubResource("Sky_30au6")
-sky_custom_fov = 73.8
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
+[ext_resource type="AudioStream" uid="uid://deh3syobn5363" path="res://sounds/bell.mp3" id="20_2qbs1"]
+[ext_resource type="Texture2D" uid="uid://b1ihebmvna0bq" path="res://textures/jesus.png" id="21_6sy1o"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_73q55"]
 transparency = 1
 cull_mode = 2
 shading_mode = 0
+disable_fog = true
 vertex_color_use_as_albedo = true
 vertex_color_is_srgb = true
 
@@ -124,7 +109,10 @@ viewport_path = NodePath("VideoViewport")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rj3ky"]
 resource_local_to_scene = true
 transparency = 1
+no_depth_test = true
 shading_mode = 0
+disable_ambient_light = true
+disable_fog = true
 albedo_texture = SubResource("ViewportTexture_5nddi")
 texture_filter = 1
 texture_repeat = false
@@ -139,6 +127,7 @@ viewport_path = NodePath("PanelLeftViewport")
 resource_local_to_scene = true
 transparency = 1
 shading_mode = 0
+disable_fog = true
 albedo_texture = SubResource("ViewportTexture_b0vun")
 texture_repeat = false
 
@@ -152,6 +141,7 @@ viewport_path = NodePath("PanelRightViewport")
 resource_local_to_scene = true
 transparency = 1
 shading_mode = 0
+disable_fog = true
 albedo_texture = SubResource("ViewportTexture_crm1r")
 texture_repeat = false
 
@@ -213,7 +203,6 @@ script = ExtResource("1_1hgss")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.75)
-environment = SubResource("Environment_dn4lr")
 fov = 70.0
 
 [node name="Notes" type="MultiMeshInstance3D" parent="."]
@@ -377,7 +366,7 @@ label_settings = SubResource("LabelSettings_v63ri")
 
 [node name="SimpleMisses" type="Label" parent="PanelRightViewport"]
 visible = false
-anchors_preset = -1
+anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -535,6 +524,10 @@ texture = ExtResource("9_nde5v")
 expand_mode = 1
 stretch_mode = 1
 
+[node name="Bell" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("20_2qbs1")
+max_polyphony = 4
+
 [node name="FPSCounter" type="Label" parent="."]
 anchors_preset = 2
 anchor_top = 1.0
@@ -607,6 +600,16 @@ layout_mode = 1
 anchors_preset = -1
 anchor_bottom = 1.0
 grow_vertical = 2
+
+[node name="Jesus" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("21_6sy1o")
 
 [node name="Transition" type="ColorRect" parent="."]
 self_modulate = Color(1, 1, 1, 0)
