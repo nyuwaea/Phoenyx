@@ -4,7 +4,8 @@ uniform float progress : hint_range(0, 1) = 0;
 uniform vec4 colour : source_color = vec4(1.0, 1.0, 1.0, 1.0);
 uniform vec4 background_colour : source_color = vec4(0.155, 0.155, 0.155, 1.0);
 uniform int sides : hint_range(3, 32, 0.1) = 8;
-uniform float thickness : hint_range(0, 50, 0.5) = 3.0;
+uniform float thickness : hint_range(0, 50) = 3.0;
+uniform float size : hint_range(0, 2) = 1.0;
 
 void fragment() {
 	vec2 points[32];
@@ -16,7 +17,7 @@ void fragment() {
 	for (int i = 0; i < sides; i++)
 	{
 		float angle = (360.0 / float(sides) * float(i)) * PI / 180.0;
-		vec2 pos = vec2(0.0, -0.25);
+		vec2 pos = vec2(0.0, -0.25 * size);
 		vec2 rotated = vec2(cos(angle) * pos.x - sin(angle) * pos.y, sin(angle) * pos.x + cos(angle) * pos.y) + center;
 		
 		points[i] = rotated;

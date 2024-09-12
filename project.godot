@@ -31,14 +31,11 @@ ToastNotification="*res://scripts/ToastNotification.cs"
 SceneManager="*res://scripts/SceneManager.cs"
 SoundManager="*res://scripts/SoundManager.cs"
 Phoenyx="*res://scripts/Phoenyx.cs"
+SettingsManager="*res://scripts/SettingsManager.cs"
 
 [debug]
 
 file_logging/enable_file_logging=true
-
-[display]
-
-mouse_cursor/custom_image="res://textures/empty.png"
 
 [dotnet]
 

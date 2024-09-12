@@ -18,7 +18,7 @@ public partial class Results : Control
 		Holder = GetNode<Panel>("Holder");
 		Cover = GetNode<TextureRect>("Cover");
 
-		Input.MouseMode = Input.MouseModeEnum.Visible;
+		Input.MouseMode = Input.MouseModeEnum.Hidden;
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Mailbox);
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;

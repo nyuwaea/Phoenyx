@@ -1,0 +1,21 @@
+[gd_resource type="Theme" load_steps=6 format=3 uid="uid://c8tb6mtqpycc8"]
+
+[ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="1_58h2q"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kncke"]
+bg_color = Color(0.0352941, 0.0313726, 0.0509804, 0.501961)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6kbgk"]
+bg_color = Color(0.0352941, 0.0313726, 0.0509804, 0.501961)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jlnvv"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y08lf"]
+bg_color = Color(0.0745098, 0.0666667, 0.101961, 0.501961)
+
+[resource]
+Button/fonts/font = ExtResource("1_58h2q")
+Button/styles/focus = SubResource("StyleBoxFlat_kncke")
+Button/styles/hover = SubResource("StyleBoxFlat_6kbgk")
+Button/styles/normal = SubResource("StyleBoxEmpty_jlnvv")
+Button/styles/pressed = SubResource("StyleBoxFlat_y08lf")

@@ -10,6 +10,8 @@ public partial class Runner : Node3D
 	private static readonly PackedScene PlayerScore = GD.Load<PackedScene>("res://prefabs/player_score.tscn");
 	private static readonly PackedScene MissFeedback = GD.Load<PackedScene>("res://prefabs/miss_icon.tscn");
 
+	private static Panel Menu;
+	//private static Panel SettingsHolder;
 	private static Label FPSCounter;
 	private static Camera3D Camera;
 	private static Label3D TitleLabel;
@@ -54,6 +56,8 @@ public partial class Runner : Node3D
 
 	public static bool Playing = false;
 	public static ulong Started = 0;
+	public static bool MenuShown = false;
+	public static bool SettingsShown = false;
 	public static int ToProcess = 0;
 	public static List<Note> ProcessNotes = [];
 	public static Attempt CurrentAttempt;
@@ -99,7 +103,7 @@ public partial class Runner : Node3D
 			Speed = speed;
 			Players = players ?? [];
 			Progress = -1000 - Phoenyx.Settings.ApproachTime * 1000;
-			ComboMultiplierIncrement = (uint)Map.Notes.Length / 200;
+			ComboMultiplierIncrement = Math.Max(2, (uint)Map.Notes.Length / 200);
 			RawMods = mods;
 			Mods = new(){
 				["NoFail"] = mods.Contains("NoFail"),
@@ -143,12 +147,13 @@ public partial class Runner : Node3D
 			{
 				if (ComboMultiplier < 8)
 				{
-					ComboMultiplierProgress = 0;
+					ComboMultiplierProgress = ComboMultiplier == 7 ? ComboMultiplierIncrement : 0;
 					ComboMultiplier++;
-				}
-				else
-				{
-					MultiplierColour = Color.Color8(255, 140, 0);
+
+					if (ComboMultiplier == 8)
+					{
+						MultiplierColour = Color.Color8(255, 140, 0);
+					}
 				}
 			}
 
@@ -195,16 +200,16 @@ public partial class Runner : Node3D
 
 			MissesInfo.Add(Map.Notes[index].Millisecond);
 
-			if (Health - HealthStep <= 0)
-			{
-				Bell.Play();
-				Jesus.Modulate = Color.Color8(255, 255, 255, 196);
-
-				JesusTween?.Kill();
-				JesusTween = Jesus.CreateTween();
-				JesusTween.TweenProperty(Jesus, "modulate", Color.Color8(255, 255, 255, 0), 1);
-				JesusTween.Play();
-			}
+			//if (Health - HealthStep <= 0)
+			//{
+			//	Bell.Play();
+			//	Jesus.Modulate = Color.Color8(255, 255, 255, 196);
+			//
+			//	JesusTween?.Kill();
+			//	JesusTween = Jesus.CreateTween();
+			//	JesusTween.TweenProperty(Jesus, "modulate", Color.Color8(255, 255, 255, 0), 1);
+			//	JesusTween.Play();
+			//}
 
 			if (Health <= 0)
 			{
@@ -262,6 +267,8 @@ public partial class Runner : Node3D
 	{
 		Node3D = this;
 
+		Menu = GetNode<Panel>("Menu");
+		//SettingsHolder = GetNode("Settings").GetNode<Panel>("Holder");
 		FPSCounter = GetNode<Label>("FPSCounter");
 		Camera = GetNode<Camera3D>("Camera3D");
 		TitleLabel = GetNode<Label3D>("Title");
@@ -291,6 +298,26 @@ public partial class Runner : Node3D
 		MultiplierProgressMaterial = MultiplierProgressPanel.Material as ShaderMaterial;
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
+		Panel menuButtonsHolder = Menu.GetNode<Panel>("Holder");
+
+		Menu.GetNode<Button>("Button").Pressed += HideMenu;
+		menuButtonsHolder.GetNode<Button>("Resume").Pressed += HideMenu;
+		menuButtonsHolder.GetNode<Button>("Restart").Pressed += Restart;
+		menuButtonsHolder.GetNode<Button>("Settings").Pressed += () => {
+			SettingsManager.ShowSettings();
+		};
+		menuButtonsHolder.GetNode<Button>("Quit").Pressed += () => {
+			if (CurrentAttempt.Alive)
+			{
+				SoundManager.FailSound.Play();
+			}
+
+			CurrentAttempt.Alive = false;
+			CurrentAttempt.Qualifies = false;
+
+			Stop();
+		};
+
 		if (Phoenyx.Settings.SimpleHUD)
 		{
 			Godot.Collections.Array<Node> widgets = PanelLeft.GetChildren();
@@ -304,6 +331,7 @@ public partial class Runner : Node3D
 			SimpleMissesLabel.Visible = true;
 		}
 
+		MenuShown = false;
 		Camera.Fov = (float)Phoenyx.Settings.FoV;
 		VideoQuad.Transparency = 1;
 		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
@@ -314,8 +342,12 @@ public partial class Runner : Node3D
 		(VideoQuad.Mesh as QuadMesh).Size = new(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
 		Video.GetParent<SubViewport>().Size = new((int)(1920 * Phoenyx.Settings.VideoRenderScale / 100), (int)(1080 * Phoenyx.Settings.VideoRenderScale / 100));
 
+		MultiplierProgress = 0;
+		MultiplierColour = Color.Color8(255, 255, 255);
+
 		MultiplierProgressMaterial.SetShaderParameter("progress", 0);
-		MultiplierProgressMaterial.SetShaderParameter("colour", Color.Color8(255, 255, 255));
+		MultiplierProgressMaterial.SetShaderParameter("colour", MultiplierColour);
+		MultiplierProgressMaterial.SetShaderParameter("sides", Math.Clamp(CurrentAttempt.ComboMultiplierIncrement, 3, 32));
 
 		Phoenyx.Util.DiscordRPC.Call("Set", "details", "Playing a Map");
 		Phoenyx.Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
@@ -602,7 +634,7 @@ public partial class Runner : Node3D
 
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventMouseMotion eventMouseMotion)
+		if (@event is InputEventMouseMotion eventMouseMotion && Playing)
 		{
 			if (Phoenyx.Settings.CameraLock)
 			{
@@ -646,17 +678,20 @@ public partial class Runner : Node3D
 			switch (eventKey.PhysicalKeycode)
 			{
 				case Key.Escape:
-					CurrentAttempt.Alive = false;
 					CurrentAttempt.Qualifies = false;
-					SoundManager.FailSound.Play();
-					QueueStop();
+
+					if (SettingsManager.Shown)
+					{
+						SettingsManager.HideSettings();
+					}
+					else
+					{
+						ShowMenu(!MenuShown);	
+					}
+
 					break;
 				case Key.Quoteleft:
-					CurrentAttempt.Alive = false;
-					CurrentAttempt.Qualifies = false;
-					Stop(false);
-					GetTree().ReloadCurrentScene();
-					Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.RawMods, CurrentAttempt.Players);
+					Restart();
 					break;
 				case Key.Space:
 					if (Lobby.PlayerCount > 1)
@@ -665,20 +700,13 @@ public partial class Runner : Node3D
 					}
 					
 					Skip();
+
 					break;
 				case Key.F:
 					Phoenyx.Settings.FadeOut = !Phoenyx.Settings.FadeOut;
 					break;
 				case Key.P:
 					Phoenyx.Settings.Pushback = !Phoenyx.Settings.Pushback;
-					break;
-				case Key.C:
-					Bell.Play();
-					Jesus.Modulate = Color.Color8(255, 255, 255, 196);
-					JesusTween?.Kill();
-					JesusTween = Jesus.CreateTween();
-					JesusTween.TweenProperty(Jesus, "modulate", Color.Color8(255, 255, 255, 0), 1);
-					JesusTween.Play();
 					break;
 				case Key.Equal:
 					if (Lobby.PlayerCount > 1)
@@ -688,6 +716,7 @@ public partial class Runner : Node3D
 					
 					CurrentAttempt.Speed = Math.Round((CurrentAttempt.Speed + 0.05) * 100) / 100;
 					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
+
 					break;
 				case Key.Minus:
 					if (Lobby.PlayerCount > 1)
@@ -697,6 +726,7 @@ public partial class Runner : Node3D
 					
 					CurrentAttempt.Speed = Math.Max(0.05, Math.Round((CurrentAttempt.Speed - 0.05) * 100) / 100);
 					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
+
 					break;
 			}
 		}
@@ -718,6 +748,15 @@ public partial class Runner : Node3D
 		{
 			Phoenyx.Stats.FavouriteMaps[map.ID]++;
 		}
+	}
+
+	public static void Restart()
+	{
+		CurrentAttempt.Alive = false;
+		CurrentAttempt.Qualifies = false;
+		Stop(false);
+		Node3D.GetTree().ReloadCurrentScene();
+		Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.RawMods, CurrentAttempt.Players);
 	}
 
 	public static void Skip()
@@ -750,17 +789,18 @@ public partial class Runner : Node3D
 
 	public static void QueueStop()
 	{
-		StopQueued = true;
-	}
-
-	public static void Stop(bool results = true)
-	{
 		if (!Playing)
 		{
 			return;
 		}
 
 		Playing = false;
+		StopQueued = true;
+	}
+
+	public static void Stop(bool results = true)
+	{
+		Input.MouseMode = Input.MouseModeEnum.Hidden;
 
 		Phoenyx.Stats.GamePlaytime += (Time.GetTicksUsec() - Started) / 1000000;
 		Phoenyx.Stats.TotalDistance += (ulong)CurrentAttempt.DistanceMM;
@@ -789,6 +829,59 @@ public partial class Runner : Node3D
 		}
 	}
 
+	public static void ShowMenu(bool show = true)
+	{
+		MenuShown = show;
+		Playing = !MenuShown;
+		SoundManager.Song.PitchScale = Playing ? (float)CurrentAttempt.Speed : 0.00000000000001f;	// i'm gonna kms
+		Input.MouseMode = MenuShown ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
+
+		if (MenuShown)
+		{
+			Menu.Visible = true;
+			Input.WarpMouse(Node3D.GetViewport().GetWindow().Size / 2);
+		}
+
+		Tween tween = Menu.CreateTween();
+		tween.TweenProperty(Menu, "modulate", Color.Color8(255, 255, 255, (byte)(MenuShown ? 255 : 0)), 0.25).SetTrans(Tween.TransitionType.Quad);
+		tween.TweenCallback(Callable.From(() => {
+			Menu.Visible = MenuShown;
+		}));
+		tween.Play();
+	}
+
+	public static void HideMenu()
+	{
+		ShowMenu(false);
+	}
+
+	//public static void ShowSettings(bool show = true)
+	//{
+	//	SettingsShown = show;
+	//
+	//	ColorRect parent = SettingsHolder.GetParent<ColorRect>();
+	//	parent.GetNode<Button>("Deselect").MouseFilter = SettingsShown ? Control.MouseFilterEnum.Stop : Control.MouseFilterEnum.Ignore;
+	//
+	//	if (SettingsShown)
+	//	{
+	//		parent.Visible = true;
+	//	}
+	//
+	//	Tween tween = parent.CreateTween();
+	//	tween.TweenProperty(parent, "modulate", Color.FromHtml($"#ffffff{(SettingsShown ? "ff" : "00")}"), 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+	//	tween.Parallel().TweenProperty(SettingsHolder, "offset_top", SettingsShown ? 0 : 25, 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+	//	tween.Parallel().TweenProperty(SettingsHolder, "offset_bottom", SettingsShown ? 0 : 25, 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
+	//	tween.TweenCallback(Callable.From(() => {
+	//		parent.Visible = SettingsShown;
+	//	}));
+	//	tween.Play();
+	//}
+	//
+	//public static void HideSettings()
+	//{
+	//	ShowSettings(false);
+	//}
+	
 	public static void UpdateVolume()
 	{
 		SoundManager.Song.VolumeDb = -80 + 70 * (float)Math.Pow(Phoenyx.Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Phoenyx.Settings.VolumeMaster / 100, 0.1);

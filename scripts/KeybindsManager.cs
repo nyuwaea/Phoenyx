@@ -36,7 +36,7 @@ public partial class KeybindsManager : Node
                 
                 if (SceneManager.Scene.Name == "SceneMenu")
                 {
-                    MainMenu.UpdateSettings();
+                    SettingsManager.UpdateSettings();
                     MainMenu.UpdateSpectrumSpacing();
                 }
             }

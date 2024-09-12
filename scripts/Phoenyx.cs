@@ -511,6 +511,7 @@ public partial class Phoenyx : Node
                 Stats.Save();
             }
 
+            SettingsManager.UpdateSettings();
             Stats.GamesOpened++;
         }
 
