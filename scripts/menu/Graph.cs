@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 
 public partial class Graph : ColorRect
@@ -8,7 +9,7 @@ public partial class Graph : ColorRect
 		double start = Time.GetTicksUsec();
 		Color hitColor = Color.FromHtml("00ff00ff");
 		Color missColor = Color.FromHtml("ff000044");
-
+		
 		foreach (int miss in Runner.CurrentAttempt.MissesInfo)
 		{
 			int position = (int)(Size.X * miss / Runner.CurrentAttempt.Map.Length);

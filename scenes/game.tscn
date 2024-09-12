@@ -1,4 +1,4 @@
-[gd_scene load_steps=56 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=58 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -17,6 +17,7 @@
 [ext_resource type="FontFile" uid="uid://b6hgjef6s6oly" path="res://fonts/Comfortaa-Bold.ttf" id="12_axsek"]
 [ext_resource type="Texture2D" uid="uid://diba7c3s8as4s" path="res://skin/panel_right_background.png" id="12_whe6p"]
 [ext_resource type="Texture2D" uid="uid://dw2gxd3m24h4m" path="res://skin/hits.png" id="13_6rhgc"]
+[ext_resource type="Shader" path="res://scripts/shaders/alpha_gradient.gdshader" id="14_3xchs"]
 [ext_resource type="Texture2D" uid="uid://c3x2cp3tx4vqt" path="res://skin/misses.png" id="14_bqf11"]
 [ext_resource type="Shader" path="res://scripts/shaders/combo_progress.gdshader" id="14_y51pe"]
 [ext_resource type="AudioStream" uid="uid://deh3syobn5363" path="res://sounds/bell.mp3" id="20_2qbs1"]
@@ -50,6 +51,7 @@ size = Vector2(4, 4)
 transparency = 1
 cull_mode = 2
 shading_mode = 0
+disable_fog = true
 vertex_color_use_as_albedo = true
 vertex_color_is_srgb = true
 albedo_texture = ExtResource("13_6rhgc")
@@ -64,6 +66,8 @@ mesh = SubResource("QuadMesh_5p2n8")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_lvhmj"]
 transparency = 1
 shading_mode = 0
+disable_ambient_light = true
+disable_fog = true
 albedo_texture = ExtResource("3_negii")
 texture_filter = 5
 texture_repeat = false
@@ -80,6 +84,7 @@ viewport_path = NodePath("HealthViewport")
 resource_local_to_scene = true
 transparency = 1
 shading_mode = 0
+disable_fog = true
 albedo_texture = SubResource("ViewportTexture_q2syx")
 texture_repeat = false
 
@@ -95,6 +100,7 @@ viewport_path = NodePath("ProgressBarViewport")
 resource_local_to_scene = true
 transparency = 1
 shading_mode = 0
+disable_fog = true
 albedo_texture = SubResource("ViewportTexture_n4au3")
 texture_repeat = false
 
@@ -173,23 +179,19 @@ font_color = Color(1, 1, 1, 0.768627)
 font = ExtResource("12_axsek")
 font_size = 50
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gc8yu"]
+shader = ExtResource("14_3xchs")
+
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_x2xye"]
 shader = ExtResource("14_y51pe")
 shader_parameter/progress = 0.0
 shader_parameter/colour = Color(1, 1, 1, 1)
+shader_parameter/background_colour = Color(0.155, 0.155, 0.155, 1)
+shader_parameter/sides = 8
+shader_parameter/thickness = 3.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_56f8v"]
-draw_center = false
-border_width_left = 8
-border_width_top = 8
-border_width_right = 8
-border_width_bottom = 8
-border_color = Color(0.158472, 0.158472, 0.158472, 1)
-corner_radius_top_left = 100
-corner_radius_top_right = 100
-corner_radius_bottom_right = 100
-corner_radius_bottom_left = 100
-corner_detail = 2
+bg_color = Color(0, 0, 0, 0)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t86sn"]
 
@@ -232,7 +234,7 @@ cast_shadow = 0
 mesh = SubResource("QuadMesh_7mook")
 
 [node name="Video" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -100)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.479675, -0.459572, -99.9929)
 material_override = SubResource("StandardMaterial3D_rj3ky")
 transparency = 1.0
 cast_shadow = 0
@@ -326,9 +328,9 @@ texture = ExtResource("12_whe6p")
 [node name="Accuracy" type="Label" parent="PanelRightViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.4
+anchor_top = 0.35
 anchor_right = 0.5
-anchor_bottom = 0.4
+anchor_bottom = 0.35
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
@@ -339,9 +341,9 @@ horizontal_alignment = 1
 [node name="Hits" type="Label" parent="PanelRightViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.575
+anchor_top = 0.625
 anchor_right = 0.5
-anchor_bottom = 0.575
+anchor_bottom = 0.625
 offset_right = -25.0
 grow_horizontal = 0
 grow_vertical = 2
@@ -354,9 +356,9 @@ horizontal_alignment = 2
 [node name="Misses" type="Label" parent="PanelRightViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.575
+anchor_top = 0.625
 anchor_right = 0.5
-anchor_bottom = 0.575
+anchor_bottom = 0.625
 offset_left = 25.0
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -381,9 +383,9 @@ label_settings = SubResource("LabelSettings_g4ffu")
 [node name="Sum" type="Label" parent="PanelRightViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.65
+anchor_top = 0.7
 anchor_right = 0.5
-anchor_bottom = 0.65
+anchor_bottom = 0.7
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -395,12 +397,12 @@ horizontal_alignment = 1
 [node name="HitsIcon" type="TextureRect" parent="PanelRightViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.575
+anchor_top = 0.625
 anchor_right = 0.5
-anchor_bottom = 0.575
-offset_top = -10.0
+anchor_bottom = 0.625
+offset_top = -12.0
 offset_right = -2.0
-offset_bottom = 10.0
+offset_bottom = 7.0
 grow_horizontal = 0
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
@@ -410,22 +412,23 @@ expand_mode = 2
 [node name="MissesIcon" type="TextureRect" parent="PanelRightViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.575
+anchor_top = 0.625
 anchor_right = 0.5
-anchor_bottom = 0.575
+anchor_bottom = 0.625
 offset_left = 2.0
-offset_top = -10.0
-offset_bottom = 10.0
+offset_top = -12.0
+offset_bottom = 7.0
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
 texture = ExtResource("14_bqf11")
 expand_mode = 2
 
 [node name="Line" type="ColorRect" parent="PanelRightViewport"]
+material = SubResource("ShaderMaterial_gc8yu")
 anchors_preset = -1
-anchor_top = 0.6
+anchor_top = 0.65
 anchor_right = 1.0
-anchor_bottom = 0.6
+anchor_bottom = 0.65
 offset_left = 16.0
 offset_right = -16.0
 offset_bottom = 2.0
@@ -451,21 +454,21 @@ clip_children = 2
 material = SubResource("ShaderMaterial_x2xye")
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.6
+anchor_top = 0.65
 anchor_right = 0.5
-anchor_bottom = 0.6
-offset_left = -72.0
-offset_top = -72.0
-offset_right = 72.0
-offset_bottom = 72.0
+anchor_bottom = 0.65
+offset_left = -128.0
+offset_top = -128.0
+offset_right = 128.0
+offset_bottom = 128.0
 theme_override_styles/panel = SubResource("StyleBoxFlat_56f8v")
 
 [node name="Score" type="Label" parent="PanelLeftViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.4
+anchor_top = 0.35
 anchor_right = 0.5
-anchor_bottom = 0.4
+anchor_bottom = 0.35
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")
@@ -476,9 +479,9 @@ horizontal_alignment = 1
 [node name="Multiplier" type="Label" parent="PanelLeftViewport"]
 anchors_preset = -1
 anchor_left = 0.5
-anchor_top = 0.6
+anchor_top = 0.65
 anchor_right = 0.5
-anchor_bottom = 0.6
+anchor_bottom = 0.65
 grow_horizontal = 2
 grow_vertical = 2
 theme = ExtResource("4_rvp5o")

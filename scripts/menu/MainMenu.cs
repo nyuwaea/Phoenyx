@@ -201,7 +201,7 @@ public partial class MainMenu : Control
 							sum += accuracy;
 						}
 
-						value = $"{(Math.Floor(sum / Phoenyx.Stats.PassAccuracies.Count * 100) / 100).ToString().PadDecimals(2)}%";
+						value = $"{(Phoenyx.Stats.PassAccuracies.Count == 0 ? 0 : Math.Floor(sum / Phoenyx.Stats.PassAccuracies.Count * 100) / 100).ToString().PadDecimals(2)}%";
 						break;
 					case "RageQuits":
 						value = Lib.String.PadMagnitude(Phoenyx.Stats.RageQuits.ToString());

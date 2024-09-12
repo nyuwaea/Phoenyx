@@ -498,6 +498,7 @@ public partial class Phoenyx : Node
 
             if (!File.Exists($"{Constants.UserFolder}/stats"))
             {
+                File.WriteAllText($"{Constants.UserFolder}/stats", "");
                 Stats.Save();
             }
             

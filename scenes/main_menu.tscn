@@ -17,9 +17,9 @@
 [ext_resource type="Texture2D" uid="uid://bpsvcunhigs6c" path="res://skin/jukebox_skip.png" id="10_i0l4j"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="10_j4s1w"]
 [ext_resource type="Texture2D" uid="uid://ct67kupv6bmny" path="res://textures/discord.png" id="11_vckcj"]
-[ext_resource type="Texture2D" uid="uid://cf5g2fnlyyyn7" path="res://textures/discord_hover.png" id="12_e83hu"]
 [ext_resource type="Texture2D" uid="uid://men3chmi3esy" path="res://textures/add.png" id="13_h750m"]
 [ext_resource type="Texture2D" uid="uid://d3buklvnhgqcy" path="res://textures/discord_hovered.png" id="13_lpi1s"]
+[ext_resource type="Texture2D" uid="uid://c0wbm1qc5npty" path="res://textures/discord_pressed.png" id="15_sy0m2"]
 [ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="21_bm8r1"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
@@ -1171,7 +1171,7 @@ offset_bottom = 16.0
 grow_vertical = 2
 focus_mode = 0
 texture_normal = ExtResource("11_vckcj")
-texture_pressed = ExtResource("12_e83hu")
+texture_pressed = ExtResource("15_sy0m2")
 texture_hover = ExtResource("13_lpi1s")
 
 [node name="Jukebox" type="Panel" parent="."]
