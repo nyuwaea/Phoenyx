@@ -19,7 +19,6 @@ public partial class SettingsManager : Control
         Settings = GD.Load<PackedScene>("res://prefabs//settings.tscn").Instantiate<ColorRect>();
         Holder = Settings.GetNode<Panel>("Holder");
 		Settings.GetNode<Button>("Deselect").Pressed += HideSettings;
-        Settings.Name = "SettingsMenu";
 
         AddChild(Settings);
 		HideSettings();
@@ -127,6 +126,7 @@ public partial class SettingsManager : Control
 			Phoenyx.Settings.CursorTrail = (bool)data["cursor_trail"];
 			Phoenyx.Settings.TrailTime = (float)data["trail_time"];
 			Phoenyx.Settings.SimpleHUD = (bool)data["simple_hud"];
+            Phoenyx.Settings.AbsoluteInput = (bool)data["absolute_mode"];
 
 			UpdateSettings();
 
@@ -247,6 +247,9 @@ public partial class SettingsManager : Control
 			case "AutoplayJukebox":
 				Phoenyx.Settings.AutoplayJukebox = (bool)value;
 				break;
+            case "AbsoluteInput":
+                Phoenyx.Settings.AbsoluteInput = (bool)value;
+                break;
 		}
 
 		UpdateSettings();

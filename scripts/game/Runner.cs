@@ -353,7 +353,7 @@ public partial class Runner : Node3D
 		Phoenyx.Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
 		Phoenyx.Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000 / CurrentAttempt.Speed);
 
-		Input.MouseMode = Input.MouseModeEnum.Captured;
+		Input.MouseMode = Phoenyx.Settings.AbsoluteInput ? Input.MouseModeEnum.ConfinedHidden : Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
@@ -834,7 +834,7 @@ public partial class Runner : Node3D
 		MenuShown = show;
 		Playing = !MenuShown;
 		SoundManager.Song.PitchScale = Playing ? (float)CurrentAttempt.Speed : 0.00000000000001f;	// i'm gonna kms
-		Input.MouseMode = MenuShown ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Captured;
+		Input.MouseMode = MenuShown ? Input.MouseModeEnum.Visible : (Phoenyx.Settings.AbsoluteInput ? Input.MouseModeEnum.ConfinedHidden : Input.MouseModeEnum.Captured);
 
 		if (MenuShown)
 		{

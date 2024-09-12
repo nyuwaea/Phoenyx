@@ -56,6 +56,7 @@ public partial class Phoenyx : Node
         public static double VideoRenderScale {get; set;} = 100;
         public static bool SimpleHUD {get; set;} = false;
         public static string Space {get; set;} = "skin";
+        public static bool AbsoluteInput {get; set;} = false;
 
         public static void Save(string profile = null)
         {
@@ -91,7 +92,8 @@ public partial class Phoenyx : Node
                 ["VideoDim"] = VideoDim,
                 ["VideoRenderScale"] = VideoRenderScale,
                 ["SimpleHUD"] = SimpleHUD,
-                ["Space"] = Space
+                ["Space"] = Space,
+                ["AbsoluteInput"] = AbsoluteInput
             };
 
             File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
@@ -142,6 +144,7 @@ public partial class Phoenyx : Node
                 VideoRenderScale = (double)data["VideoRenderScale"];
                 SimpleHUD = (bool)data["SimpleHUD"];
                 Space = (string)data["Space"];
+                AbsoluteInput = (bool)data["AbsoluteInput"];
 
                 if (Fullscreen)
                 {
