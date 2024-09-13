@@ -25,8 +25,8 @@ public partial class Runner : Node3D
 	private static MeshInstance3D VideoQuad;
 	private static MultiMeshInstance3D NotesMultimesh;
 	private static MultiMeshInstance3D CursorTrailMultimesh;
-	private static TextureRect Health;
-	private static TextureRect ProgressBar;
+	private static TextureRect HealthTexture;
+	private static TextureRect ProgressBarTexture;
 	private static SubViewport PanelLeft;
 	private static SubViewport PanelRight;
 	private static AudioStreamPlayer Bell;
@@ -219,6 +219,9 @@ public partial class Runner : Node3D
 					Qualifies = false;
 					DeathTime = Progress;
 					SoundManager.FailSound.Play();
+
+					HealthTexture.Modulate = Color.Color8(255, 255, 255, 128);
+					HealthTexture.GetParent().GetNode<TextureRect>("Background").Modulate = HealthTexture.Modulate;
 				}
 
 				if (!Mods["NoFail"])
@@ -282,8 +285,8 @@ public partial class Runner : Node3D
 		VideoQuad = GetNode<MeshInstance3D>("Video");
 		NotesMultimesh = GetNode<MultiMeshInstance3D>("Notes");
 		CursorTrailMultimesh = GetNode<MultiMeshInstance3D>("CursorTrail");
-		Health = GetNode("HealthViewport").GetNode<TextureRect>("Main");
-		ProgressBar = GetNode("ProgressBarViewport").GetNode<TextureRect>("Main");
+		HealthTexture = GetNode("HealthViewport").GetNode<TextureRect>("Main");
+		ProgressBarTexture = GetNode("ProgressBarViewport").GetNode<TextureRect>("Main");
 		PanelLeft = GetNode<SubViewport>("PanelLeftViewport");
 		PanelRight = GetNode<SubViewport>("PanelRightViewport");
 		Bell = GetNode<AudioStreamPlayer>("Bell");
@@ -366,10 +369,10 @@ public partial class Runner : Node3D
 			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = Phoenyx.Skin.GridImage;
 			PanelLeft.GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.PanelLeftImage;
 			PanelRight.GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.PanelRightImage;
-			Health.Texture = Phoenyx.Skin.HealthImage;
-			Health.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.HealthBackgroundImage;
-			ProgressBar.Texture = Phoenyx.Skin.ProgressImage;
-			ProgressBar.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.ProgressBackgroundImage;
+			HealthTexture.Texture = Phoenyx.Skin.HealthImage;
+			HealthTexture.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.HealthBackgroundImage;
+			ProgressBarTexture.Texture = Phoenyx.Skin.ProgressImage;
+			ProgressBarTexture.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.ProgressBackgroundImage;
 			PanelRight.GetNode<TextureRect>("HitsIcon").Texture = Phoenyx.Skin.HitsImage;
 			PanelRight.GetNode<TextureRect>("MissesIcon").Texture = Phoenyx.Skin.MissesImage;
 			NotesMultimesh.Multimesh.Mesh = Phoenyx.Skin.NoteMesh;
@@ -570,8 +573,8 @@ public partial class Runner : Node3D
 		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 		SpeedLabel.Modulate = Color.FromHtml($"#ffffff{(CurrentAttempt.Speed == 1 ? "00" : "20")}");
 		ProgressLabel.Text = $"{Lib.String.FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {Lib.String.FormatTime(MapLength / 1000)}";
-		Health.Size = Health.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), (float)delta * 64);
-		ProgressBar.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
+		HealthTexture.Size = HealthTexture.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), (float)delta * 64);
+		ProgressBarTexture.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
 		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
 
 		if (StopQueued)

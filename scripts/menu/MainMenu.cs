@@ -66,6 +66,7 @@ public partial class MainMenu : Control
 	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
 	private static string CurrentMenu = "Main";
+	private static string LastMenu = CurrentMenu;
 	private static string SearchTitle = "";
 	private static string SearchAuthor = "";
 	private static string ContextMenuTarget;
@@ -734,6 +735,12 @@ public partial class MainMenu : Control
 							Transition("Main");
 						}
 						break;
+					case MouseButton.Xbutton2:
+						if (eventMouseButton.Pressed && CurrentMenu != LastMenu)
+						{
+							Transition(LastMenu);
+						}
+						break;
 				}
 			}
 		}
@@ -1045,6 +1052,7 @@ public partial class MainMenu : Control
 
 	private static void Transition(string menuName, bool instant = false)
 	{
+		LastMenu = CurrentMenu;
 		CurrentMenu = menuName;
 
 		switch (CurrentMenu)

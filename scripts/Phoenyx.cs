@@ -99,6 +99,7 @@ public partial class Phoenyx : Node
             File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
 
             Phoenyx.Skin.Save();
+            Logger.Log($"Saved settings {profile}");
         }
 
         public static void Load(string profile = null)
@@ -171,6 +172,8 @@ public partial class Phoenyx : Node
                 ToastNotification.Notify("Settings file corrupted", 2);
                 throw Logger.Error($"Settings file corrupted; {err.Message}");
             }
+
+            Logger.Log($"Loaded settings {profile}");
         }
     }
 
@@ -202,6 +205,7 @@ public partial class Phoenyx : Node
         {
             File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/colors.txt", RawColors);
             File.WriteAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/space.txt", Space);
+            Logger.Log($"Saved skin {Settings.Skin}");
         }
 
         public static void Load()
@@ -260,6 +264,7 @@ public partial class Phoenyx : Node
             }
             
             ToastNotification.Notify($"Loaded skin [{Settings.Skin}]");
+            Logger.Log($"Loaded skin {Settings.Skin}");
         }
     }
 
@@ -319,6 +324,7 @@ public partial class Phoenyx : Node
             file.Close();
 
             File.SetAttributes($"{Constants.UserFolder}/stats", FileAttributes.Hidden);
+            Logger.Log("Saved stats");
         }
 
         public static void Load()
@@ -375,6 +381,8 @@ public partial class Phoenyx : Node
                 ToastNotification.Notify("Stats file corrupt or modified", 2);
                 throw Logger.Error($"Stats file corrupt or modified; {exception.Message}");
             }
+
+            Logger.Log("Loaded stats");
         }
     }
 
@@ -501,6 +509,7 @@ public partial class Phoenyx : Node
 
             if (!File.Exists($"{Constants.UserFolder}/stats"))
             {
+                Logger.Log("Stats file not found");
                 File.WriteAllText($"{Constants.UserFolder}/stats", "");
                 Stats.Save();
             }

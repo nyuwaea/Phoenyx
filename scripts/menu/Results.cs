@@ -51,6 +51,8 @@ public partial class Results : Control
 			}
 		}
 
+		SoundManager.Song.PitchScale = (float)Runner.CurrentAttempt.Speed;
+
 		Footer.GetNode<Button>("Back").Pressed += Stop;
 		Footer.GetNode<Button>("Play").Pressed += Replay;
 	}
