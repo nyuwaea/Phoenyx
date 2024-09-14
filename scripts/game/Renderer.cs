@@ -12,21 +12,28 @@ public partial class Renderer : MultiMeshInstance3D
 
         Multimesh.InstanceCount = Runner.ToProcess;
 
-        Transform3D transform = new Transform3D(new Vector3((float)Phoenyx.Settings.NoteSize / 2, 0, 0), new Vector3(0, (float)Phoenyx.Settings.NoteSize / 2, 0), new Vector3(0, 0, (float)Phoenyx.Settings.NoteSize / 2), Vector3.Zero);
+        float ar = (float)(Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].ApproachRate : Phoenyx.Settings.ApproachRate);
+        float ad = (float)(Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].ApproachDistance : Phoenyx.Settings.ApproachDistance);
+        float at = ad / ar;
+        float fadeIn = (float)(Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].FadeIn : Phoenyx.Settings.FadeIn);
+        bool fadeOut = Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].FadeOut : Phoenyx.Settings.FadeOut;
+        bool pushback = Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].Pushback : Phoenyx.Settings.Pushback;
+        float noteSize = (float)(Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].NoteSize : Phoenyx.Settings.NoteSize);
+        Transform3D transform = new Transform3D(new Vector3(noteSize / 2, 0, 0), new Vector3(0, noteSize / 2, 0), new Vector3(0, 0, noteSize / 2), Vector3.Zero);
 
         for (int i = 0; i < Runner.ToProcess; i++)
         {
             Note note = Runner.ProcessNotes[i];
 
-            float depth = (note.Millisecond - (float)Runner.CurrentAttempt.Progress) / (1000 * (float)Phoenyx.Settings.ApproachTime) * (float)Phoenyx.Settings.ApproachDistance / (float)Runner.CurrentAttempt.Speed;
-            float alpha = Math.Clamp((1 - (float)depth / (float)Phoenyx.Settings.ApproachDistance) / ((float)Phoenyx.Settings.FadeIn / 100), 0, 1);
+            float depth = (note.Millisecond - (float)Runner.CurrentAttempt.Progress) / (1000 * at) * ad / (float)Runner.CurrentAttempt.Speed;
+            float alpha = Math.Clamp((1 - (float)depth / ad) / (fadeIn / 100), 0, 1);
             
-            if (Phoenyx.Settings.FadeOut)
+            if (fadeOut)
             {
-                alpha -= ((float)Phoenyx.Settings.ApproachDistance - depth) / ((float)Phoenyx.Settings.ApproachDistance + (float)Phoenyx.Constants.HitWindow * (float)Phoenyx.Settings.ApproachRate / 1000);
+                alpha -= (ad - depth) / (ad + (float)Phoenyx.Constants.HitWindow * ar / 1000);
             }
 
-            if (!Phoenyx.Settings.Pushback && note.Millisecond - Runner.CurrentAttempt.Progress <= 0)
+            if (!pushback && note.Millisecond - Runner.CurrentAttempt.Progress <= 0)
             {
                 alpha = 0;
             }

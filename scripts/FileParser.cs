@@ -66,6 +66,11 @@ public class FileParser
         return BitConverter.ToDouble(Buffer, Pointer - 8);
     }
 
+    public ushort GetUInt8()
+    {
+        return Get(1)[0];
+    }
+
     public ushort GetUInt16()
     {
         Pointer += 2;

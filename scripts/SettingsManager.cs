@@ -250,6 +250,9 @@ public partial class SettingsManager : Control
             case "AbsoluteInput":
                 Phoenyx.Settings.AbsoluteInput = (bool)value;
                 break;
+			case "RecordReplays":
+				Phoenyx.Settings.RecordReplays = (bool)value;
+				break;
 		}
 
 		UpdateSettings();

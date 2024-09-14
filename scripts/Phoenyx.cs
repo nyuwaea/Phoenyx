@@ -21,9 +21,13 @@ public partial class Phoenyx : Node
         public static string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
         public static Color[] DifficultyColours = [Color.FromHtml("ffffff"), Color.FromHtml("00ff00"), Color.FromHtml("ffff00"), Color.FromHtml("ff0000"), Color.FromHtml("7f00ff"), Color.FromHtml("007fff")];
         public static Color[] SecondaryDifficultyColours = [Color.FromHtml("808080"), Color.FromHtml("7fff7f"), Color.FromHtml("ffff7f"), Color.FromHtml("ff007f"), Color.FromHtml("ff00ff"), Color.FromHtml("007fff")];
-        public static Dictionary<string, double> ModsMultipliers = new(){
+        public static Dictionary<string, double> ModsMultiplierIncrement = new(){
             ["NoFail"] = 0,
-            ["Ghost"] = 0.0675
+            ["Ghost"] = 0.0675,
+			["Spin"] = 0,
+			["Masked"] = 0,
+			["Chaos"] = 0,
+			["HardRock"] = 0
         };
     }
 
@@ -57,6 +61,7 @@ public partial class Phoenyx : Node
         public static bool SimpleHUD {get; set;} = false;
         public static string Space {get; set;} = "skin";
         public static bool AbsoluteInput {get; set;} = false;
+        public static bool RecordReplays {get; set;} = true;
 
         public static void Save(string profile = null)
         {
@@ -93,7 +98,8 @@ public partial class Phoenyx : Node
                 ["VideoRenderScale"] = VideoRenderScale,
                 ["SimpleHUD"] = SimpleHUD,
                 ["Space"] = Space,
-                ["AbsoluteInput"] = AbsoluteInput
+                ["AbsoluteInput"] = AbsoluteInput,
+                ["RecordReplays"] = RecordReplays
             };
 
             File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
@@ -146,6 +152,7 @@ public partial class Phoenyx : Node
                 SimpleHUD = (bool)data["SimpleHUD"];
                 Space = (string)data["Space"];
                 AbsoluteInput = (bool)data["AbsoluteInput"];
+                RecordReplays = (bool)data["RecordReplays"];
 
                 if (Fullscreen)
                 {
@@ -389,6 +396,7 @@ public partial class Phoenyx : Node
     public class Util
     {
         private static bool Initialized = false;
+        private static bool Loaded = false;
         private static string[] UserDirectories = ["maps", "profiles", "skins", "replays"];
         private static string[] SkinFiles = ["cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "hit.mp3", "fail.mp3", "colors.txt"];
 
@@ -525,6 +533,8 @@ public partial class Phoenyx : Node
 
             SettingsManager.UpdateSettings();
             Stats.GamesOpened++;
+
+            Loaded = true;
         }
 
         public static void Quit()
@@ -536,10 +546,18 @@ public partial class Phoenyx : Node
 
             Quitting = true;
 
+            if (!Runner.CurrentAttempt.IsReplay)
+            {
+                Runner.CurrentAttempt.Stop();
+            }
+
             Stats.TotalPlaytime += (Time.GetTicksUsec() - Constants.Started) / 1000000;
 
-            Settings.Save();
-            Stats.Save();
+            if (Loaded)
+            {
+                Settings.Save();
+                Stats.Save();
+            }
             
             DiscordRPC.Call("Set", "end_timestamp", 0);
             DiscordRPC.Call("Clear");

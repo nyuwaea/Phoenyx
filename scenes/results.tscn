@@ -427,6 +427,21 @@ theme_override_font_sizes/font_size = 22
 text = "Play"
 flat = true
 
+[node name="Replay" type="Button" parent="Footer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.925
+anchor_right = 0.925
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = -32.0
+offset_bottom = -8.0
+grow_horizontal = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "Watch Replay"
+flat = true
+
 [node name="Volume" type="Panel" parent="."]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1

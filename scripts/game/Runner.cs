@@ -11,7 +11,6 @@ public partial class Runner : Node3D
 	private static readonly PackedScene MissFeedback = GD.Load<PackedScene>("res://prefabs/miss_icon.tscn");
 
 	private static Panel Menu;
-	//private static Panel SettingsHolder;
 	private static Label FPSCounter;
 	private static Camera3D Camera;
 	private static Label3D TitleLabel;
@@ -63,9 +62,19 @@ public partial class Runner : Node3D
 	public static Attempt CurrentAttempt;
 	public static double MapLength;
 	public static Tween JesusTween;
+	public static MeshInstance3D[] Cursors;
 
 	public struct Attempt
 	{
+		public string ID = "";
+		public bool Stopped = false;
+		public bool IsReplay = false;
+		public Replay[] Replays;	// when reading replays
+		public List<float[]> ReplayFrames = [];	// when writing replays
+		public List<float> ReplaySkips = [];
+		public ulong LastReplayFrame = 0;
+		public uint ReplayFrameCountOffset = 0;
+		public Godot.FileAccess ReplayFile;
 		public double Progress = 0;	// ms
 		public double StartOffset = 0;
 		public Map Map = new();
@@ -77,10 +86,9 @@ public partial class Runner : Node3D
 		public bool Skippable = false;
 		public bool Qualifies = true;
 		public uint Hits = 0;
-		public List<Dictionary<string, float>> HitsInfo = [];
+		public float[] HitsInfo = [];
 		public Color LastHitColour = Phoenyx.Skin.Colors[^1];
 		public uint Misses = 0;
-		public List<int> MissesInfo = [];
 		public double DeathTime = -1;
 		public uint Sum = 0;
 		public uint Combo = 0;
@@ -97,24 +105,75 @@ public partial class Runner : Node3D
 		public Vector2 RawCursorPosition = Vector2.Zero;
 		public double DistanceMM = 0;
 
-		public Attempt(Map map, double speed, string[] mods, string[] players = null, bool replay = false)
+		public Attempt(Map map, double speed, string[] mods, string[] players = null, Replay[] replays = null)
 		{
+			ID = $"{map.ID}_{OS.GetUniqueId()}_{Time.GetDatetimeStringFromUnixTime((long)Time.GetUnixTimeFromSystem())}".Replace(":", "_");
+			IsReplay = replays != null;
+			Replays = replays;
 			Map = map;
 			Speed = speed;
 			Players = players ?? [];
 			Progress = -1000 - Phoenyx.Settings.ApproachTime * 1000;
 			ComboMultiplierIncrement = Math.Max(2, (uint)Map.Notes.Length / 200);
-			RawMods = mods;
+			RawMods = IsReplay ? Replays[0].Modifiers : mods;
 			Mods = new(){
 				["NoFail"] = mods.Contains("NoFail"),
-				["Ghost"] = mods.Contains("Ghost")
+				["Ghost"] = mods.Contains("Ghost"),
+				["Spin"] = mods.Contains("Spin"),
+				["Masked"] = mods.Contains("Masked"),
+				["Chaos"] = mods.Contains("Chaos"),
+				["HardRock"] = mods.Contains("HardRock")
 			};
+			HitsInfo = IsReplay ? Replays[0].Notes : new float[Map.Notes.Length];
+
+			if (!IsReplay && Phoenyx.Settings.RecordReplays)
+			{
+				ReplayFile = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/replays/{ID}.phxr", Godot.FileAccess.ModeFlags.Write);
+				ReplayFile.StoreString("phxr");	// sig
+				ReplayFile.Store8(1);	// replay file version
+
+				string mapFileName = Map.FilePath.GetFile().GetBaseName();
+
+				ReplayFile.StoreDouble(Speed);
+				ReplayFile.StoreDouble(Phoenyx.Settings.ApproachRate);
+				ReplayFile.StoreDouble(Phoenyx.Settings.ApproachDistance);
+				ReplayFile.StoreDouble(Phoenyx.Settings.FadeIn);
+				ReplayFile.Store8((byte)(Phoenyx.Settings.FadeOut ? 1 : 0));
+				ReplayFile.Store8((byte)(Phoenyx.Settings.Pushback ? 1 : 0));
+				ReplayFile.StoreDouble(Phoenyx.Settings.Parallax);
+				ReplayFile.StoreDouble(Phoenyx.Settings.FoV);
+				ReplayFile.StoreDouble(Phoenyx.Settings.NoteSize);
+
+				string modifiers = "";
+				string player = "You";
+
+				foreach (KeyValuePair<string, bool> mod in Mods)
+				{
+					if (mod.Value)
+					{
+						modifiers += $"{mod.Key}_";
+					}
+				}
+
+				modifiers = modifiers.TrimSuffix("_");
+
+				ReplayFile.Store32((uint)modifiers.Length);
+				ReplayFile.StoreString(modifiers);
+				ReplayFile.Store32((uint)mapFileName.Length);
+				ReplayFile.StoreString(mapFileName);
+				ReplayFile.Store32((uint)player.Length);
+				ReplayFile.StoreString(player);
+
+				ReplayFrameCountOffset = (uint)ReplayFile.GetPosition();
+
+				ReplayFile.Store64(0);	// reserve frame count
+			}
 
 			foreach (KeyValuePair<string, bool> entry in Mods)
 			{
 				if (entry.Value)
 				{
-					ModsMultiplier += Phoenyx.Constants.ModsMultipliers[entry.Key];
+					ModsMultiplier += Phoenyx.Constants.ModsMultiplierIncrement[entry.Key];
 				}
 			}
 		}
@@ -135,13 +194,13 @@ public partial class Runner : Node3D
 
 			LastHitColour = Phoenyx.Skin.Colors[index % Phoenyx.Skin.Colors.Length];
 
-			float lateness = (float)((Progress - Map.Notes[index].Millisecond) / CurrentAttempt.Speed);
+			float lateness = (float)((Progress - Map.Notes[index].Millisecond) / Speed);
 			float factor = 1 - Math.Max(0, lateness - 25) / 150f;
-
-			HitsInfo.Add(new(){
-				["Time"] = Map.Notes[index].Millisecond,
-				["Offset"] = lateness,
-			});
+			
+			if (!IsReplay)
+			{
+				HitsInfo[index] = lateness;
+			}
 
 			if (ComboMultiplierProgress == ComboMultiplierIncrement)
 			{
@@ -198,7 +257,10 @@ public partial class Runner : Node3D
 			HealthStep = Math.Min(HealthStep * 1.2, 100);
 			Phoenyx.Stats.NotesMissed++;
 
-			MissesInfo.Add(Map.Notes[index].Millisecond);
+			if (!IsReplay)
+			{
+				HitsInfo[index] = -1;
+			}
 
 			//if (Health - HealthStep <= 0)
 			//{
@@ -264,6 +326,61 @@ public partial class Runner : Node3D
 			}));
 			tween.Play();
 		}
+
+		public void Stop()
+		{
+			if (Stopped)
+			{
+				return;
+			}
+
+			Stopped = true;
+
+			if (ReplayFile == null)
+			{
+				return;
+			}
+
+			if (!IsReplay)
+			{
+				ReplayFile.Seek(ReplayFrameCountOffset);
+				ReplayFile.Store64((ulong)ReplayFrames.Count);
+
+				foreach (float[] frame in ReplayFrames)
+				{
+					ReplayFile.StoreFloat(frame[0]);
+					ReplayFile.StoreFloat(frame[1]);
+					ReplayFile.StoreFloat(frame[2]);
+				}
+
+				ReplayFile.Seek(ReplayFile.GetLength());
+				ReplayFile.Store64((ulong)Map.Notes.Length);
+
+				for (int i = 0; i < Sum; i++)
+				{
+					ReplayFile.StoreFloat(HitsInfo[i]);
+				}
+
+				for (int i = (int)Sum; i < Map.Notes.Length; i++)
+				{
+					ReplayFile.StoreFloat(-1);
+				}
+
+				ReplayFile.Store64((ulong)ReplaySkips.Count);
+
+				foreach (float skip in ReplaySkips)
+				{
+					ReplayFile.StoreFloat(skip);
+				}
+
+				ReplayFile.Close();
+				CurrentAttempt.HitsInfo = CurrentAttempt.HitsInfo[0 .. (int)PassedNotes];
+			}
+			else
+			{
+				CurrentAttempt.HitsInfo = CurrentAttempt.HitsInfo[0 .. (int)CurrentAttempt.Replays[0].LastNote];
+			}
+		}
 	}
 	
 	public override void _Ready()
@@ -271,7 +388,6 @@ public partial class Runner : Node3D
 		Node3D = this;
 
 		Menu = GetNode<Panel>("Menu");
-		//SettingsHolder = GetNode("Settings").GetNode<Panel>("Holder");
 		FPSCounter = GetNode<Label>("FPSCounter");
 		Camera = GetNode<Camera3D>("Camera3D");
 		TitleLabel = GetNode<Label3D>("Title");
@@ -334,14 +450,19 @@ public partial class Runner : Node3D
 			SimpleMissesLabel.Visible = true;
 		}
 
+		float fov = (float)(CurrentAttempt.IsReplay ? CurrentAttempt.Replays[0].FoV : Phoenyx.Settings.FoV);
+
 		MenuShown = false;
-		Camera.Fov = (float)Phoenyx.Settings.FoV;
+		Camera.Fov = fov;
 		VideoQuad.Transparency = 1;
 		TitleLabel.Text = CurrentAttempt.Map.PrettyTitle;
-		HitsLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
-		MissesLabel.LabelSettings.FontColor = Color.FromHtml("#ffffffa0");
+		HitsLabel.LabelSettings.FontColor = Color.Color8(255, 255, 255, 160);
+		MissesLabel.LabelSettings.FontColor = Color.Color8(255, 255, 255, 160);
+		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
+		SpeedLabel.Modulate = Color.Color8(255, 255, 255, (byte)(CurrentAttempt.Speed == 1 ? 0 : 32));
 
-		float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(Phoenyx.Settings.FoV / 2)), 2) - Math.Pow(103.75, 2));
+		float videoHeight = 2 * (float)Math.Sqrt(Math.Pow(103.75 / Math.Cos(Mathf.DegToRad(fov / 2)), 2) - Math.Pow(103.75, 2));
+
 		(VideoQuad.Mesh as QuadMesh).Size = new(videoHeight / 0.5625f, videoHeight);	// don't use 16:9? too bad lol
 		Video.GetParent<SubViewport>().Size = new((int)(1920 * Phoenyx.Settings.VideoRenderScale / 100), (int)(1080 * Phoenyx.Settings.VideoRenderScale / 100));
 
@@ -356,7 +477,7 @@ public partial class Runner : Node3D
 		Phoenyx.Util.DiscordRPC.Call("Set", "state", CurrentAttempt.Map.PrettyTitle);
 		Phoenyx.Util.DiscordRPC.Call("Set", "end_timestamp", Time.GetUnixTimeFromSystem() + CurrentAttempt.Map.Length / 1000 / CurrentAttempt.Speed);
 
-		Input.MouseMode = Phoenyx.Settings.AbsoluteInput ? Input.MouseModeEnum.ConfinedHidden : Input.MouseModeEnum.Captured;
+		Input.MouseMode = Phoenyx.Settings.AbsoluteInput || CurrentAttempt.IsReplay ? Input.MouseModeEnum.ConfinedHidden : Input.MouseModeEnum.Captured;
 		Input.UseAccumulatedInput = false;
 		DisplayServer.WindowSetVsyncMode(DisplayServer.VSyncMode.Disabled);
 
@@ -402,6 +523,8 @@ public partial class Runner : Node3D
 		{
 			MapLength = CurrentAttempt.Map.Length + 1000;
 		}
+
+		MapLength += Phoenyx.Constants.HitWindow;
 		
 		if (Phoenyx.Settings.VideoDim < 100 && CurrentAttempt.Map.VideoBuffer != null)
 		{
@@ -415,14 +538,38 @@ public partial class Runner : Node3D
 			}
 		}
 
-		MapLength += Phoenyx.Constants.HitWindow;
+		if (CurrentAttempt.Replays != null)
+		{
+			if (CurrentAttempt.Replays.Length > 1)
+			{
+				CurrentAttempt.Replays[0].Pushback = false;
+			}
+
+			CurrentAttempt.Mods["Spin"] = true;
+			Cursors = new MeshInstance3D[CurrentAttempt.Replays.Length];
+
+			for (int i = 0; i < CurrentAttempt.Replays.Length; i++)
+			{
+				if (CurrentAttempt.Mods["Spin"] && !CurrentAttempt.Replays[i].Modifiers.Contains("Spin"))
+				{
+					CurrentAttempt.Mods["Spin"] = false;
+				}
+
+				MeshInstance3D cursor = Cursor.Duplicate() as MeshInstance3D;
+				cursor.Name = $"_cursor{i}";
+				Node3D.AddChild(cursor);
+				Cursors[i] = cursor;
+			}
+			
+			Cursor.Visible = false;
+		}
 
 		UpdateVolume();
 	}
 
     public override void _PhysicsProcess(double delta)
     {
-        MultiplierProgress = Mathf.Lerp(MultiplierProgress, (float)CurrentAttempt.ComboMultiplierProgress / CurrentAttempt.ComboMultiplierIncrement, (float)delta * 16);
+        MultiplierProgress = Mathf.Lerp(MultiplierProgress, (float)CurrentAttempt.ComboMultiplierProgress / CurrentAttempt.ComboMultiplierIncrement, Math.Min(1, (float)delta * 16));
 		MultiplierColour = MultiplierColour.Lerp(Color.Color8(255, 255, 255), (float)delta * 2);
 		MultiplierProgressMaterial.SetShaderParameter("progress", MultiplierProgress);
 	
@@ -438,7 +585,7 @@ public partial class Runner : Node3D
 		delta = (now - LastFrame) / 1000000;	// more reliable
 		LastFrame = now;
 		FrameCount++;
-		SkipLabelAlpha = Mathf.Lerp(SkipLabelAlpha, TargetSkipLabelAlpha, (float)delta * 20);
+		SkipLabelAlpha = Mathf.Lerp(SkipLabelAlpha, TargetSkipLabelAlpha, Math.Min(1, (float)delta * 20));
 
 		if (LastSecond + 1000000 <= now)
 		{
@@ -450,6 +597,88 @@ public partial class Runner : Node3D
 		if (!Playing)
 		{
 			return;
+		}
+
+		if (CurrentAttempt.IsReplay)
+		{
+			Vector2 positionSum = new();
+
+			for (int i = 0; i < CurrentAttempt.Replays.Length; i++)
+			{
+				for (int j = CurrentAttempt.Replays[i].PositionIndex; j < CurrentAttempt.Replays[i].Positions.Length; j++)
+				{
+					if (CurrentAttempt.Progress < CurrentAttempt.Replays[i].Positions[j].Progress)
+					{
+						CurrentAttempt.Replays[i].PositionIndex = Math.Max(0, j - 1);
+						break;
+					}
+				}
+
+				int next = Math.Min(CurrentAttempt.Replays[i].PositionIndex + 1, CurrentAttempt.Replays[i].Positions.Length - 2);
+
+				if (!CurrentAttempt.Replays[i].Complete && CurrentAttempt.Replays[i].PositionIndex == next)
+				{
+					CurrentAttempt.Replays[i].Complete = true;
+					CurrentAttempt.Replays[i].LastNote = CurrentAttempt.PassedNotes;
+
+					Tween tween = Cursors[i].CreateTween();
+					tween.TweenProperty(Cursors[i], "transparency", 1, 1).SetTrans(Tween.TransitionType.Quad);
+					tween.Play();
+				}
+
+				double inverse = Mathf.InverseLerp(CurrentAttempt.Replays[i].Positions[CurrentAttempt.Replays[i].PositionIndex].Progress, CurrentAttempt.Replays[i].Positions[next].Progress, CurrentAttempt.Progress);
+				Vector2 cursorPos = CurrentAttempt.Replays[i].Positions[CurrentAttempt.Replays[i].PositionIndex].CursorPosition.Lerp(CurrentAttempt.Replays[i].Positions[next].CursorPosition, (float)Math.Clamp(inverse, 0, 1));
+				
+				if (Cursors.Length - 1 >= i)	// why
+				{
+					Cursors[i].Position = new(cursorPos.X, cursorPos.Y, 0);
+				}
+
+				CurrentAttempt.Replays[i].CurrentPosition = cursorPos;
+				positionSum += cursorPos;
+			}
+
+			Vector2 averagePosition = positionSum / CurrentAttempt.Replays.Length;
+			Vector2 mouseDelta = averagePosition - CurrentAttempt.CursorPosition;
+
+			if (CurrentAttempt.Mods["Spin"])
+			{
+				mouseDelta *= new Vector2(1, -1) * (float)Math.PI / 2 * 100;
+			}
+
+			UpdateCursor(mouseDelta);
+
+			CurrentAttempt.CursorPosition = averagePosition;
+
+			if (CurrentAttempt.Replays.Length == 1 && CurrentAttempt.Replays[0].SkipIndex < CurrentAttempt.Replays[0].Skips.Length && CurrentAttempt.Progress >= CurrentAttempt.Replays[0].Skips[CurrentAttempt.Replays[0].SkipIndex])
+			{
+				CurrentAttempt.Replays[0].SkipIndex++;
+				Skip();
+			}
+
+			int complete = 0;
+
+			foreach (Replay replay in CurrentAttempt.Replays)
+			{
+				if (replay.Complete)
+				{
+					complete++;
+				}
+			}
+
+			if (complete == CurrentAttempt.Replays.Length)
+			{
+				QueueStop();
+			}
+		}
+		else if (!CurrentAttempt.Stopped && Phoenyx.Settings.RecordReplays && now - CurrentAttempt.LastReplayFrame >= 1000000/60)	// 60hz
+		{
+			CurrentAttempt.LastReplayFrame = now;
+			CurrentAttempt.ReplayFrames.Add([
+				(float)CurrentAttempt.Progress,
+				CurrentAttempt.CursorPosition.X,
+				CurrentAttempt.CursorPosition.Y
+			]);
 		}
 		
 		CurrentAttempt.Progress += delta * 1000 * CurrentAttempt.Speed;
@@ -499,6 +728,8 @@ public partial class Runner : Node3D
 		ProcessNotes.Clear();
 
 		// note process check
+		double at = CurrentAttempt.IsReplay ? CurrentAttempt.Replays[0].ApproachTime : Phoenyx.Settings.ApproachTime;
+
 		for (uint i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)
 		{
 			Note note = CurrentAttempt.Map.Notes[i];
@@ -507,7 +738,7 @@ public partial class Runner : Node3D
 			{
 				if (i + 1 > CurrentAttempt.PassedNotes)
 				{
-					if (!note.Hit)
+					if (CurrentAttempt.IsReplay && CurrentAttempt.Replays.Length <= 1 && CurrentAttempt.Replays[0].Notes[note.Index] == -1 || !CurrentAttempt.IsReplay && !note.Hit)
 					{
 						CurrentAttempt.Miss(note.Index);
 					}
@@ -515,9 +746,12 @@ public partial class Runner : Node3D
 					CurrentAttempt.PassedNotes = i + 1;
 				}
 
-				continue;
+				if (!CurrentAttempt.IsReplay)
+				{
+					continue;
+				}
 			}
-			else if (note.Millisecond > CurrentAttempt.Progress + Phoenyx.Settings.ApproachTime * 1000 * CurrentAttempt.Speed)	// past approach distance
+			else if (note.Millisecond > CurrentAttempt.Progress + at * 1000 * CurrentAttempt.Speed)	// past approach distance
 			{
 				break;
 			}
@@ -542,12 +776,23 @@ public partial class Runner : Node3D
 		{
 			Note note = ProcessNotes[i];
 
-			if (note.Hit || note.Millisecond - CurrentAttempt.Progress > 0)
+			if (note.Hit)
 			{
 				continue;
 			}
 
-			if (CurrentAttempt.CursorPosition.X + Phoenyx.Constants.HitBoxSize >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Phoenyx.Constants.HitBoxSize <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Phoenyx.Constants.HitBoxSize >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Phoenyx.Constants.HitBoxSize <= note.Y + 0.5f)
+			if (!CurrentAttempt.IsReplay)
+			{
+				if (note.Millisecond - CurrentAttempt.Progress > 0)
+				{
+					continue;
+				}
+				else if (CurrentAttempt.CursorPosition.X + Phoenyx.Constants.HitBoxSize >= note.X - 0.5f && CurrentAttempt.CursorPosition.X - Phoenyx.Constants.HitBoxSize <= note.X + 0.5f && CurrentAttempt.CursorPosition.Y + Phoenyx.Constants.HitBoxSize >= note.Y - 0.5f && CurrentAttempt.CursorPosition.Y - Phoenyx.Constants.HitBoxSize <= note.Y + 0.5f)
+				{
+					CurrentAttempt.Hit(note.Index);
+				}
+			}
+			else if (CurrentAttempt.Replays.Length > 1 && note.Millisecond - CurrentAttempt.Progress <= 0 || CurrentAttempt.Replays[0].Notes[note.Index] != -1 && note.Millisecond - CurrentAttempt.Progress + CurrentAttempt.Replays[0].Notes[note.Index] * CurrentAttempt.Speed <= 0)
 			{
 				CurrentAttempt.Hit(note.Index);
 			}
@@ -558,22 +803,20 @@ public partial class Runner : Node3D
 			Stop();
 			return;
 		}
-
+		
 		if (CurrentAttempt.Skippable)
 		{
 			TargetSkipLabelAlpha = 32f / 255f;
-			ProgressLabel.Modulate = Color.FromHtml("ffffff" + (64 + (int)(172 * (Math.Sin(Math.PI * now / 750000) / 2 + 0.5f))).ToString("X2"));
+			ProgressLabel.Modulate = Color.Color8(255, 255, 255, (byte)(64 + (int)(172 * (Math.Sin(Math.PI * now / 750000) / 2 + 0.5))));
 		}
 		else
 		{
 			TargetSkipLabelAlpha = 0;
-			ProgressLabel.Modulate = Color.FromHtml("ffffff40");
+			ProgressLabel.Modulate = Color.Color8(255, 255, 255, 64);
 		}
 
-		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
-		SpeedLabel.Modulate = Color.FromHtml($"#ffffff{(CurrentAttempt.Speed == 1 ? "00" : "20")}");
 		ProgressLabel.Text = $"{Lib.String.FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {Lib.String.FormatTime(MapLength / 1000)}";
-		HealthTexture.Size = HealthTexture.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), (float)delta * 64);
+		HealthTexture.Size = HealthTexture.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), Math.Min(1, (float)delta * 64));
 		ProgressBarTexture.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
 		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
 
@@ -585,7 +828,6 @@ public partial class Runner : Node3D
 		}
 
 		// trail stuff
-		
 		if (Phoenyx.Settings.CursorTrail)
 		{
 			List<Dictionary<string, object>> culledList = [];
@@ -637,42 +879,9 @@ public partial class Runner : Node3D
 
 	public override void _Input(InputEvent @event)
 	{
-		if (@event is InputEventMouseMotion eventMouseMotion && Playing)
+		if (@event is InputEventMouseMotion eventMouseMotion && Playing && !CurrentAttempt.IsReplay)
 		{
-			if (Phoenyx.Settings.CameraLock)
-			{
-				if (Phoenyx.Settings.CursorDrift)
-				{
-					CurrentAttempt.CursorPosition = (CurrentAttempt.CursorPosition + new Vector2(1, -1) * eventMouseMotion.Relative / 120 * (float)Phoenyx.Settings.Sensitivity).Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
-				}
-				else
-				{
-					CurrentAttempt.RawCursorPosition += new Vector2(1, -1) * eventMouseMotion.Relative / 120 * (float)Phoenyx.Settings.Sensitivity;
-					CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
-				}
-
-				Cursor.Position = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
-				Camera.Position = new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * (float)Phoenyx.Settings.Parallax;
-				Camera.Rotation = Vector3.Zero;
-				
-				VideoQuad.Position = new Vector3(Camera.Position.X, Camera.Position.Y, -100);
-			}
-			else
-			{
-				Camera.Rotation += new Vector3(-eventMouseMotion.Relative.Y / 120 * (float)Phoenyx.Settings.Sensitivity / (float)Math.PI, -eventMouseMotion.Relative.X / 120 * (float)Phoenyx.Settings.Sensitivity / (float)Math.PI, 0);
-				Camera.Rotation = new Vector3((float)Math.Clamp(Camera.Rotation.X, Mathf.DegToRad(-90), Mathf.DegToRad(90)), Camera.Rotation.Y, Camera.Rotation.Z);
-				Camera.Position = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
-				
-				float hypotenuse = 3.5f / Camera.Basis.Z.Z;
-				float distance = (float)Math.Sqrt(Math.Pow(hypotenuse, 2) - Math.Pow(3.5f, 2));
-				
-				CurrentAttempt.RawCursorPosition = new Vector2(Camera.Basis.Z.X, Camera.Basis.Z.Y).Normalized() * -distance;
-				CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
-				Cursor.Position = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
-
-				VideoQuad.Position = Camera.Position - Camera.Basis.Z * 103.75f;
-				VideoQuad.Rotation = Camera.Rotation;
-			}
+			UpdateCursor(eventMouseMotion.Relative);
 
 			CurrentAttempt.DistanceMM += eventMouseMotion.Relative.Length() / Phoenyx.Settings.Sensitivity / 57.5;
 		}
@@ -697,12 +906,19 @@ public partial class Runner : Node3D
 					Restart();
 					break;
 				case Key.Space:
-					if (Lobby.PlayerCount > 1)
+					if (CurrentAttempt.IsReplay)
 					{
-						break;
+						GD.Print("toggle replay player menu");
 					}
-					
-					Skip();
+					else
+					{
+						if (Lobby.PlayerCount > 1)
+						{
+							break;
+						}
+						
+						Skip();
+					}
 
 					break;
 				case Key.F:
@@ -711,33 +927,13 @@ public partial class Runner : Node3D
 				case Key.P:
 					Phoenyx.Settings.Pushback = !Phoenyx.Settings.Pushback;
 					break;
-				case Key.Equal:
-					if (Lobby.PlayerCount > 1)
-					{
-						break;
-					}
-					
-					CurrentAttempt.Speed = Math.Round((CurrentAttempt.Speed + 0.05) * 100) / 100;
-					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
-
-					break;
-				case Key.Minus:
-					if (Lobby.PlayerCount > 1)
-					{
-						break;
-					}
-					
-					CurrentAttempt.Speed = Math.Max(0.05, Math.Round((CurrentAttempt.Speed - 0.05) * 100) / 100);
-					SoundManager.Song.PitchScale = (float)CurrentAttempt.Speed;
-
-					break;
 			}
 		}
 	}
 	
-	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null)
+	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null, Replay[] replays = null)
 	{
-		CurrentAttempt = new Attempt(map, speed, mods, players);
+		CurrentAttempt = new(map, speed, mods, players, replays);
 		Playing = true;
 		Started = Time.GetTicksUsec();
 		ProcessNotes = [];
@@ -759,13 +955,15 @@ public partial class Runner : Node3D
 		CurrentAttempt.Qualifies = false;
 		Stop(false);
 		Node3D.GetTree().ReloadCurrentScene();
-		Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.RawMods, CurrentAttempt.Players);
+		Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.RawMods, CurrentAttempt.Players, CurrentAttempt.Replays);
 	}
 
 	public static void Skip()
 	{
 		if (CurrentAttempt.Skippable)
 		{
+			CurrentAttempt.ReplaySkips.Add((float)CurrentAttempt.Progress);
+
 			if (CurrentAttempt.PassedNotes >= CurrentAttempt.Map.Notes.Length)
 			{
 				CurrentAttempt.Progress = SoundManager.Song.Stream.GetLength() * 1000;
@@ -803,6 +1001,8 @@ public partial class Runner : Node3D
 
 	public static void Stop(bool results = true)
 	{
+		CurrentAttempt.Stop();
+
 		Input.MouseMode = Input.MouseModeEnum.Hidden;
 
 		Phoenyx.Stats.GamePlaytime += (Time.GetTicksUsec() - Started) / 1000000;
@@ -837,7 +1037,7 @@ public partial class Runner : Node3D
 		MenuShown = show;
 		Playing = !MenuShown;
 		SoundManager.Song.PitchScale = Playing ? (float)CurrentAttempt.Speed : 0.00000000000001f;	// i'm gonna kms
-		Input.MouseMode = MenuShown ? Input.MouseModeEnum.Visible : (Phoenyx.Settings.AbsoluteInput ? Input.MouseModeEnum.ConfinedHidden : Input.MouseModeEnum.Captured);
+		Input.MouseMode = MenuShown ? Input.MouseModeEnum.Visible : (Phoenyx.Settings.AbsoluteInput || CurrentAttempt.IsReplay ? Input.MouseModeEnum.ConfinedHidden : Input.MouseModeEnum.Captured);
 
 		if (MenuShown)
 		{
@@ -857,39 +1057,50 @@ public partial class Runner : Node3D
 	{
 		ShowMenu(false);
 	}
-
-	//public static void ShowSettings(bool show = true)
-	//{
-	//	SettingsShown = show;
-	//
-	//	ColorRect parent = SettingsHolder.GetParent<ColorRect>();
-	//	parent.GetNode<Button>("Deselect").MouseFilter = SettingsShown ? Control.MouseFilterEnum.Stop : Control.MouseFilterEnum.Ignore;
-	//
-	//	if (SettingsShown)
-	//	{
-	//		parent.Visible = true;
-	//	}
-	//
-	//	Tween tween = parent.CreateTween();
-	//	tween.TweenProperty(parent, "modulate", Color.FromHtml($"#ffffff{(SettingsShown ? "ff" : "00")}"), 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-	//	tween.Parallel().TweenProperty(SettingsHolder, "offset_top", SettingsShown ? 0 : 25, 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-	//	tween.Parallel().TweenProperty(SettingsHolder, "offset_bottom", SettingsShown ? 0 : 25, 0.25).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.Out);
-	//	tween.TweenCallback(Callable.From(() => {
-	//		parent.Visible = SettingsShown;
-	//	}));
-	//	tween.Play();
-	//}
-	//
-	//public static void HideSettings()
-	//{
-	//	ShowSettings(false);
-	//}
 	
 	public static void UpdateVolume()
 	{
 		SoundManager.Song.VolumeDb = -80 + 70 * (float)Math.Pow(Phoenyx.Settings.VolumeMusic / 100, 0.1) * (float)Math.Pow(Phoenyx.Settings.VolumeMaster / 100, 0.1);
 		SoundManager.HitSound.VolumeDb = -80 + 80 * (float)Math.Pow(Phoenyx.Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Phoenyx.Settings.VolumeMaster / 100, 0.1);
 		SoundManager.FailSound.VolumeDb = -80 + 80 * (float)Math.Pow(Phoenyx.Settings.VolumeSFX / 100, 0.1) * (float)Math.Pow(Phoenyx.Settings.VolumeMaster / 100, 0.1);
+	}
+
+	public static void UpdateCursor(Vector2 mouseDelta)
+	{
+		if (!CurrentAttempt.Mods["Spin"])
+		{
+			if (Phoenyx.Settings.CursorDrift)
+			{
+				CurrentAttempt.CursorPosition = (CurrentAttempt.CursorPosition + new Vector2(1, -1) * mouseDelta / 120 * (float)Phoenyx.Settings.Sensitivity).Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
+			}
+			else
+			{
+				CurrentAttempt.RawCursorPosition += new Vector2(1, -1) * mouseDelta / 120 * (float)Phoenyx.Settings.Sensitivity;
+				CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
+			}
+			
+			Cursor.Position = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
+			Camera.Position = new Vector3(0, 0, 3.75f) + new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0) * (float)(CurrentAttempt.IsReplay ? CurrentAttempt.Replays[0].Parallax : Phoenyx.Settings.Parallax);
+			Camera.Rotation = Vector3.Zero;
+			
+			VideoQuad.Position = new Vector3(Camera.Position.X, Camera.Position.Y, -100);
+		}
+		else
+		{
+			Camera.Rotation += new Vector3(-mouseDelta.Y / 120 * (float)Phoenyx.Settings.Sensitivity / (float)Math.PI, -mouseDelta.X / 120 * (float)Phoenyx.Settings.Sensitivity / (float)Math.PI, 0);
+			Camera.Rotation = new Vector3((float)Math.Clamp(Camera.Rotation.X, Mathf.DegToRad(-90), Mathf.DegToRad(90)), Camera.Rotation.Y, Camera.Rotation.Z);
+			Camera.Position = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
+			
+			float hypotenuse = 3.5f / Camera.Basis.Z.Z;
+			float distance = (float)Math.Sqrt(Math.Pow(hypotenuse, 2) - Math.Pow(3.5f, 2));
+			
+			CurrentAttempt.RawCursorPosition = new Vector2(Camera.Basis.Z.X, Camera.Basis.Z.Y).Normalized() * -distance;
+			CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
+			Cursor.Position = new Vector3(CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y, 0);
+
+			VideoQuad.Position = Camera.Position - Camera.Basis.Z * 103.75f;
+			VideoQuad.Rotation = Camera.Rotation;
+		}
 	}
 
 	public static void UpdateScore(string player, int score)

@@ -99,20 +99,67 @@ public partial class MainMenu : Control
 			Viewport viewport = GetViewport();
 
 			viewport.SizeChanged += () => {
+				if (SceneManager.Scene.Name != "SceneMenu")
+				{
+					return;
+				}
+
 				WindowSize = DisplayServer.WindowGetSize();
 				UpdateMaxScroll();
 				TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
 				UpdateSpectrumSpacing();
 			};
 			viewport.Connect("files_dropped", Callable.From((string[] files) => {
-				MapParser.Import(files);
-				UpdateMapList();
-				Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm").TrimSuffix(".sspm").TrimSuffix(".txt"));
-				
-				if (!mapButton.Name.ToString().Contains(SearchTitle))
+				if (files[0].GetExtension() == "phxr")
 				{
-					mapButton.Visible = false;
-					VisibleMaps--;
+					List<Replay> replays = [];
+					List<Replay> matching = [];
+
+					for (int i = 0; i < files.Length; i++)
+					{
+						Replay replay = new(files[i]);
+
+						if (!replay.Valid)
+						{
+							continue;
+						}
+
+						replays.Add(replay);
+					}
+
+					foreach (Replay replay in replays)
+					{
+						if (replay == replays[0])
+						{
+							matching.Add(replay);
+						}
+						else
+						{
+							ToastNotification.Notify("Replay doesn't match first", 1);
+							Logger.Log($"Replay {replay} doesn't match {replays[0]}");
+						}
+					}
+
+					if (Runner.Playing)
+					{
+						Runner.QueueStop();
+					}
+					
+					SoundManager.Song.Stop();
+					SceneManager.Load("res://scenes/game.tscn");
+					Runner.Play(MapParser.Decode(matching[0].MapFilePath), matching[0].Speed, matching[0].Modifiers, null, [.. matching]);
+				}
+				else
+				{
+					MapParser.Import(files);
+					UpdateMapList();
+					Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm").TrimSuffix(".sspm").TrimSuffix(".txt"));
+
+					if (!mapButton.Name.ToString().Contains(SearchTitle))
+					{
+						mapButton.Visible = false;
+						VisibleMaps--;
+					}
 				}
 			}));
 		}

@@ -1300,6 +1300,36 @@ theme = ExtResource("1_8p7x0")
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 text = "1-Click Import"
 
+[node name="RecordReplays" type="Panel" parent="Holder/Categories/Other/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Other/Container/RecordReplays"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Record Replays"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Other/Container/RecordReplays"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
 [node name="Sidebar" type="ScrollContainer" parent="Holder"]
 layout_mode = 1
 anchors_preset = -1

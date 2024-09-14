@@ -363,7 +363,7 @@ bbcode_enabled = true
 text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
 [font_size=24]Changelog
 
-[font_size=16][i]FEATURES & CHANGES[/i][ul]
+[font_size=16][i]FEATURES & MAIN CHANGES[/i][ul]
  Proper main menu
  Extras (& statistics) menu
  Search by map author
@@ -378,7 +378,8 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
  Video background render scale
  Absolute input
 [/ul]
- Mde score dropoff more lenient (20ms for perfect hit -> 25ms, lowest multiplier 0.65x -> 0.8x)
+ Made score dropoff more lenient (20ms for perfect hit -> 25ms, lowest multiplier 0.65x -> 0.8x)
+ This panel :)
 [/ul]
 
 [i]QoL CHANGES[/i][ul]

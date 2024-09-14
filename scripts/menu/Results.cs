@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.IO;
 
 public partial class Results : Control
 {
@@ -35,7 +36,7 @@ public partial class Results : Control
 
 		if (Runner.CurrentAttempt.Map.CoverBuffer != null)
 		{
-			FileAccess file = FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/cover.png", FileAccess.ModeFlags.Write);
+			Godot.FileAccess file = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/cover.png", Godot.FileAccess.ModeFlags.Write);
 			file.StoreBuffer(Runner.CurrentAttempt.Map.CoverBuffer);
 			file.Close();
 
@@ -55,6 +56,26 @@ public partial class Results : Control
 
 		Footer.GetNode<Button>("Back").Pressed += Stop;
 		Footer.GetNode<Button>("Play").Pressed += Replay;
+		Footer.GetNode<Button>("Replay").Pressed += () => {
+			string path;
+
+			if (Runner.CurrentAttempt.IsReplay)
+			{
+				path = $"{Phoenyx.Constants.UserFolder}/replays/{Runner.CurrentAttempt.Replays[0].ID}.phxr";
+			}
+			else
+			{
+				path = Runner.CurrentAttempt.ReplayFile.GetPath();
+			}
+			
+			if (File.Exists(path))
+			{
+				Replay replay = new(path);
+				SoundManager.Song.Stop();
+				SceneManager.Load("res://scenes/game.tscn");
+				Runner.Play(MapParser.Decode(replay.MapFilePath), replay.Speed, replay.Modifiers, null, [replay]);
+			}
+		};
 	}
 
 	public override void _Process(double delta)
