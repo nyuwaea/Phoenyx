@@ -12,6 +12,7 @@ public struct Replay
     public FileParser FileBuffer;
     public bool Valid;
     public float Length;
+    public string Status;
 
     public double Speed;
     public string[] Modifiers;
@@ -39,7 +40,7 @@ public struct Replay
     {
         public float Progress = progress;
         public Vector2 CursorPosition = new(x, y);
-    
+
         public override string ToString() => $"({CursorPosition}) @{Progress}ms";
     }
 
@@ -51,12 +52,23 @@ public struct Replay
         LastNote = 0;
         LastFrame = 0;
 
+        byte[] bytes = FileBuffer.Get((int)FileBuffer.Length - 32);
+        
+        if (SHA256.HashData(bytes).Stringify() != FileBuffer.Get(32).Stringify())
+        {
+            Valid = false;
+            ToastNotification.Notify("Replay file corrupted", 2);
+			Logger.Error($"Replay file corrupted; invalid hash");
+			return;
+        }
+
+        FileBuffer.Seek(0);
+
         string sig = FileBuffer.GetString(4);
 
 		if (sig != "phxr")
 		{
             Valid = false;
-            
 			ToastNotification.Notify("Replay file corrupted", 2);
 			Logger.Error($"Replay file corrupted; invalid file sig {sig}");
 			return;
@@ -75,6 +87,10 @@ public struct Replay
             Parallax = FileBuffer.GetDouble();
             FoV = FileBuffer.GetDouble();
             NoteSize = FileBuffer.GetDouble();
+
+            ushort status = FileBuffer.GetUInt8();
+            Status = status == 0 ? "PASSED" : status == 1 ? "DISQUALIFIED" : "FAILED";
+
             Modifiers = FileBuffer.GetString((int)FileBuffer.GetUInt32()).Split("_");
             MapID = FileBuffer.GetString((int)FileBuffer.GetUInt32());
             MapFilePath = $"{Phoenyx.Constants.UserFolder}/maps/{MapID}.phxm";
@@ -92,6 +108,12 @@ public struct Replay
             CurrentPosition = new();
             FrameIndex = 0;
             SkipIndex = 0;
+            
+            if (Frames.Length <= 1)
+            {
+                Valid = false;
+                return;
+            }
 
             for (int i = 0; i < Frames.Length; i++)
             {

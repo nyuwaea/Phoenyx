@@ -96,8 +96,13 @@ public partial class MainMenu : Control
 		if (!Initialized)
 		{
 			Initialized = true;
-			Viewport viewport = GetViewport();
+			SoundManager.JukeboxQueue = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
+			SoundManager.JukeboxPlayed += (Map map) => {
+				PassedNotes = 0;
+				CurrentMap = map;
+			};
 
+			Viewport viewport = GetViewport();
 			viewport.SizeChanged += () => {
 				if (SceneManager.Scene.Name != "SceneMenu")
 				{
@@ -118,13 +123,19 @@ public partial class MainMenu : Control
 					for (int i = 0; i < files.Length; i++)
 					{
 						Replay replay = new(files[i]);
-
+						
 						if (!replay.Valid)
 						{
 							continue;
 						}
 
 						replays.Add(replay);
+					}
+
+					if (replays.Count == 0)
+					{
+						ToastNotification.Notify("No valid replays", 2);
+						return;
 					}
 
 					foreach (Replay replay in replays)
@@ -279,12 +290,10 @@ public partial class MainMenu : Control
 			OS.ShellOpen("https://discord.gg/aSyC7btWDX");
 		};
 
-		SoundManager.JukeboxQueue = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
-		SoundManager.JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, SoundManager.JukeboxQueue.Length - 1));
-		SoundManager.JukeboxPlayed += (Map map) => {
-			PassedNotes = 0;
-			CurrentMap = map;
-		};
+		if (!SoundManager.Song.Playing)
+		{
+			SoundManager.JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, SoundManager.JukeboxQueue.Length - 1));
+		}
 
 		for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
 		{
@@ -294,19 +303,18 @@ public partial class MainMenu : Control
 		JukeboxButton.MouseEntered += () => {
 			Label title = Jukebox.GetNode<Label>("Title");
 			Tween tween = title.CreateTween();
-			tween.TweenProperty(title, "modulate", Color.FromHtml("ffffffff"), 0.25).SetTrans(Tween.TransitionType.Quad);
+			tween.TweenProperty(title, "modulate", Color.Color8(255, 255, 255), 0.25).SetTrans(Tween.TransitionType.Quad);
 			tween.Play();
 		};
 		JukeboxButton.MouseExited += () => {
 			Label title = Jukebox.GetNode<Label>("Title");
 			Tween tween = title.CreateTween();
-			tween.TweenProperty(title, "modulate", Color.FromHtml("c2c2c2ff"), 0.25).SetTrans(Tween.TransitionType.Quad);
+			tween.TweenProperty(title, "modulate", Color.Color8(194, 194, 194), 0.25).SetTrans(Tween.TransitionType.Quad);
 			tween.Play();
 		};
 		JukeboxButton.Pressed += () => {
 			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].Split("\\")[^1].TrimSuffix(".phxm").Replace(".", "_");
 			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
-
 			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
 		};
 
@@ -321,12 +329,12 @@ public partial class MainMenu : Control
 
 			button.MouseEntered += () => {
 				Tween tween = button.CreateTween();
-				tween.TweenProperty(button, "self_modulate", Color.FromHtml("ffffffff"), 0.25).SetTrans(Tween.TransitionType.Quad);
+				tween.TweenProperty(button, "self_modulate", Color.Color8(255, 255, 255), 0.25).SetTrans(Tween.TransitionType.Quad);
 				tween.Play();
 			};
 			button.MouseExited += () => {
 				Tween tween = button.CreateTween();
-				tween.TweenProperty(button, "self_modulate", Color.FromHtml("c2c2c2ff"), 0.25).SetTrans(Tween.TransitionType.Quad);
+				tween.TweenProperty(button, "self_modulate", Color.Color8(194, 194, 194), 0.25).SetTrans(Tween.TransitionType.Quad);
 				tween.Play();
 			};
 			button.Pressed += () => {
@@ -408,6 +416,10 @@ public partial class MainMenu : Control
 		UpdateMapList();
 
 		SearchEdit.Text = SearchTitle;
+		SearchAuthorEdit.Text = SearchAuthor;
+
+		SearchEdit.ReleaseFocus();
+		SearchAuthorEdit.ReleaseFocus();
 
 		foreach (Panel map in MapListContainer.GetChildren())
 		{
@@ -616,6 +628,8 @@ public partial class MainMenu : Control
 		if (FirstFrame)
 		{
 			FirstFrame = false;
+
+			Search();
 
 			if (SelectedMap != null)
 			{
@@ -863,6 +877,81 @@ public partial class MainMenu : Control
 		}
 
 		UpdateMaxScroll();
+		TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
+	}
+
+	public static void Chat(string message)
+	{
+		Label chatMessage = ChatMessage.Instantiate<Label>();
+		chatMessage.Text = message;
+
+		ChatHolder.AddChild(chatMessage);
+		ChatScrollContainer.ScrollVertical += 100;
+	}
+
+	private static void SendMessage()
+	{
+		if (ChatLine.Text.Replace(" ", "") == "")
+		{
+			return;
+		}
+		
+		ServerManager.Node.Rpc("ValidateChat", ChatLine.Text);
+		ChatLine.Text = "";
+	}
+
+	private static void Transition(string menuName, bool instant = false)
+	{
+		LastMenu = CurrentMenu;
+		CurrentMenu = menuName;
+
+		switch (CurrentMenu)
+		{
+			case "Main":
+				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Main Menu");
+				break;
+			case "Play":
+				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Browsing Maps");
+				break;
+			case "Extras":
+				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Extras");
+				break;
+		}
+
+		if (SettingsManager.FocusedLineEdit != null)
+		{
+			SettingsManager.FocusedLineEdit.ReleaseFocus();
+		}
+
+		Tween outTween = Control.CreateTween();
+		
+		foreach (Panel menu in Menus.GetChildren())
+		{
+			if (menu.Name == CurrentMenu)
+			{
+				continue;
+			}
+			outTween.Parallel().TweenProperty(menu, "modulate", Color.Color8(255, 255, 255, 0), instant ? 0 : 0.15).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
+		}
+
+		outTween.TweenCallback(Callable.From(() => {
+			foreach (Panel menu in Menus.GetChildren())
+			{
+				if (menu.Name == CurrentMenu)
+				{
+					continue;
+				}
+				menu.Visible = false;
+			}
+		}));
+		outTween.Play();
+
+		Panel inMenu = Menus.GetNode<Panel>(menuName);
+		inMenu.Visible = true;
+
+		Tween inTween = Control.CreateTween();
+		inTween.TweenProperty(inMenu, "modulate", Color.Color8(255, 255, 255, 255), instant ? 0 : 0.15).SetTrans(Tween.TransitionType.Quad);
+		inTween.Play();
 	}
 
 	public static void UpdateVolume()
@@ -883,7 +972,7 @@ public partial class MainMenu : Control
 			try
 			{
 				string[] split = mapFile.Split("\\");
-				string fileName = split[^1].Replace(".phxm", "");
+				string fileName = split[^1].TrimSuffix(".phxm");
 				bool favorited = favorites.Contains(fileName);
 				
 				if (mapFile.GetExtension() != "phxm" || LoadedMaps.Contains(fileName))
@@ -1023,7 +1112,7 @@ public partial class MainMenu : Control
 						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
 
 						int index = SoundManager.JukeboxQueueInverse[mapButton.Name];
-
+						
 						if (SoundManager.JukeboxIndex != index)
 						{
 							SoundManager.JukeboxIndex = index;
@@ -1075,79 +1164,5 @@ public partial class MainMenu : Control
 	public static void UpdateJukeboxButtons()
 	{
 		Jukebox.GetNode<TextureButton>("Pause").TextureNormal = SoundManager.JukeboxPaused ? Phoenyx.Skin.JukeboxPlayImage : Phoenyx.Skin.JukeboxPauseImage;
-	}
-
-	public static void Chat(string message)
-	{
-		Label chatMessage = ChatMessage.Instantiate<Label>();
-		chatMessage.Text = message;
-
-		ChatHolder.AddChild(chatMessage);
-		ChatScrollContainer.ScrollVertical += 100;
-	}
-
-	private static void SendMessage()
-	{
-		if (ChatLine.Text.Replace(" ", "") == "")
-		{
-			return;
-		}
-		
-		ServerManager.Node.Rpc("ValidateChat", ChatLine.Text);
-		ChatLine.Text = "";
-	}
-
-	private static void Transition(string menuName, bool instant = false)
-	{
-		LastMenu = CurrentMenu;
-		CurrentMenu = menuName;
-
-		switch (CurrentMenu)
-		{
-			case "Main":
-				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Main Menu");
-				break;
-			case "Play":
-				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Browsing Maps");
-				break;
-			case "Extras":
-				Phoenyx.Util.DiscordRPC.Call("Set", "details", "Extras");
-				break;
-		}
-
-		if (SettingsManager.FocusedLineEdit != null)
-		{
-			SettingsManager.FocusedLineEdit.ReleaseFocus();
-		}
-
-		Tween outTween = Control.CreateTween();
-		
-		foreach (Panel menu in Menus.GetChildren())
-		{
-			if (menu.Name == CurrentMenu)
-			{
-				continue;
-			}
-			outTween.Parallel().TweenProperty(menu, "modulate", Color.Color8(255, 255, 255, 0), instant ? 0 : 0.15).SetTrans(Tween.TransitionType.Quad).SetEase(Tween.EaseType.In);
-		}
-
-		outTween.TweenCallback(Callable.From(() => {
-			foreach (Panel menu in Menus.GetChildren())
-			{
-				if (menu.Name == CurrentMenu)
-				{
-					continue;
-				}
-				menu.Visible = false;
-			}
-		}));
-		outTween.Play();
-
-		Panel inMenu = Menus.GetNode<Panel>(menuName);
-		inMenu.Visible = true;
-
-		Tween inTween = Control.CreateTween();
-		inTween.TweenProperty(inMenu, "modulate", Color.Color8(255, 255, 255, 255), instant ? 0 : 0.15).SetTrans(Tween.TransitionType.Quad);
-		inTween.Play();
 	}
 }

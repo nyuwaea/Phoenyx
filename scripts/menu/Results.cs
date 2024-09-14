@@ -31,7 +31,7 @@ public partial class Results : Control
 		Holder.GetNode<Label>("Accuracy").Text = $"{Runner.CurrentAttempt.Accuracy.ToString().PadDecimals(2)}%";
 		Holder.GetNode<Label>("Score").Text = $"{Lib.String.PadMagnitude(Runner.CurrentAttempt.Score.ToString())}";
 		Holder.GetNode<Label>("Hits").Text = $"{Lib.String.PadMagnitude(Runner.CurrentAttempt.Hits.ToString())} / {Lib.String.PadMagnitude(Runner.CurrentAttempt.Sum.ToString())}";
-		Holder.GetNode<Label>("Status").Text = Runner.CurrentAttempt.Alive ? (Runner.CurrentAttempt.Qualifies ? "PASSED" : "DISQUALIFIED") : "FAILED";
+		Holder.GetNode<Label>("Status").Text = Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].Status : Runner.CurrentAttempt.Alive ? (Runner.CurrentAttempt.Qualifies ? "PASSED" : "DISQUALIFIED") : "FAILED";
 		Holder.GetNode<Label>("Speed").Text = $"{Runner.CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
 
 		if (Runner.CurrentAttempt.Map.CoverBuffer != null)
@@ -53,6 +53,7 @@ public partial class Results : Control
 		}
 
 		SoundManager.Song.PitchScale = (float)Runner.CurrentAttempt.Speed;
+		SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[Runner.CurrentAttempt.Map.ID.Replace(".", "_")];
 
 		Footer.GetNode<Button>("Back").Pressed += Stop;
 		Footer.GetNode<Button>("Play").Pressed += Replay;

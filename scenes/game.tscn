@@ -759,7 +759,7 @@ offset_left = 32.0
 offset_right = -32.0
 theme = ExtResource("25_748ov")
 theme_override_font_sizes/font_size = 28
-text = "QUIT"
+text = "GIVE UP"
 
 [node name="Volume" type="Panel" parent="."]
 modulate = Color(1, 1, 1, 0)

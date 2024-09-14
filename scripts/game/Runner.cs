@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using Godot;
 
 public partial class Runner : Node3D
@@ -82,6 +83,7 @@ public partial class Runner : Node3D
 		public List<float> ReplaySkips = [];
 		public ulong LastReplayFrame = 0;
 		public uint ReplayFrameCountOffset = 0;
+		public uint ReplayAttemptStatusOffset = 0;
 		public Godot.FileAccess ReplayFile;
 		public double Progress = 0;	// ms
 		public double StartOffset = 0;
@@ -116,8 +118,8 @@ public partial class Runner : Node3D
 		public Attempt(Map map, double speed, string[] mods, string[] players = null, Replay[] replays = null)
 		{
 			ID = $"{map.ID}_{OS.GetUniqueId()}_{Time.GetDatetimeStringFromUnixTime((long)Time.GetUnixTimeFromSystem())}".Replace(":", "_");
-			IsReplay = replays != null;
 			Replays = replays;
+			IsReplay = Replays != null;
 			Map = map;
 			Speed = speed;
 			Players = players ?? [];
@@ -151,6 +153,10 @@ public partial class Runner : Node3D
 				ReplayFile.StoreDouble(Phoenyx.Settings.Parallax);
 				ReplayFile.StoreDouble(Phoenyx.Settings.FoV);
 				ReplayFile.StoreDouble(Phoenyx.Settings.NoteSize);
+
+				ReplayAttemptStatusOffset = (uint)ReplayFile.GetPosition();
+
+				ReplayFile.Store8(0);	// reserve attempt status
 
 				string modifiers = "";
 				string player = "You";
@@ -357,6 +363,9 @@ public partial class Runner : Node3D
 
 			if (!IsReplay && ReplayFile != null)
 			{
+				ReplayFile.Seek(ReplayAttemptStatusOffset);
+				ReplayFile.Store8((byte)(Alive ? (Qualifies ? 0 : 1) : 2));
+
 				ReplayFile.Seek(ReplayFrameCountOffset);
 				ReplayFile.Store64((ulong)ReplayFrames.Count);
 
@@ -388,6 +397,14 @@ public partial class Runner : Node3D
 				}
 
 				ReplayFile.Close();
+				ReplayFile = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/replays/{ID}.phxr", Godot.FileAccess.ModeFlags.ReadWrite);
+
+				ulong length = ReplayFile.GetLength();
+				byte[] hash = SHA256.HashData(ReplayFile.GetBuffer((long)length));
+
+				ReplayFile.StoreBuffer(hash);
+				ReplayFile.Close();
+
 				CurrentAttempt.HitsInfo = CurrentAttempt.HitsInfo[0 .. (int)PassedNotes];
 			}
 			else if (IsReplay)
@@ -498,6 +515,7 @@ public partial class Runner : Node3D
 			for (int i = 0; i < CurrentAttempt.Replays.Length; i++)
 			{
 				Cursors[i].Transparency = 0;
+				CurrentAttempt.Replays[i].Complete = false;
 
 				for (int j = 0; j < CurrentAttempt.Replays[i].Frames.Length; j++)
 				{
@@ -721,10 +739,11 @@ public partial class Runner : Node3D
 				double inverse = Mathf.InverseLerp(CurrentAttempt.Replays[i].Frames[CurrentAttempt.Replays[i].FrameIndex].Progress, CurrentAttempt.Replays[i].Frames[next].Progress, CurrentAttempt.Progress);
 				Vector2 cursorPos = CurrentAttempt.Replays[i].Frames[CurrentAttempt.Replays[i].FrameIndex].CursorPosition.Lerp(CurrentAttempt.Replays[i].Frames[next].CursorPosition, (float)Math.Clamp(inverse, 0, 1));
 				
-				if (Cursors.Length - 1 >= i)	// why
+				try
 				{
 					Cursors[i].Position = new(cursorPos.X, cursorPos.Y, 0);
 				}
+				catch {}	// dnc
 
 				CurrentAttempt.Replays[i].CurrentPosition = cursorPos;
 				positionSum += cursorPos;
@@ -1039,6 +1058,7 @@ public partial class Runner : Node3D
 	{
 		CurrentAttempt = new(map, speed, mods, players, replays);
 		Playing = true;
+		StopQueued = false;
 		Started = Time.GetTicksUsec();
 		ProcessNotes = [];
 		
@@ -1109,9 +1129,12 @@ public partial class Runner : Node3D
 
 	public static void Stop(bool results = true)
 	{
-		CurrentAttempt.Stop();
+		if (CurrentAttempt.Stopped)
+		{
+			return;
+		}
 
-		Input.MouseMode = Input.MouseModeEnum.Hidden;
+		CurrentAttempt.Stop();
 
 		if (!CurrentAttempt.IsReplay)
 		{
