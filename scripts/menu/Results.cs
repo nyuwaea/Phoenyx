@@ -25,7 +25,7 @@ public partial class Results : Control
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
 
-		Holder.GetNode<Label>("Title").Text = Runner.CurrentAttempt.Map.PrettyTitle;
+		Holder.GetNode<Label>("Title").Text = (Runner.CurrentAttempt.IsReplay ? "[REPLAY] " : "") + Runner.CurrentAttempt.Map.PrettyTitle;
 		Holder.GetNode<Label>("Difficulty").Text = Runner.CurrentAttempt.Map.DifficultyName;
 		Holder.GetNode<Label>("Mappers").Text = $"by {Runner.CurrentAttempt.Map.PrettyMappers}";
 		Holder.GetNode<Label>("Accuracy").Text = $"{Runner.CurrentAttempt.Accuracy.ToString().PadDecimals(2)}%";

@@ -1,4 +1,4 @@
-[gd_scene load_steps=65 format=3 uid="uid://vp1nmsiqt5yv"]
+[gd_scene load_steps=68 format=3 uid="uid://vp1nmsiqt5yv"]
 
 [ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
@@ -22,6 +22,7 @@
 [ext_resource type="Shader" path="res://scripts/shaders/combo_progress.gdshader" id="14_y51pe"]
 [ext_resource type="AudioStream" uid="uid://deh3syobn5363" path="res://sounds/bell.mp3" id="20_2qbs1"]
 [ext_resource type="Texture2D" uid="uid://b1ihebmvna0bq" path="res://textures/jesus.png" id="21_6sy1o"]
+[ext_resource type="Texture2D" uid="uid://lfj8i1bi6kfs" path="res://textures/pause.png" id="23_7silw"]
 [ext_resource type="FontFile" uid="uid://dotb3skhwouha" path="res://fonts/Roboto-Bold.ttf" id="23_wf21h"]
 [ext_resource type="FontFile" uid="uid://rs2mb33nd3b1" path="res://fonts/Roboto-Italic.ttf" id="24_j6p10"]
 [ext_resource type="Theme" uid="uid://c8tb6mtqpycc8" path="res://theme/midgame_menu_buttons.tres" id="25_748ov"]
@@ -196,6 +197,12 @@ shader_parameter/size = 1.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_56f8v"]
 bg_color = Color(0, 0, 0, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sijr0"]
+bg_color = Color(0.1072, 0.0896, 0.16, 0.25098)
+
+[sub_resource type="LabelSettings" id="LabelSettings_a70tm"]
+font_color = Color(1, 1, 1, 0.25098)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_d5aou"]
 
@@ -557,6 +564,66 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("21_6sy1o")
+
+[node name="ReplayViewer" type="Panel" parent="."]
+visible = false
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -84.0
+offset_right = -32.0
+offset_bottom = -32.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_sijr0")
+
+[node name="Label" type="Label" parent="ReplayViewer"]
+layout_mode = 1
+anchors_preset = -1
+offset_right = 40.0
+grow_vertical = 0
+text = "Press Space to toggle"
+label_settings = SubResource("LabelSettings_a70tm")
+
+[node name="Time" type="Label" parent="ReplayViewer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 12.0
+offset_right = 164.0
+offset_bottom = -12.0
+text = "0:00 / 0:00"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Pause" type="TextureButton" parent="ReplayViewer"]
+texture_repeat = 1
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 12.0
+offset_right = 52.0
+grow_vertical = 2
+texture_normal = ExtResource("23_7silw")
+stretch_mode = 3
+
+[node name="Seek" type="HSlider" parent="ReplayViewer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 192.0
+offset_right = -32.0
+grow_vertical = 2
+theme = ExtResource("4_rvp5o")
+max_value = 1.0
+step = 0.0
 
 [node name="FPSCounter" type="Label" parent="."]
 anchors_preset = 2

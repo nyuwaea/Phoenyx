@@ -367,16 +367,18 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
  Proper main menu
  Extras (& statistics) menu
  Search by map author
- Spaces (environment backgrounds)[ul]
+ Spaces (background environments)[ul]
  Void
  Grid
 [/ul]
+ Replays (supports viewing multiple at once)
  Fully customizable combo progress widget (will become editable when skin editor is implemented)
  Proper pause menu
  Settings profiles
  New settings[ul]
  Video background render scale
  Absolute input
+ Record replays
 [/ul]
  Made score dropoff more lenient (20ms for perfect hit -> 25ms, lowest multiplier 0.65x -> 0.8x)
  This panel :)
@@ -386,7 +388,7 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
  Jukebox will now account for keyboards with media keys
  Map difficulty names' colour now represents the difficulty
  The delay when starting a map now accounts for your approach time
- Smooth song transitions from the game scene, to results, to menus
+ Smooth song transitions from the game scene, to results, then menus
  Improved game scene HUD
  Many more that I did not keep track of
 [/ul]

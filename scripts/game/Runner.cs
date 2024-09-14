@@ -29,6 +29,10 @@ public partial class Runner : Node3D
 	private static SubViewport PanelLeft;
 	private static SubViewport PanelRight;
 	private static AudioStreamPlayer Bell;
+	private static Panel ReplayViewer;
+	private static TextureButton ReplayViewerPause;
+	private static Label ReplayViewerLabel;
+	private static HSlider ReplayViewerSeek;
 	private static Label AccuracyLabel;
 	private static Label HitsLabel;
 	private static Label MissesLabel;
@@ -45,6 +49,8 @@ public partial class Runner : Node3D
 	private static Tween MissTween;
 	private static bool StopQueued = false;
 	private static int MissIcons = 0;
+	private static bool ReplayViewerSeekHovered = false;
+	private static bool LeftMouseButtonDown = false;
 
 	private double LastFrame = Time.GetTicksUsec(); 	// delta arg unreliable..
 	private double LastSecond = Time.GetTicksUsec();	// better framerate calculation
@@ -57,6 +63,7 @@ public partial class Runner : Node3D
 	public static ulong Started = 0;
 	public static bool MenuShown = false;
 	public static bool SettingsShown = false;
+	public static bool ReplayViewerShown = false;
 	public static int ToProcess = 0;
 	public static List<Note> ProcessNotes = [];
 	public static Attempt CurrentAttempt;
@@ -70,6 +77,7 @@ public partial class Runner : Node3D
 		public bool Stopped = false;
 		public bool IsReplay = false;
 		public Replay[] Replays;	// when reading replays
+		public float LongestReplayLength = 0;
 		public List<float[]> ReplayFrames = [];	// when writing replays
 		public List<float> ReplaySkips = [];
 		public ulong LastReplayFrame = 0;
@@ -168,6 +176,16 @@ public partial class Runner : Node3D
 
 				ReplayFile.Store64(0);	// reserve frame count
 			}
+			else if (IsReplay)
+			{
+				foreach (Replay replay in Replays)
+				{
+					if (replay.Length > LongestReplayLength)
+					{
+						LongestReplayLength = replay.Length;
+					}
+				}
+			}
 
 			foreach (KeyValuePair<string, bool> entry in Mods)
 			{
@@ -185,20 +203,21 @@ public partial class Runner : Node3D
 			Accuracy = Math.Floor((float)Hits / Sum * 10000) / 100;
 			Combo++;
 			ComboMultiplierProgress++;
-			Phoenyx.Stats.NotesHit++;
-
-			if (Combo > Phoenyx.Stats.HighestCombo)
-			{
-				Phoenyx.Stats.HighestCombo = Combo;
-			}
 
 			LastHitColour = Phoenyx.Skin.Colors[index % Phoenyx.Skin.Colors.Length];
 
-			float lateness = (float)((Progress - Map.Notes[index].Millisecond) / Speed);
+			float lateness = IsReplay ? HitsInfo[index] : (float)((Progress - Map.Notes[index].Millisecond) / Speed);
 			float factor = 1 - Math.Max(0, lateness - 25) / 150f;
 			
 			if (!IsReplay)
 			{
+				Phoenyx.Stats.NotesHit++;
+
+				if (Combo > Phoenyx.Stats.HighestCombo)
+				{
+					Phoenyx.Stats.HighestCombo = Combo;
+				}
+
 				HitsInfo[index] = lateness;
 			}
 
@@ -255,11 +274,11 @@ public partial class Runner : Node3D
 			ComboMultiplier = Math.Max(1, ComboMultiplier - 1);
 			Health = Math.Max(0, Health - HealthStep);
 			HealthStep = Math.Min(HealthStep * 1.2, 100);
-			Phoenyx.Stats.NotesMissed++;
 
 			if (!IsReplay)
 			{
 				HitsInfo[index] = -1;
+				Phoenyx.Stats.NotesMissed++;
 			}
 
 			//if (Health - HealthStep <= 0)
@@ -336,12 +355,7 @@ public partial class Runner : Node3D
 
 			Stopped = true;
 
-			if (ReplayFile == null)
-			{
-				return;
-			}
-
-			if (!IsReplay)
+			if (!IsReplay && ReplayFile != null)
 			{
 				ReplayFile.Seek(ReplayFrameCountOffset);
 				ReplayFile.Store64((ulong)ReplayFrames.Count);
@@ -376,7 +390,7 @@ public partial class Runner : Node3D
 				ReplayFile.Close();
 				CurrentAttempt.HitsInfo = CurrentAttempt.HitsInfo[0 .. (int)PassedNotes];
 			}
-			else
+			else if (IsReplay)
 			{
 				CurrentAttempt.HitsInfo = CurrentAttempt.HitsInfo[0 .. (int)CurrentAttempt.Replays[0].LastNote];
 			}
@@ -406,6 +420,10 @@ public partial class Runner : Node3D
 		PanelLeft = GetNode<SubViewport>("PanelLeftViewport");
 		PanelRight = GetNode<SubViewport>("PanelRightViewport");
 		Bell = GetNode<AudioStreamPlayer>("Bell");
+		ReplayViewer = GetNode<Panel>("ReplayViewer");
+		ReplayViewerPause = ReplayViewer.GetNode<TextureButton>("Pause");
+		ReplayViewerLabel = ReplayViewer.GetNode<Label>("Time");
+		ReplayViewerSeek = ReplayViewer.GetNode<HSlider>("Seek");
 		AccuracyLabel = PanelRight.GetNode<Label>("Accuracy");
 		HitsLabel = PanelRight.GetNode<Label>("Hits");
 		MissesLabel = PanelRight.GetNode<Label>("Misses");
@@ -435,6 +453,74 @@ public partial class Runner : Node3D
 			CurrentAttempt.Qualifies = false;
 
 			Stop();
+		};
+
+		ReplayViewerPause.Pressed += () => {
+			Playing = !Playing;
+			SoundManager.Song.PitchScale = Playing ? (float)CurrentAttempt.Speed : 0.00000000000001f;	// ooohh my goood
+			ReplayViewerPause.TextureNormal = GD.Load<Texture2D>(Playing ? "res://textures/pause.png" : "res://textures/play.png");
+		};
+
+		ReplayViewerSeek.ValueChanged += (double value) => {
+			ReplayViewerLabel.Text = $"{Lib.String.FormatTime(value * CurrentAttempt.LongestReplayLength / 1000)} / {Lib.String.FormatTime(CurrentAttempt.LongestReplayLength / 1000)}";
+		};
+		ReplayViewerSeek.DragEnded += (bool _) => {
+			CurrentAttempt.Hits = 0;
+			CurrentAttempt.Misses = 0;
+			CurrentAttempt.Sum = 0;
+			CurrentAttempt.Accuracy = 100;
+			CurrentAttempt.Score = 0;
+			CurrentAttempt.PassedNotes = 0;
+			CurrentAttempt.Combo = 0;
+			CurrentAttempt.ComboMultiplier = 1;
+			CurrentAttempt.ComboMultiplierProgress = 0;
+			CurrentAttempt.Health = 100;
+			CurrentAttempt.HealthStep = 15;
+
+			HitsLabel.Text = "0";
+			MissesLabel.Text = "0";
+			SimpleMissesLabel.Text = "0";
+			SumLabel.Text = "0";
+			AccuracyLabel.Text = "100.00%";
+			ScoreLabel.Text = "0";
+			ComboLabel.Text = "0";
+			MultiplierLabel.Text = "1x";
+			MultiplierProgress = 0;
+			MultiplierColour = Color.Color8(255, 255, 255);
+
+			for (int i = 0; i < CurrentAttempt.Map.Notes.Length; i++)
+			{
+				CurrentAttempt.Map.Notes[i].Hit = false;
+			}
+
+			CurrentAttempt.Progress = (float)ReplayViewerSeek.Value * CurrentAttempt.LongestReplayLength;
+
+			for (int i = 0; i < CurrentAttempt.Replays.Length; i++)
+			{
+				Cursors[i].Transparency = 0;
+
+				for (int j = 0; j < CurrentAttempt.Replays[i].Frames.Length; j++)
+				{
+					if (CurrentAttempt.Progress < CurrentAttempt.Replays[i].Frames[j].Progress)
+					{
+						CurrentAttempt.Replays[i].FrameIndex = Math.Max(0, j - 1);
+						break;
+					}
+				}
+			}
+
+			if (!SoundManager.Song.Playing)
+			{
+				SoundManager.Song.Play();
+			}
+
+			SoundManager.Song.Seek((float)CurrentAttempt.Progress / 1000);
+		};
+		ReplayViewerSeek.FocusEntered += () => {
+			ReplayViewerSeekHovered = true;
+		};
+		ReplayViewerSeek.FocusExited += () => {
+			ReplayViewerSeekHovered = false;
 		};
 
 		if (Phoenyx.Settings.SimpleHUD)
@@ -562,6 +648,7 @@ public partial class Runner : Node3D
 			}
 			
 			Cursor.Visible = false;
+			ShowReplayViewer();
 		}
 
 		UpdateVolume();
@@ -601,22 +688,27 @@ public partial class Runner : Node3D
 
 		if (CurrentAttempt.IsReplay)
 		{
+			if (!ReplayViewerSeekHovered || !LeftMouseButtonDown)
+			{
+				ReplayViewerSeek.Value = CurrentAttempt.Progress / CurrentAttempt.LongestReplayLength;
+			}
+
 			Vector2 positionSum = new();
 
 			for (int i = 0; i < CurrentAttempt.Replays.Length; i++)
 			{
-				for (int j = CurrentAttempt.Replays[i].PositionIndex; j < CurrentAttempt.Replays[i].Positions.Length; j++)
+				for (int j = CurrentAttempt.Replays[i].FrameIndex; j < CurrentAttempt.Replays[i].Frames.Length; j++)
 				{
-					if (CurrentAttempt.Progress < CurrentAttempt.Replays[i].Positions[j].Progress)
+					if (CurrentAttempt.Progress < CurrentAttempt.Replays[i].Frames[j].Progress)
 					{
-						CurrentAttempt.Replays[i].PositionIndex = Math.Max(0, j - 1);
+						CurrentAttempt.Replays[i].FrameIndex = Math.Max(0, j - 1);
 						break;
 					}
 				}
 
-				int next = Math.Min(CurrentAttempt.Replays[i].PositionIndex + 1, CurrentAttempt.Replays[i].Positions.Length - 2);
+				int next = Math.Min(CurrentAttempt.Replays[i].FrameIndex + 1, CurrentAttempt.Replays[i].Frames.Length - 2);
 
-				if (!CurrentAttempt.Replays[i].Complete && CurrentAttempt.Replays[i].PositionIndex == next)
+				if (!CurrentAttempt.Replays[i].Complete && CurrentAttempt.Progress >= CurrentAttempt.Replays[i].Length)
 				{
 					CurrentAttempt.Replays[i].Complete = true;
 					CurrentAttempt.Replays[i].LastNote = CurrentAttempt.PassedNotes;
@@ -626,8 +718,8 @@ public partial class Runner : Node3D
 					tween.Play();
 				}
 
-				double inverse = Mathf.InverseLerp(CurrentAttempt.Replays[i].Positions[CurrentAttempt.Replays[i].PositionIndex].Progress, CurrentAttempt.Replays[i].Positions[next].Progress, CurrentAttempt.Progress);
-				Vector2 cursorPos = CurrentAttempt.Replays[i].Positions[CurrentAttempt.Replays[i].PositionIndex].CursorPosition.Lerp(CurrentAttempt.Replays[i].Positions[next].CursorPosition, (float)Math.Clamp(inverse, 0, 1));
+				double inverse = Mathf.InverseLerp(CurrentAttempt.Replays[i].Frames[CurrentAttempt.Replays[i].FrameIndex].Progress, CurrentAttempt.Replays[i].Frames[next].Progress, CurrentAttempt.Progress);
+				Vector2 cursorPos = CurrentAttempt.Replays[i].Frames[CurrentAttempt.Replays[i].FrameIndex].CursorPosition.Lerp(CurrentAttempt.Replays[i].Frames[next].CursorPosition, (float)Math.Clamp(inverse, 0, 1));
 				
 				if (Cursors.Length - 1 >= i)	// why
 				{
@@ -673,12 +765,15 @@ public partial class Runner : Node3D
 		}
 		else if (!CurrentAttempt.Stopped && Phoenyx.Settings.RecordReplays && now - CurrentAttempt.LastReplayFrame >= 1000000/60)	// 60hz
 		{
-			CurrentAttempt.LastReplayFrame = now;
-			CurrentAttempt.ReplayFrames.Add([
-				(float)CurrentAttempt.Progress,
-				CurrentAttempt.CursorPosition.X,
-				CurrentAttempt.CursorPosition.Y
-			]);
+			if (CurrentAttempt.ReplayFrames.Count == 0 || (CurrentAttempt.ReplayFrames[^1][1 .. 2] != new float[]{CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y}))
+			{
+				CurrentAttempt.LastReplayFrame = now;
+				CurrentAttempt.ReplayFrames.Add([
+					(float)CurrentAttempt.Progress,
+					CurrentAttempt.CursorPosition.X,
+					CurrentAttempt.CursorPosition.Y
+				]);
+			}
 		}
 		
 		CurrentAttempt.Progress += delta * 1000 * CurrentAttempt.Speed;
@@ -908,7 +1003,7 @@ public partial class Runner : Node3D
 				case Key.Space:
 					if (CurrentAttempt.IsReplay)
 					{
-						GD.Print("toggle replay player menu");
+						ShowReplayViewer(!ReplayViewerShown);
 					}
 					else
 					{
@@ -929,6 +1024,15 @@ public partial class Runner : Node3D
 					break;
 			}
 		}
+		else if (@event is InputEventMouseButton eventMouseButton)
+		{
+			switch (eventMouseButton.ButtonIndex)
+			{
+				case MouseButton.Left:
+					LeftMouseButtonDown = eventMouseButton.Pressed;
+					break;
+			}
+		}
 	}
 	
 	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null, Replay[] replays = null)
@@ -937,15 +1041,19 @@ public partial class Runner : Node3D
 		Playing = true;
 		Started = Time.GetTicksUsec();
 		ProcessNotes = [];
-		Phoenyx.Stats.Attempts++;
+		
+		if (!CurrentAttempt.IsReplay)
+		{
+			Phoenyx.Stats.Attempts++;
 
-		if (!Phoenyx.Stats.FavouriteMaps.ContainsKey(map.ID))
-		{
-			Phoenyx.Stats.FavouriteMaps[map.ID] = 1;
-		}
-		else
-		{
-			Phoenyx.Stats.FavouriteMaps[map.ID]++;
+			if (!Phoenyx.Stats.FavouriteMaps.ContainsKey(map.ID))
+			{
+				Phoenyx.Stats.FavouriteMaps[map.ID] = 1;
+			}
+			else
+			{
+				Phoenyx.Stats.FavouriteMaps[map.ID]++;
+			}
 		}
 	}
 
@@ -1005,25 +1113,28 @@ public partial class Runner : Node3D
 
 		Input.MouseMode = Input.MouseModeEnum.Hidden;
 
-		Phoenyx.Stats.GamePlaytime += (Time.GetTicksUsec() - Started) / 1000000;
-		Phoenyx.Stats.TotalDistance += (ulong)CurrentAttempt.DistanceMM;
-
-		if (CurrentAttempt.StartOffset == 0 && CurrentAttempt.Qualifies)
+		if (!CurrentAttempt.IsReplay)
 		{
-			Phoenyx.Stats.Passes++;
-			Phoenyx.Stats.TotalScore += CurrentAttempt.Score;
+			Phoenyx.Stats.GamePlaytime += (Time.GetTicksUsec() - Started) / 1000000;
+			Phoenyx.Stats.TotalDistance += (ulong)CurrentAttempt.DistanceMM;
 
-			if (CurrentAttempt.Accuracy == 100)
+			if (CurrentAttempt.StartOffset == 0 && CurrentAttempt.Qualifies)
 			{
-				Phoenyx.Stats.FullCombos++;
-			}
+				Phoenyx.Stats.Passes++;
+				Phoenyx.Stats.TotalScore += CurrentAttempt.Score;
 
-			if (CurrentAttempt.Score > Phoenyx.Stats.HighestScore)
-			{
-				Phoenyx.Stats.HighestScore = CurrentAttempt.Score;
-			}
+				if (CurrentAttempt.Accuracy == 100)
+				{
+					Phoenyx.Stats.FullCombos++;
+				}
 
-			Phoenyx.Stats.PassAccuracies.Add(CurrentAttempt.Accuracy);
+				if (CurrentAttempt.Score > Phoenyx.Stats.HighestScore)
+				{
+					Phoenyx.Stats.HighestScore = CurrentAttempt.Score;
+				}
+
+				Phoenyx.Stats.PassAccuracies.Add(CurrentAttempt.Accuracy);
+			}
 		}
 
 		if (results)
@@ -1056,6 +1167,19 @@ public partial class Runner : Node3D
 	public static void HideMenu()
 	{
 		ShowMenu(false);
+	}
+
+	public static void ShowReplayViewer(bool show = true)
+	{
+		ReplayViewerShown = CurrentAttempt.IsReplay && show;
+		ReplayViewer.Visible = ReplayViewerShown;
+
+		Input.MouseMode = ReplayViewerShown ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Hidden;
+	}
+
+	public static void HideReplayViewer()
+	{
+		ShowReplayViewer(false);
 	}
 	
 	public static void UpdateVolume()

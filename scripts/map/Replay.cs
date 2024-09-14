@@ -11,6 +11,7 @@ public struct Replay
     public string Player;
     public FileParser FileBuffer;
     public bool Valid;
+    public float Length;
 
     public double Speed;
     public string[] Modifiers;
@@ -28,11 +29,19 @@ public struct Replay
     public ulong LastNote;
 	public ulong LastFrame;
     public Vector2 CurrentPosition;
-    public Position[] Positions;
-    public int PositionIndex;
+    public Frame[] Frames;
+    public int FrameIndex;
     public float[] Notes;
     public float[] Skips;
     public int SkipIndex;
+
+    public struct Frame(float progress, float x, float y)
+    {
+        public float Progress = progress;
+        public Vector2 CursorPosition = new(x, y);
+    
+        public override string ToString() => $"({CursorPosition}) @{Progress}ms";
+    }
 
     public Replay(string path)
     {
@@ -79,16 +88,17 @@ public struct Replay
             }
             
             Player = FileBuffer.GetString((int)FileBuffer.GetUInt32());
-            Positions = new Position[FileBuffer.GetUInt64()];
+            Frames = new Frame[FileBuffer.GetUInt64()];
             CurrentPosition = new();
-            PositionIndex = 0;
+            FrameIndex = 0;
             SkipIndex = 0;
 
-            for (int i = 0; i < Positions.Length; i++)
+            for (int i = 0; i < Frames.Length; i++)
             {
-                Positions[i] = new(FileBuffer.GetFloat(), FileBuffer.GetFloat(), FileBuffer.GetFloat());
+                Frames[i] = new(FileBuffer.GetFloat(), FileBuffer.GetFloat(), FileBuffer.GetFloat());
             }
-            
+
+            Length = Frames.Length > 0 ? Frames[^1].Progress : 0;
             Notes = new float[FileBuffer.GetUInt64()];
 
             for (int i = 0; i < Notes.Length; i++)
@@ -135,12 +145,4 @@ public struct Replay
     {
         return !(left == right);
     }
-}
-
-public struct Position(float progress, float x, float y)
-{
-    public float Progress = progress;
-    public Vector2 CursorPosition = new(x, y);
-
-    public override string ToString() => $"({CursorPosition}) @{Progress}ms";
 }
