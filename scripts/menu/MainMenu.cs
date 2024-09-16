@@ -24,6 +24,7 @@ public partial class MainMenu : Control
 	private static Button JukeboxButton;
 	private static ColorRect JukeboxProgress;
 	private static HBoxContainer JukeboxSpectrum;
+	private static ColorRect[] JukeboxSpectrumBars;
 	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
 	private static Panel ContextMenu;
 	private static TextureRect Peruchor;
@@ -61,8 +62,9 @@ public partial class MainMenu : Control
 	private static bool RightMouseHeld = false;
 	private static bool RightClickingButton = false;
 	private static List<string> LoadedMaps = [];
-	private static List<string> FavoritedMaps = [];
-	private static Dictionary<string, int> OriginalMapOrder = [];
+	private static Dictionary<string, int> MapsOrder = [];
+	private static Dictionary<Panel, bool> FavoritedMaps = [];
+	private static TextureRect[] FavoriteMapsTextures = [];
 	private static int VisibleMaps = 0;
 	private static string SelectedMap = null;
 	private static string CurrentMenu = "Main";
@@ -96,7 +98,6 @@ public partial class MainMenu : Control
 		if (!Initialized)
 		{
 			Initialized = true;
-			SoundManager.JukeboxQueue = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
 			SoundManager.JukeboxPlayed += (Map map) => {
 				PassedNotes = 0;
 				CurrentMap = map;
@@ -115,61 +116,56 @@ public partial class MainMenu : Control
 				UpdateSpectrumSpacing();
 			};
 			viewport.Connect("files_dropped", Callable.From((string[] files) => {
-				if (files[0].GetExtension() == "phxr")
+				Import(files);
+
+				foreach (string file in files)
 				{
-					List<Replay> replays = [];
-					List<Replay> matching = [];
-
-					for (int i = 0; i < files.Length; i++)
+					switch (file.GetExtension())
 					{
-						Replay replay = new(files[i]);
-						
-						if (!replay.Valid)
-						{
-							continue;
-						}
+						case "phxr":
+							List<Replay> replays = [];
+							List<Replay> matching = [];
 
-						replays.Add(replay);
-					}
+							for (int i = 0; i < files.Length; i++)
+							{
+								Replay replay = new(files[i]);
+								
+								if (!replay.Valid)
+								{
+									continue;
+								}
 
-					if (replays.Count == 0)
-					{
-						ToastNotification.Notify("No valid replays", 2);
-						return;
-					}
+								replays.Add(replay);
+							}
 
-					foreach (Replay replay in replays)
-					{
-						if (replay == replays[0])
-						{
-							matching.Add(replay);
-						}
-						else
-						{
-							ToastNotification.Notify("Replay doesn't match first", 1);
-							Logger.Log($"Replay {replay} doesn't match {replays[0]}");
-						}
-					}
+							if (replays.Count == 0)
+							{
+								ToastNotification.Notify("No valid replays", 2);
+								return;
+							}
 
-					if (Runner.Playing)
-					{
-						Runner.QueueStop();
-					}
-					
-					SoundManager.Song.Stop();
-					SceneManager.Load("res://scenes/game.tscn");
-					Runner.Play(MapParser.Decode(matching[0].MapFilePath), matching[0].Speed, matching[0].Modifiers, null, [.. matching]);
-				}
-				else
-				{
-					MapParser.Import(files);
-					UpdateMapList();
-					Panel mapButton = MapListContainer.GetNode<Panel>(files[0].Split("\\")[^1].TrimSuffix(".phxm").TrimSuffix(".sspm").TrimSuffix(".txt"));
+							foreach (Replay replay in replays)
+							{
+								if (replay == replays[0])
+								{
+									matching.Add(replay);
+								}
+								else
+								{
+									ToastNotification.Notify("Replay doesn't match first", 1);
+									Logger.Log($"Replay {replay} doesn't match {replays[0]}");
+								}
+							}
 
-					if (!mapButton.Name.ToString().Contains(SearchTitle))
-					{
-						mapButton.Visible = false;
-						VisibleMaps--;
+							if (Runner.Playing)
+							{
+								Runner.QueueStop();
+							}
+							
+							SoundManager.Song.Stop();
+							SceneManager.Load("res://scenes/game.tscn");
+							Runner.Play(MapParser.Decode(matching[0].MapFilePath), matching[0].Speed, matching[0].Modifiers, null, [.. matching]);
+							break;
 					}
 				}
 			}));
@@ -195,6 +191,15 @@ public partial class MainMenu : Control
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
+
+		Godot.Collections.Array<Node> jukeboxBars = JukeboxSpectrum.GetChildren();
+
+		JukeboxSpectrumBars = new ColorRect[jukeboxBars.Count];
+
+		for (int i = 0; i < jukeboxBars.Count; i++)
+		{
+			JukeboxSpectrumBars[i] = jukeboxBars[i].GetNode<ColorRect>("Main");
+		}
 
 		VBoxContainer buttons = Main.GetNode<VBoxContainer>("Buttons");
 
@@ -290,16 +295,6 @@ public partial class MainMenu : Control
 			OS.ShellOpen("https://discord.gg/aSyC7btWDX");
 		};
 
-		if (!SoundManager.Song.Playing)
-		{
-			SoundManager.JukeboxIndex = (int)new Random().NextInt64(Math.Max(0, SoundManager.JukeboxQueue.Length - 1));
-		}
-
-		for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
-		{
-			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i].GetFile().GetBaseName().Replace(".", "_")] = i;
-		}
-
 		JukeboxButton.MouseEntered += () => {
 			Label title = Jukebox.GetNode<Label>("Title");
 			Tween tween = title.CreateTween();
@@ -313,7 +308,7 @@ public partial class MainMenu : Control
 			tween.Play();
 		};
 		JukeboxButton.Pressed += () => {
-			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].Split("\\")[^1].TrimSuffix(".phxm").Replace(".", "_");
+			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].GetFile().GetBaseName().Replace(".", "_");
 			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
 			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
 		};
@@ -409,8 +404,7 @@ public partial class MainMenu : Control
 			Search();
 		};
 		ImportDialog.FilesSelected += (string[] files) => {
-			MapParser.Import(files);
-			UpdateMapList();
+			Import(files);
 		};
 
 		UpdateMapList();
@@ -438,28 +432,34 @@ public partial class MainMenu : Control
 
 			string favorites = File.ReadAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt");
 			bool favorited = favorites.Split("\n").ToList().Contains(ContextMenuTarget);
-			TextureRect favorite = MapListContainer.GetNode(ContextMenuTarget).GetNode("Holder").GetNode<TextureRect>("Favorited");
+			Panel mapButton = MapListContainer.GetNode<Panel>(ContextMenuTarget);
+			TextureRect favorite = mapButton.GetNode("Holder").GetNode<TextureRect>("Favorited");
 			favorite.Visible = !favorited;
 
 			if (favorited)
 			{
 				File.WriteAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt", favorites.Replace($"{ContextMenuTarget}\n", ""));
-				FavoritedMaps.Remove(ContextMenuTarget);
+				FavoritedMaps[mapButton] = false;
 			}
 			else
 			{
 				favorite.Texture = Phoenyx.Skin.FavoriteImage;
 				File.WriteAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt", $"{favorites}{ContextMenuTarget}\n");
-				FavoritedMaps.Add(ContextMenuTarget);
+				FavoritedMaps[mapButton] = true;
 			}
 			
-			MapListContainer.MoveChild(MapListContainer.GetNode(ContextMenuTarget), favorited ? OriginalMapOrder[ContextMenuTarget] : 0);
+			SortMapList();
+			UpdateFavoriteMapsTextures();
 
 			ToastNotification.Notify($"Successfully {(favorited ? "removed" : "added")} map {(favorited ? "from" : "to")} favorites");
 		};
 		ContextMenu.GetNode("Container").GetNode<Button>("Delete").Pressed += () => {
 			ContextMenu.Visible = false;
-			MapListContainer.GetNode(ContextMenuTarget).QueueFree();
+
+			Panel mapButton = MapListContainer.GetNode<Panel>(ContextMenuTarget);
+
+			FavoritedMaps.Remove(mapButton);
+			mapButton.QueueFree();
 			LoadedMaps.Remove(ContextMenuTarget);
 			
 			if (ContextMenuTarget.Contains(SearchTitle))
@@ -594,6 +594,8 @@ public partial class MainMenu : Control
 
 		// Finish
 
+		SoundManager.UpdateJukeboxQueue();
+
 		if (!SoundManager.Song.Playing)
 		{
 			SoundManager.PlayJukebox();
@@ -656,16 +658,14 @@ public partial class MainMenu : Control
 			float energy = (60 + Mathf.LinearToDb(magnitude)) / 30;
 			prevHz = hz;
 			
-			ColorRect colorRect = JukeboxSpectrum.GetNode((i + 1).ToString()).GetNode<ColorRect>("Main");
-			colorRect.AnchorTop = Math.Clamp(Mathf.Lerp(colorRect.AnchorTop, 1 - energy * (SoundManager.JukeboxPaused ? 0.0000000001f : 1), (float)delta * 12), 0, 1);	// oh god not again
+			JukeboxSpectrumBars[i].AnchorTop = Math.Clamp(Mathf.Lerp(JukeboxSpectrumBars[i].AnchorTop, 1 - energy * (SoundManager.JukeboxPaused ? 0.0000000001f : 1), (float)delta * 12), 0, 1);	// oh god not again
 		}
 
-		for (int i = 0; i < FavoritedMaps.Count; i++)
+		for (int i = 0; i < FavoriteMapsTextures.Length; i++)
 		{
-			TextureRect favoriteRect = MapListContainer.GetNode(FavoritedMaps[i]).GetNode("Holder").GetNode<TextureRect>("Favorited");
-			Color modulate = Color.FromHtml("ffffff" + (196 + (int)(59 * Math.Sin(Math.PI * now / 1000000 + i))).ToString("X2"));
-			favoriteRect.Rotation = (float)now / 1000000;
-			favoriteRect.Modulate = modulate;
+			Color modulate = Color.Color8(255, 255, 255, (byte)(196 + (59 * Math.Sin(Math.PI * now / 1000000 + i))));
+			FavoriteMapsTextures[i].Rotation = (float)now / 1000000;
+			FavoriteMapsTextures[i].Modulate = modulate;
 		}
 
 		foreach (ColorRect tile in BackgroundTiles)
@@ -862,6 +862,18 @@ public partial class MainMenu : Control
 		}
     }
 
+	public static Dictionary<string, bool> Import(string[] files)
+	{
+		Dictionary<string, bool> results = MapParser.BulkImport(files);
+
+		SoundManager.UpdateJukeboxQueue();
+		UpdateMapList();
+		Search();
+		Select(files[0].GetFile().GetBaseName(), true);
+
+		return results;
+	}
+
 	public static void Search()
 	{
 		VisibleMaps = 0;
@@ -878,6 +890,113 @@ public partial class MainMenu : Control
 
 		UpdateMaxScroll();
 		TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
+	}
+
+	public static void Select(string fileName, bool fromImport = false)
+	{
+		Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
+
+		if (mapButton == null)
+		{
+			Logger.Log($"Tried to select map {fileName}, but it wasn't found in the map list");
+			return;
+		}
+
+		Panel holder = mapButton.GetNode<Panel>("Holder");
+
+		if (SelectedMap != null)
+		{
+			Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+			selectedHolder.GetNode<Panel>("Normal").Visible = true;
+			selectedHolder.GetNode<Panel>("Selected").Visible = false;
+
+			Tween deselectTween = selectedHolder.CreateTween().SetParallel();
+			deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+			deselectTween.TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+			deselectTween.Play();
+
+			if (MapListContainer.GetNode(SelectedMap) == mapButton && !fromImport)
+			{
+				Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{fileName}.phxm");
+
+				SoundManager.Song.Stop();
+				SceneManager.Load("res://scenes/game.tscn");
+				Runner.Play(map, Lobby.Speed, Lobby.Mods);
+			}
+		}
+
+		holder.GetNode<Panel>("Normal").Visible = false;
+		holder.GetNode<Panel>("Selected").Visible = true;
+		
+		if (fromImport)
+		{
+			holder.CallDeferred("set_size", new Vector2(MapListContainer.Size.X, holder.Size.Y));
+			holder.CallDeferred("set_position", new Vector2(0, holder.Position.Y));
+		}
+		else
+		{
+			Tween selectTween = holder.CreateTween().SetParallel();
+			selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+			selectTween.TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+			selectTween.Play();
+		}
+
+		TargetScroll = Math.Clamp((MapsOrder[fileName] + 1) * (mapButton.Size.Y + 10) - MapList.Size.Y / 2, 0, MaxScroll);
+		
+		int index = SoundManager.JukeboxQueueInverse[mapButton.Name];
+		
+		if (SoundManager.JukeboxIndex != index)
+		{
+			SoundManager.JukeboxIndex = index;
+			SoundManager.JukeboxPaused = false;
+			SoundManager.Song.PitchScale = 1;
+			SoundManager.PlayJukebox();
+			UpdateJukeboxButtons();
+		}
+
+		SelectedMap = mapButton.Name;
+
+		Transition("Play");
+	}
+
+	public static void SortMapList()
+	{
+		List<Node> favorites = [];
+		string[] maps = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
+
+		for (int i = 0; i < maps.Length; i++)
+		{
+			Node mapButton = MapListContainer.GetNode(maps[i].GetFile().GetBaseName().Replace(".", "_"));
+
+			if (mapButton == null)
+			{
+				continue;
+			}
+
+			MapListContainer.MoveChild(mapButton, i);
+		}
+
+		foreach (KeyValuePair<Panel, bool> entry in FavoritedMaps)
+		{
+			if (!entry.Value)
+			{
+				continue;
+			}
+
+			favorites.Add(entry.Key);
+		}
+
+		for (int i = favorites.Count - 1; i >= 0; i--)
+		{
+			MapListContainer.MoveChild(favorites[i], 0);
+		}
+
+		Godot.Collections.Array<Node> mapButtons = MapListContainer.GetChildren();
+
+		for (int i = 0; i < mapButtons.Count; i++)
+		{
+			MapsOrder[mapButtons[i].Name] = i;
+		}
 	}
 
 	public static void Chat(string message)
@@ -964,27 +1083,20 @@ public partial class MainMenu : Control
 		double start = Time.GetTicksUsec();
 		int i = 0;
 		Color black = Color.Color8(0, 0, 0, 1);
-		List<string> favorites = File.ReadAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt").Split("\n").ToList();
-		FavoritedMaps = [];
+		List<string> favorites = [.. File.ReadAllText($"{Phoenyx.Constants.UserFolder}/favorites.txt").Split("\n")];
 
 		foreach (string mapFile in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps"))
 		{
 			try
 			{
-				string[] split = mapFile.Split("\\");
-				string fileName = split[^1].TrimSuffix(".phxm");
-				bool favorited = favorites.Contains(fileName);
-				
-				if (mapFile.GetExtension() != "phxm" || LoadedMaps.Contains(fileName))
-				{
-					if (favorited)
-					{
-						FavoritedMaps.Add(fileName);
-					}
+				string fileName = mapFile.GetFile().GetBaseName();
 
+				if (LoadedMaps.Contains(fileName))
+				{
 					continue;
 				}
 
+				bool favorited = favorites.Contains(fileName);
 				string title;
 				string difficultyName;
 				string mappers = "";
@@ -1042,26 +1154,22 @@ public partial class MainMenu : Control
 
 				Panel mapButton = MapButton.Instantiate<Panel>();
 				Panel holder = mapButton.GetNode<Panel>("Holder");
+
+				FavoritedMaps[mapButton] = favorited;
 				
 				if (coverFile != null)
 				{
 					holder.GetNode<TextureRect>("Cover").Texture = ImageTexture.CreateFromImage(Image.LoadFromFile(coverFile));
 				}
 
-				mapButton.Name = fileName;
-
 				holder.GetNode<Label>("Title").Text = title;
 				holder.GetNode<RichTextLabel>("Extra").Text = $"[color={Phoenyx.Constants.SecondaryDifficultyColours[difficulty].ToHtml(false)}]{difficultyName}[color=808080] - {mappers}".ReplaceLineEndings("");
 
 				MapListContainer.AddChild(mapButton);
-
-				OriginalMapOrder[fileName] = i + 1;
+				mapButton.Name = fileName;
 
 				if (favorited)
 				{
-					MapListContainer.MoveChild(mapButton, 0);
-					FavoritedMaps.Add(fileName);
-
 					TextureRect favorite = holder.GetNode<TextureRect>("Favorited");
 					favorite.Texture = Phoenyx.Skin.FavoriteImage;
 					favorite.Visible = true;
@@ -1080,49 +1188,7 @@ public partial class MainMenu : Control
 					
 					if (!RightMouseHeld)
 					{
-						if (SelectedMap != null)
-						{
-							Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
-							selectedHolder.GetNode<Panel>("Normal").Visible = true;
-							selectedHolder.GetNode<Panel>("Selected").Visible = false;
-
-							Tween deselectTween = selectedHolder.CreateTween().SetParallel();
-							deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-							deselectTween.TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-							deselectTween.Play();
-
-							if (MapListContainer.GetNode(SelectedMap) == mapButton)
-							{
-								Map map = MapParser.Decode(mapFile);
-
-								SoundManager.Song.Stop();
-								SceneManager.Load("res://scenes/game.tscn");
-								Runner.Play(map, Lobby.Speed, Lobby.Mods);
-							}
-						}
-
-						holder.GetNode<Panel>("Normal").Visible = false;
-						holder.GetNode<Panel>("Selected").Visible = true;
-						
-						Tween selectTween = holder.CreateTween().SetParallel();
-						selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-						selectTween.TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-						selectTween.Play();
-
-						TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
-
-						int index = SoundManager.JukeboxQueueInverse[mapButton.Name];
-						
-						if (SoundManager.JukeboxIndex != index)
-						{
-							SoundManager.JukeboxIndex = index;
-							SoundManager.JukeboxPaused = false;
-							SoundManager.Song.PitchScale = 1;
-							SoundManager.PlayJukebox();
-							UpdateJukeboxButtons();
-						}
-
-						SelectedMap = mapButton.Name;
+						Select(fileName);
 					}
 					else
 					{
@@ -1132,7 +1198,7 @@ public partial class MainMenu : Control
 						ContextMenu.Position = MousePosition;
 						ContextMenuTarget = fileName;
 
-						bool favorited = FavoritedMaps.Contains(fileName);
+						bool favorited = FavoritedMaps[mapButton];
 
 						ContextMenu.GetNode("Container").GetNode<Button>("Favorite").Text = favorited ? "Unfavorite" : "Favorite";
 					}
@@ -1147,6 +1213,8 @@ public partial class MainMenu : Control
 		}
 
 		UpdateMaxScroll();
+		SortMapList();
+		UpdateFavoriteMapsTextures();
 
 		Logger.Log($"MAPLIST UPDATE: {(Time.GetTicksUsec() - start) / 1000}ms");
 	}
@@ -1159,6 +1227,26 @@ public partial class MainMenu : Control
 	public static void UpdateSpectrumSpacing()
 	{
 		JukeboxSpectrum.AddThemeConstantOverride("separation", ((int)JukeboxSpectrum.Size.X - 32 * 6) / 48);
+	}
+
+	public static void UpdateFavoriteMapsTextures()
+	{
+		List<Panel> favorites = [];
+
+		foreach (KeyValuePair<Panel, bool> entry in FavoritedMaps)
+		{
+			if (entry.Value)
+			{
+				favorites.Add(entry.Key);
+			}
+		}
+
+		FavoriteMapsTextures = new TextureRect[favorites.Count];
+
+		for (int i = 0; i < favorites.Count; i++)
+		{
+			FavoriteMapsTextures[i] = favorites[i].GetNode("Holder").GetNode<TextureRect>("Favorited");
+		}
 	}
 
 	public static void UpdateJukeboxButtons()

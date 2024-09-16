@@ -24,7 +24,6 @@ public partial class Renderer : MultiMeshInstance3D
         for (int i = 0; i < Runner.ToProcess; i++)
         {
             Note note = Runner.ProcessNotes[i];
-
             float depth = (note.Millisecond - (float)Runner.CurrentAttempt.Progress) / (1000 * at) * ad / (float)Runner.CurrentAttempt.Speed;
             float alpha = Math.Clamp((1 - (float)depth / ad) / (fadeIn / 100), 0, 1);
             

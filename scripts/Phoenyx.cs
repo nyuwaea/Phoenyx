@@ -4,24 +4,25 @@ using System.Text.RegularExpressions;
 using System.Security.Cryptography;
 using Godot;
 using Godot.Collections;
+using System.Collections.Generic;
 
 public partial class Phoenyx : Node
 {
     public struct Constants
     {
-        public static ulong Started = Time.GetTicksUsec();
-        public static string RootFolder {get;} = Directory.GetCurrentDirectory();
-        public static string UserFolder {get;} = OS.GetUserDataDir();
-        public static double CursorSize {get;} = 0.2625;
-        public static double GridSize {get;} = 3.0;
-        public static Vector2 Bounds {get;} = new Vector2((float)(GridSize / 2 - CursorSize / 2), (float)(GridSize / 2 - CursorSize / 2));
-        public static double HitBoxSize {get;} = 0.07;
-        public static double HitWindow {get;} = 55;
-        public static int BreakTime {get;} = 4000;  // used for skipping breaks mid-map
-        public static string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
-        public static Color[] DifficultyColours = [Color.FromHtml("ffffff"), Color.FromHtml("00ff00"), Color.FromHtml("ffff00"), Color.FromHtml("ff0000"), Color.FromHtml("7f00ff"), Color.FromHtml("007fff")];
-        public static Color[] SecondaryDifficultyColours = [Color.FromHtml("808080"), Color.FromHtml("7fff7f"), Color.FromHtml("ffff7f"), Color.FromHtml("ff007f"), Color.FromHtml("ff00ff"), Color.FromHtml("007fff")];
-        public static Dictionary<string, double> ModsMultiplierIncrement = new(){
+        public static readonly ulong Started = Time.GetTicksUsec();
+        public static readonly string RootFolder = Directory.GetCurrentDirectory();
+        public static readonly string UserFolder = OS.GetUserDataDir();
+        public static readonly double CursorSize = 0.2625;
+        public static readonly double GridSize = 3.0;
+        public static readonly Vector2 Bounds = new((float)(GridSize / 2 - CursorSize / 2), (float)(GridSize / 2 - CursorSize / 2));
+        public static readonly double HitBoxSize = 0.07;
+        public static readonly double HitWindow = 55;
+        public static readonly int BreakTime = 4000;  // used for skipping breaks mid-map
+        public static readonly string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
+        public static readonly Color[] DifficultyColours = [Color.FromHtml("ffffff"), Color.FromHtml("00ff00"), Color.FromHtml("ffff00"), Color.FromHtml("ff0000"), Color.FromHtml("7f00ff"), Color.FromHtml("007fff")];
+        public static readonly Color[] SecondaryDifficultyColours = [Color.FromHtml("808080"), Color.FromHtml("7fff7f"), Color.FromHtml("ffff7f"), Color.FromHtml("ff007f"), Color.FromHtml("ff00ff"), Color.FromHtml("007fff")];
+        public static readonly Godot.Collections.Dictionary<string, double> ModsMultiplierIncrement = new(){
             ["NoFail"] = 0,
             ["Ghost"] = 0.0675,
 			["Spin"] = 0,
@@ -291,7 +292,7 @@ public partial class Phoenyx : Node
         public static ulong TotalScore = 0;
         public static ulong RageQuits = 0;
         public static Array<double> PassAccuracies = [];
-        public static Dictionary<string, ulong> FavouriteMaps = [];
+        public static Godot.Collections.Dictionary<string, ulong> FavouriteMaps = [];
 
         public static void Save()
         {
@@ -364,7 +365,7 @@ public partial class Phoenyx : Node
                         TotalScore = file.GetUInt64();
                         RageQuits = file.GetUInt64();
                         PassAccuracies = (Array<double>)Json.ParseString(file.GetString((int)file.GetUInt32()));
-                        FavouriteMaps = (Dictionary<string, ulong>)Json.ParseString(file.GetString((int)file.GetUInt32()));
+                        FavouriteMaps = (Godot.Collections.Dictionary<string, ulong>)Json.ParseString(file.GetString((int)file.GetUInt32()));
 
                         byte[] hash = file.Get(32);
                         byte[] newHash = new byte[32];
@@ -375,7 +376,7 @@ public partial class Phoenyx : Node
                         {
                             if (hash[i] != newHash[i])
                             {
-                                throw new("Wrong hash");
+                                throw new("Wrong hash lol");
                             }
                         }
 
@@ -458,7 +459,7 @@ public partial class Phoenyx : Node
                 {
                     if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
                     {
-                        byte[] buffer = System.Array.Empty<byte>();
+                        byte[] buffer = [];
 
                         if (skinFile.GetExtension() == "txt")
                         {
@@ -533,6 +534,18 @@ public partial class Phoenyx : Node
 
             SettingsManager.UpdateSettings();
             Stats.GamesOpened++;
+
+            List<string> import = [];
+
+            foreach (string file in Directory.GetFiles($"{Constants.UserFolder}/maps"))
+            {
+                if (file.GetExtension() == "sspm" || file.GetExtension() == "txt")
+                {
+                    import.Add(file);
+                }
+            }
+
+            MapParser.BulkImport([.. import]);
 
             Loaded = true;
         }

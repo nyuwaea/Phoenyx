@@ -348,7 +348,7 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_5gt56")
 
-[node name="Label" type="RichTextLabel" parent="Menus/Main/News/Panel"]
+[node name="RichTextLabel" type="RichTextLabel" parent="Menus/Main/News/Panel"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
@@ -396,6 +396,7 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
 [i]BUG FIXES[/i][ul]
  Settings values now round properly
  Skipping a break in a map with a video background no longer desyncs the video
+ Playing a map you just imported will actually work
  Many, many more that I did not keep track of"
 shortcut_keys_enabled = false
 

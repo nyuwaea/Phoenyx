@@ -15,18 +15,22 @@ public class NoteComparer : IComparer<Note>
 
 public partial class MapParser : Node
 {
-	public static void Import(string[] files)
+	public static Dictionary<string, bool> BulkImport(string[] files)
 	{
 		double start = Time.GetTicksUsec();
 		int good = 0;
 		int corrupted = 0;
+		Dictionary<string, bool> results = [];
 		
 		foreach (string file in files)
 		{
+			results[file] = false;
+			
 			try
 			{
 				Decode(file, false);
 				good++;
+				results[file] = true;
 			}
 			catch
 			{
@@ -36,6 +40,8 @@ public partial class MapParser : Node
 		}
 
 		Logger.Log($"BULK IMPORT: {(Time.GetTicksUsec() - start) / 1000}ms; TOTAL: {good + corrupted}; CORRUPT: {corrupted}");
+
+		return results;
 	}
 
 	public static void Encode(Map map, bool logBenchmark = true)

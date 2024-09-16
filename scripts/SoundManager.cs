@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.IO;
 using Godot;
 using Menu;
 
@@ -88,6 +89,16 @@ public partial class SoundManager : Node
             Phoenyx.Util.DiscordRPC.Call("Set", "state", $"Listening to {Map.PrettyTitle}");
         }
 	}
+
+    public static void UpdateJukeboxQueue()
+    {
+        SoundManager.JukeboxQueue = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
+
+        for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
+		{
+			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i].GetFile().GetBaseName().Replace(".", "_")] = i;
+		}
+    }
 
     public static void UpdateSounds()
     {
