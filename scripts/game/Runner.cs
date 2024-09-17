@@ -175,6 +175,7 @@ public partial class Runner : Node3D
 				ReplayFile.StoreString(modifiers);
 				ReplayFile.Store32((uint)mapFileName.Length);
 				ReplayFile.StoreString(mapFileName);
+				ReplayFile.Store64((ulong)Map.Notes.Length);
 				ReplayFile.Store32((uint)player.Length);
 				ReplayFile.StoreString(player);
 
@@ -212,7 +213,7 @@ public partial class Runner : Node3D
 
 			LastHitColour = Phoenyx.Skin.Colors[index % Phoenyx.Skin.Colors.Length];
 
-			float lateness = IsReplay ? HitsInfo[index] : (float)((Progress - Map.Notes[index].Millisecond) / Speed);
+			float lateness = IsReplay ? HitsInfo[index] : (float)(((int)Progress - Map.Notes[index].Millisecond) / Speed);
 			float factor = 1 - Math.Max(0, lateness - 25) / 150f;
 			
 			if (!IsReplay)
@@ -377,16 +378,11 @@ public partial class Runner : Node3D
 				}
 
 				ReplayFile.Seek(ReplayFile.GetLength());
-				ReplayFile.Store64((ulong)Map.Notes.Length);
+				ReplayFile.Store64(Sum);
 
 				for (int i = 0; i < Sum; i++)
 				{
-					ReplayFile.StoreFloat(HitsInfo[i]);
-				}
-
-				for (int i = (int)Sum; i < Map.Notes.Length; i++)
-				{
-					ReplayFile.StoreFloat(-1);
+					ReplayFile.Store8((byte)(HitsInfo[i] == -1 ? 255 : Math.Min(254, HitsInfo[i] * (254 / 55))));
 				}
 
 				ReplayFile.Store64((ulong)ReplaySkips.Count);
@@ -592,8 +588,8 @@ public partial class Runner : Node3D
 			(Cursor.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = Phoenyx.Skin.CursorImage;
 			(CursorTrailMultimesh.MaterialOverride as StandardMaterial3D).AlbedoTexture = Phoenyx.Skin.CursorImage;
 			(Grid.GetActiveMaterial(0) as StandardMaterial3D).AlbedoTexture = Phoenyx.Skin.GridImage;
-			PanelLeft.GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.PanelLeftImage;
-			PanelRight.GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.PanelRightImage;
+			PanelLeft.GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.PanelLeftBackgroundImage;
+			PanelRight.GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.PanelRightBackgroundImage;
 			HealthTexture.Texture = Phoenyx.Skin.HealthImage;
 			HealthTexture.GetParent().GetNode<TextureRect>("Background").Texture = Phoenyx.Skin.HealthBackgroundImage;
 			ProgressBarTexture.Texture = Phoenyx.Skin.ProgressImage;

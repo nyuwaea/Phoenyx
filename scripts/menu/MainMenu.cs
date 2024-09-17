@@ -188,6 +188,7 @@ public partial class MainMenu : Control
 		ContextMenu = GetNode<Panel>("ContextMenu");
 		Peruchor = Main.GetNode<TextureRect>("Peruchor");
 		LoadedMaps = [];
+		FavoritedMaps = [];
 
 		Cursor.Texture = Phoenyx.Skin.CursorImage;
 		Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
@@ -864,12 +865,27 @@ public partial class MainMenu : Control
 
 	public static Dictionary<string, bool> Import(string[] files)
 	{
-		Dictionary<string, bool> results = MapParser.BulkImport(files);
+		List<string> maps = [];
+
+		foreach (string file in files)
+		{
+			if (file.GetExtension() == "phxm" || file.GetExtension() == "sspm" || file.GetExtension() == "txt")
+			{
+				maps.Add(file);
+			}
+		}
+
+		Dictionary<string, bool> results = MapParser.BulkImport([.. maps]);
+
+		if (maps.Count == 0)
+		{
+			return results;
+		}
 
 		SoundManager.UpdateJukeboxQueue();
 		UpdateMapList();
 		Search();
-		Select(files[0].GetFile().GetBaseName(), true);
+		Select(maps[0].GetFile().GetBaseName(), true);
 
 		return results;
 	}

@@ -5,6 +5,7 @@ using System.Security.Cryptography;
 using Godot;
 using Godot.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 
 public partial class Phoenyx : Node
 {
@@ -72,39 +73,15 @@ public partial class Phoenyx : Node
             }
 
             Dictionary data = new(){
-                ["_Version"] = 1,
-                ["Fullscreen"] = Fullscreen,
-                ["VolumeMaster"] = VolumeMaster,
-                ["VolumeMusic"] = VolumeMusic,
-                ["VolumeSFX"] = VolumeSFX,
-                ["AutoplayJukebox"] = AutoplayJukebox,
-                ["AlwaysPlayHitSound"] = AlwaysPlayHitSound,
-                ["Skin"] = Skin,
-                ["CameraLock"] = CameraLock,
-                ["FoV"] = FoV,
-                ["Sensitivity"] = Sensitivity,
-                ["Parallax"] = Parallax,
-                ["ApproachRate"] = ApproachRate,
-                ["ApproachDistance"] = ApproachDistance,
-                ["FadeIn"] = FadeIn,
-                ["FadeOut"] = FadeOut,
-                ["Pushback"] = Pushback,
-                ["NoteSize"] = NoteSize,
-                ["CursorScale"] = CursorScale,
-                ["CursorTrail"] = CursorTrail,
-                ["TrailTime"] = TrailTime,
-                ["TrailDetail"] = TrailDetail,
-                ["CursorDrift"] = CursorDrift,
-                ["VideoDim"] = VideoDim,
-                ["VideoRenderScale"] = VideoRenderScale,
-                ["SimpleHUD"] = SimpleHUD,
-                ["Space"] = Space,
-                ["AbsoluteInput"] = AbsoluteInput,
-                ["RecordReplays"] = RecordReplays
+                ["_Version"] = 1
             };
 
-            File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
+            foreach (PropertyInfo property in typeof(Settings).GetProperties())
+            {
+                data[property.Name] = (Variant)typeof(Variant).GetMethod("From").MakeGenericMethod(property.GetValue(null).GetType()).Invoke(null, [property.GetValue(null)]);
+            }
 
+            File.WriteAllText($"{Constants.UserFolder}/profiles/{profile}.json", Json.Stringify(data, "\t"));
             Phoenyx.Skin.Save();
             Logger.Log($"Saved settings {profile}");
         }
@@ -125,35 +102,13 @@ public partial class Phoenyx : Node
 
                 file.Close();
                 
-                Fullscreen = (bool)data["Fullscreen"];
-                VolumeMaster = (double)data["VolumeMaster"];            
-                VolumeMusic = (double)data["VolumeMusic"];
-                VolumeSFX = (double)data["VolumeSFX"];
-                AutoplayJukebox = (bool)data["AutoplayJukebox"];
-                AlwaysPlayHitSound = (bool)data["AlwaysPlayHitSound"];
-                Skin = (string)data["Skin"];
-                CameraLock = (bool)data["CameraLock"];
-                FoV = (int)data["FoV"];
-                Sensitivity = (double)data["Sensitivity"];
-                Parallax = (double)data["Parallax"];
-                ApproachRate = (double)data["ApproachRate"];
-                ApproachDistance = (double)data["ApproachDistance"];
-                ApproachTime = ApproachDistance / ApproachRate;
-                FadeIn = (double)data["FadeIn"];
-                FadeOut = (bool)data["FadeOut"];
-                Pushback = (bool)data["Pushback"];
-                NoteSize = (double)data["NoteSize"];
-                CursorScale = (double)data["CursorScale"];
-                CursorTrail = (bool)data["CursorTrail"];
-                TrailTime = (double)data["TrailTime"];
-                TrailDetail = (double)data["TrailDetail"];
-                CursorDrift = (bool)data["CursorDrift"];
-                VideoDim = (double)data["VideoDim"];
-                VideoRenderScale = (double)data["VideoRenderScale"];
-                SimpleHUD = (bool)data["SimpleHUD"];
-                Space = (string)data["Space"];
-                AbsoluteInput = (bool)data["AbsoluteInput"];
-                RecordReplays = (bool)data["RecordReplays"];
+                foreach (PropertyInfo property in typeof(Settings).GetProperties())
+                {
+                    if (data.ContainsKey(property.Name))
+                    {
+                        property.SetValue(null, data[property.Name].GetType().GetMethod("As", BindingFlags.Public | BindingFlags.Instance).MakeGenericMethod(property.GetValue(null).GetType()).Invoke(data[property.Name], null));
+                    }
+                }
 
                 if (Fullscreen)
                 {
@@ -178,7 +133,7 @@ public partial class Phoenyx : Node
             if (err != null)
             {
                 ToastNotification.Notify("Settings file corrupted", 2);
-                throw Logger.Error($"Settings file corrupted; {err.Message}");
+                throw Logger.Error($"Settings file corrupted; {err}");
             }
 
             Logger.Log($"Loaded settings {profile}");
@@ -191,8 +146,8 @@ public partial class Phoenyx : Node
         public static string RawColors {get; set;} = "00ffed,ff8ff9";
         public static ImageTexture CursorImage {get; set;} = new();
         public static ImageTexture GridImage {get; set;} = new();
-        public static ImageTexture PanelLeftImage {get; set;} = new();
-        public static ImageTexture PanelRightImage {get; set;} = new();
+        public static ImageTexture PanelLeftBackgroundImage {get; set;} = new();
+        public static ImageTexture PanelRightBackgroundImage {get; set;} = new();
         public static ImageTexture HealthImage {get; set;} = new();
         public static ImageTexture HealthBackgroundImage {get; set;} = new();
         public static ImageTexture ProgressImage {get; set;} = new();
@@ -231,21 +186,17 @@ public partial class Phoenyx : Node
             }
             
             Colors = colors;
-            CursorImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/cursor.png"));
-            GridImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/grid.png"));
-            PanelLeftImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/panel_left_background.png"));
-            PanelRightImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/panel_right_background.png"));
-            HealthImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health.png"));
-            HealthBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/health_background.png"));
-            ProgressImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress.png"));
-            ProgressBackgroundImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/progress_background.png"));
-            HitsImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/hits.png"));
-            MissesImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/misses.png"));
-            MissFeedbackImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/miss_feedback.png"));
-            JukeboxPlayImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_play.png"));
-            JukeboxPauseImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_pause.png"));
-            JukeboxSkipImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/jukebox_skip.png"));
-            FavoriteImage = ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/favorite.png"));
+
+            foreach (PropertyInfo property in typeof(Skin).GetProperties())
+            {
+                if (!property.Name.Contains("Image"))
+                {
+                    continue;
+                }
+
+                property.SetValue(null, ImageTexture.CreateFromImage(Image.LoadFromFile($"{Constants.UserFolder}/skins/{Settings.Skin}/{property.Name.TrimSuffix("Image").ToSnakeCase()}.png")));
+            }
+
             Space = File.ReadAllText($"{Constants.UserFolder}/skins/{Settings.Skin}/space.txt");
 
             if (File.Exists($"{Constants.UserFolder}/skins/{Settings.Skin}/note.obj"))

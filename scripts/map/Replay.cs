@@ -7,7 +7,9 @@ public struct Replay
 {
     public string ID;
     public string MapID;
+    public ulong MapNoteCount;
     public string MapFilePath;
+    public ulong ReplayNoteCount;
     public string Player;
     public FileParser FileBuffer;
     public bool Valid;
@@ -93,6 +95,7 @@ public struct Replay
 
             Modifiers = FileBuffer.GetString((int)FileBuffer.GetUInt32()).Split("_");
             MapID = FileBuffer.GetString((int)FileBuffer.GetUInt32());
+            MapNoteCount = FileBuffer.GetUInt64();
             MapFilePath = $"{Phoenyx.Constants.UserFolder}/maps/{MapID}.phxm";
 
             if (!File.Exists(MapFilePath))
@@ -121,11 +124,19 @@ public struct Replay
             }
 
             Length = Frames.Length > 0 ? Frames[^1].Progress : 0;
-            Notes = new float[FileBuffer.GetUInt64()];
+            Notes = new float[MapNoteCount];
+            ReplayNoteCount = FileBuffer.GetUInt64();
 
-            for (int i = 0; i < Notes.Length; i++)
+            for (ulong i = 0; i < ReplayNoteCount; i++)
             {
-                Notes[i] = FileBuffer.GetFloat();
+                ushort note = FileBuffer.GetUInt8();
+
+                Notes[i] = note == 255 ? -1 : note / (254 / 55);
+            }
+
+            for (ulong i = ReplayNoteCount; i < MapNoteCount; i++)
+            {
+                Notes[i] = -1;
             }
 
             Skips = new float[FileBuffer.GetUInt64()];

@@ -389,6 +389,7 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
  Map difficulty names' colour now represents the difficulty
  The delay when starting a map now accounts for your approach time
  Smooth song transitions from the game scene, to results, then menus
+ Automatically import every non-phxm file in map folder on launch
  Improved game scene HUD
  Many more that I did not keep track of
 [/ul]
