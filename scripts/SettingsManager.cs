@@ -210,9 +210,6 @@ public partial class SettingsManager : Control
                 }
 
 				break;
-			case "CameraLock":
-				Phoenyx.Settings.CameraLock = (bool)value;
-				break;
 			case "FadeOut":
 				Phoenyx.Settings.FadeOut = (bool)value;
 				break;

@@ -14,11 +14,12 @@ public partial class Phoenyx : Node
         public static readonly ulong Started = Time.GetTicksUsec();
         public static readonly string RootFolder = Directory.GetCurrentDirectory();
         public static readonly string UserFolder = OS.GetUserDataDir();
+        public static readonly bool TempMapMode = false;//OS.GetCmdlineArgs().Length > 0;
         public static readonly double CursorSize = 0.2625;
         public static readonly double GridSize = 3.0;
         public static readonly Vector2 Bounds = new((float)(GridSize / 2 - CursorSize / 2), (float)(GridSize / 2 - CursorSize / 2));
         public static readonly double HitBoxSize = 0.07;
-        public static readonly double HitWindow = 55;
+        public static readonly double HitWindow = 550;
         public static readonly int BreakTime = 4000;  // used for skipping breaks mid-map
         public static readonly string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
         public static readonly Color[] DifficultyColours = [Color.FromHtml("ffffff"), Color.FromHtml("00ff00"), Color.FromHtml("ffff00"), Color.FromHtml("ff0000"), Color.FromHtml("7f00ff"), Color.FromHtml("007fff")];
@@ -42,7 +43,6 @@ public partial class Phoenyx : Node
         public static bool AutoplayJukebox {get; set;} = true;
         public static bool AlwaysPlayHitSound {get; set;} = false;
         public static string Skin {get; set;} = "default";
-        public static bool CameraLock {get; set;} = true;
         public static double FoV {get; set;} = 70;
         public static double Sensitivity {get; set;} = 0.5;
         public static double Parallax {get; set;} = 0.1;
@@ -67,10 +67,7 @@ public partial class Phoenyx : Node
 
         public static void Save(string profile = null)
         {
-            if (profile == null)
-            {
-                profile = Util.GetProfile();
-            }
+            profile ??= Util.GetProfile();
 
             Dictionary data = new(){
                 ["_Version"] = 1
@@ -88,10 +85,7 @@ public partial class Phoenyx : Node
 
         public static void Load(string profile = null)
         {
-            if (profile == null)
-            {
-                profile = Util.GetProfile();
-            }
+            profile ??= Util.GetProfile();
 
             Exception err = null;
 
@@ -349,7 +343,7 @@ public partial class Phoenyx : Node
     {
         private static bool Initialized = false;
         private static bool Loaded = false;
-        private static string[] UserDirectories = ["maps", "profiles", "skins", "replays"];
+        private static string[] UserDirectories = ["maps", "profiles", "skins", "replays", "pbs"];
         private static string[] SkinFiles = ["cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "hit.mp3", "fail.mp3", "colors.txt"];
 
         public static GodotObject DiscordRPC = (GodotObject)GD.Load<GDScript>("res://scripts/DiscordRPC.gd").New();
@@ -521,6 +515,11 @@ public partial class Phoenyx : Node
             {
                 Settings.Save();
                 Stats.Save();
+            }
+
+            if (File.Exists($"{Constants.UserFolder}/maps/NA_tempmap.phxm"))
+            {
+                File.Delete($"{Constants.UserFolder}/maps/NA_tempmap.phxm");
             }
             
             DiscordRPC.Call("Set", "end_timestamp", 0);

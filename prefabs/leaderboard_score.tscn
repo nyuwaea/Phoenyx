@@ -1,0 +1,116 @@
+[gd_scene load_steps=9 format=3 uid="uid://ue0x3n0ryhe5"]
+
+[ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="1_b4xd5"]
+[ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="2_uhwl7"]
+[ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="3_agvjh"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bfkib"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ddh1n"]
+font = ExtResource("1_b4xd5")
+font_size = 22
+
+[sub_resource type="LabelSettings" id="LabelSettings_i1p2f"]
+font = ExtResource("2_uhwl7")
+font_size = 22
+
+[sub_resource type="LabelSettings" id="LabelSettings_exmec"]
+font = ExtResource("2_uhwl7")
+font_size = 15
+font_color = Color(0.6, 0.6, 0.6, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_58c0b"]
+font = ExtResource("2_uhwl7")
+font_size = 10
+font_color = Color(0.3, 0.3, 0.3, 1)
+
+[node name="ScoreTemplate" type="Panel"]
+custom_minimum_size = Vector2(200, 70)
+size_flags_horizontal = 3
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bfkib")
+
+[node name="Bright" type="ColorRect" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(1, 1, 1, 0.0313726)
+
+[node name="Player" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.6
+anchor_bottom = 0.4
+offset_left = 6.0
+offset_top = 6.0
+offset_right = -3.0
+text = "TwentyCharactersLong"
+label_settings = SubResource("LabelSettings_ddh1n")
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Score" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.6
+anchor_right = 1.0
+anchor_bottom = 0.4
+offset_left = -3.0
+offset_top = 6.0
+offset_right = -6.0
+text = "10,000,000"
+label_settings = SubResource("LabelSettings_i1p2f")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Accuracy" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.6
+anchor_top = 0.4
+anchor_right = 1.0
+anchor_bottom = 0.7
+offset_left = 3.0
+offset_top = 6.0
+offset_right = -6.0
+text = "100.00%"
+label_settings = SubResource("LabelSettings_exmec")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Modifiers" type="HBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 0.6
+anchor_bottom = 1.0
+offset_left = 6.0
+offset_top = 3.0
+offset_right = -3.0
+offset_bottom = -6.0
+theme_override_constants/separation = 2
+
+[node name="ModifierTemplate" type="TextureRect" parent="Modifiers"]
+visible = false
+layout_mode = 2
+texture = ExtResource("3_agvjh")
+expand_mode = 2
+
+[node name="Time" type="Label" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.6
+anchor_top = 0.7
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 3.0
+offset_top = 3.0
+offset_right = -6.0
+offset_bottom = -6.0
+text = "1,000 days ago"
+label_settings = SubResource("LabelSettings_58c0b")
+horizontal_alignment = 2
+vertical_alignment = 1

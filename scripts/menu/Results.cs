@@ -53,11 +53,18 @@ public partial class Results : Control
 		}
 
 		SoundManager.Song.PitchScale = (float)Runner.CurrentAttempt.Speed;
-		SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[Runner.CurrentAttempt.Map.ID.Replace(".", "_")];
+		
+		if (!Runner.CurrentAttempt.Map.Ephemeral)
+		{
+			SoundManager.JukeboxIndex = SoundManager.JukeboxQueueInverse[Runner.CurrentAttempt.Map.ID];
+		}
+
+		Button replayButton = Footer.GetNode<Button>("Replay");
 
 		Footer.GetNode<Button>("Back").Pressed += Stop;
 		Footer.GetNode<Button>("Play").Pressed += Replay;
-		Footer.GetNode<Button>("Replay").Pressed += () => {
+		replayButton.Visible = !Runner.CurrentAttempt.Map.Ephemeral;
+		replayButton.Pressed += () => {
 			string path;
 
 			if (Runner.CurrentAttempt.IsReplay)
@@ -125,9 +132,11 @@ public partial class Results : Control
 
 	public static void Replay()
 	{
+		Map map = MapParser.Decode(Runner.CurrentAttempt.Map.FilePath);
+		map.Ephemeral = Runner.CurrentAttempt.Map.Ephemeral;
 		SoundManager.Song.Stop();
 		SceneManager.Load("res://scenes/game.tscn");
-		Runner.Play(MapParser.Decode(Runner.CurrentAttempt.Map.FilePath), Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.RawMods);
+		Runner.Play(map, Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.RawMods);
 	}
 
 	public static void Stop()

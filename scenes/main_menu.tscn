@@ -1,4 +1,4 @@
-[gd_scene load_steps=49 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=51 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -87,6 +87,16 @@ Button/styles/pressed = SubResource("StyleBoxFlat_keb1d")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_18lcc"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_omwck"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l7ueg"]
+shader = ExtResource("21_bm8r1")
+shader_parameter/brightness = 2.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_73f6f"]
+font = ExtResource("8_jfynb")
+font_color = Color(1, 1, 1, 0.25098)
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooiyf"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ruka0"]
@@ -103,10 +113,6 @@ font = ExtResource("10_j4s1w")
 
 [sub_resource type="LabelSettings" id="LabelSettings_5pcip"]
 font = ExtResource("8_jfynb")
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_l7ueg"]
-shader = ExtResource("21_bm8r1")
-shader_parameter/brightness = 2.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_1o5ig"]
 font_color = Color(1, 1, 1, 0.188235)
@@ -288,6 +294,7 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bl404")
 
 [node name="Main" type="Panel" parent="Menus"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -398,6 +405,7 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
  Settings values now round properly
  Skipping a break in a map with a video background no longer desyncs the video
  Playing a map you just imported will actually work
+ Consistent map order
  Many, many more that I did not keep track of"
 shortcut_keys_enabled = false
 
@@ -440,8 +448,6 @@ text = "QUIT"
 alignment = 0
 
 [node name="Play" type="Panel" parent="Menus"]
-visible = false
-modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -455,9 +461,9 @@ theme_override_styles/panel = SubResource("StyleBoxEmpty_6pifw")
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-offset_left = 4.0
+offset_left = 8.0
 offset_top = 64.0
-offset_right = -4.0
+offset_right = -8.0
 offset_bottom = 128.0
 theme = ExtResource("2_46xtp")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
@@ -643,6 +649,7 @@ anchor_left = 0.5
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_top = 128.0
+offset_right = -8.0
 offset_bottom = -72.0
 grow_horizontal = 0
 mouse_filter = 2
@@ -655,6 +662,73 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.0
 theme = ExtResource("2_46xtp")
+
+[node name="Leaderboard" type="Panel" parent="Menus/Play"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.4
+anchor_right = 0.25
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_bottom = -72.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_omwck")
+
+[node name="Background" type="ColorRect" parent="Menus/Play/Leaderboard"]
+material = SubResource("ShaderMaterial_l7ueg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="NoScores" type="Label" parent="Menus/Play/Leaderboard"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "no scores yet :("
+label_settings = SubResource("LabelSettings_73f6f")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Menus/Play/Leaderboard"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("2_46xtp")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Menus/Play/Leaderboard/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="Modifiers" type="Panel" parent="Menus/Play"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.25
+anchor_bottom = 0.4
+offset_left = 8.0
+offset_top = 128.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_omwck")
+
+[node name="Background" type="ColorRect" parent="Menus/Play/Modifiers"]
+material = SubResource("ShaderMaterial_l7ueg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Extras" type="Panel" parent="Menus"]
 visible = false
@@ -1193,9 +1267,9 @@ autowrap_mode = 3
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
 offset_bottom = 64.0
 theme = ExtResource("2_46xtp")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
@@ -1210,11 +1284,13 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Logo" type="TextureRect" parent="TopBar"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
 offset_left = 6.0
 offset_top = 6.0
-offset_right = 54.0
-offset_bottom = 54.0
+offset_right = 50.0
+offset_bottom = -6.0
 texture = ExtResource("7_8ivsy")
 expand_mode = 2
 stretch_mode = 5
@@ -1226,7 +1302,7 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 64.0
 grow_vertical = 2
-text = "Phoenyx EARLY-v0.8"
+text = "Phoenyx v1.0.0"
 label_settings = SubResource("LabelSettings_1o5ig")
 vertical_alignment = 1
 
@@ -1235,9 +1311,9 @@ layout_mode = 1
 anchors_preset = -1
 anchor_top = 0.5
 anchor_bottom = 0.5
-offset_left = 224.0
+offset_left = 184.0
 offset_top = -16.0
-offset_right = 256.0
+offset_right = 216.0
 offset_bottom = 16.0
 grow_vertical = 2
 focus_mode = 0
@@ -1251,10 +1327,10 @@ anchors_preset = -1
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 4.0
+offset_left = 8.0
 offset_top = -64.0
-offset_right = -4.0
-offset_bottom = -4.0
+offset_right = -8.0
+offset_bottom = -8.0
 theme = ExtResource("2_46xtp")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
 
@@ -1858,9 +1934,9 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -17.0
+offset_left = -15.0
 offset_top = 13.0
-offset_right = 17.0
+offset_right = 15.0
 offset_bottom = -13.0
 focus_mode = 1
 texture_normal = ExtResource("9_wc4q0")
@@ -1876,7 +1952,7 @@ anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = 20.0
 offset_top = 13.0
-offset_right = 54.0
+offset_right = 50.0
 offset_bottom = -13.0
 focus_mode = 1
 texture_normal = ExtResource("10_i0l4j")
@@ -1890,7 +1966,7 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -54.0
+offset_left = -50.0
 offset_top = 13.0
 offset_right = -20.0
 offset_bottom = -13.0
@@ -1907,9 +1983,8 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 64.0
-offset_top = -1.0
+offset_top = -2.0
 offset_right = -64.0
-offset_bottom = 1.0
 mouse_filter = 2
 
 [node name="Background" type="ColorRect" parent="Jukebox/Progress"]

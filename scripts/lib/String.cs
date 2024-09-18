@@ -15,6 +15,43 @@ public class String
 		return $"{(seconds < 0 ? "-" : "")}{(padMinutes ? minutes.ToString().PadZeros(2) : minutes)}:{seconds.ToString().PadZeros(2)}";
 	}
 
+    public static string FormatUnixTimePretty(double now, double time)
+    {
+        string formatted;
+        double seconds, minutes, hours, days;
+        double difference = now - time;
+        string prefix = difference < 0 ? "in " : "";
+        string suffix = difference > 0 ? " ago" : "";
+
+        seconds = Math.Floor(difference);
+        minutes = Math.Floor(seconds / 60);
+        hours = Math.Floor(minutes / 60);
+        days = Math.Floor(hours / 24);
+
+        if (days > 0)
+        {
+            formatted = $"{days} day" + (days > 1 ? "s" : "");
+        }
+        else if (hours > 0)
+        {
+            formatted = $"{hours} hour" + (hours > 1 ? "s" : "");
+        }
+        else if (minutes > 0)
+        {
+            formatted = $"{minutes} minute" + (minutes > 1 ? "s" : "");
+        }
+        else if (seconds > 0)
+        {
+            formatted = $"{seconds} second" + (seconds > 1 ? "s" : "");
+        }
+        else
+        {
+            formatted = "just now";
+        }
+
+        return $"{prefix}{formatted}{suffix}";
+    }
+
     public static string PadMagnitude(string str, string pad = ",")
     {
         string formatted = "";

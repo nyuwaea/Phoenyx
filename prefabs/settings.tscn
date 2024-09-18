@@ -147,36 +147,6 @@ context_menu_enabled = false
 flat = true
 caret_blink = true
 
-[node name="CameraLock" type="Panel" parent="Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
-
-[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/CameraLock"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Camera Lock"
-label_settings = SubResource("LabelSettings_glkuk")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Gameplay/Container/CameraLock"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("1_8p7x0")
-button_pressed = true
-flat = true
-
 [node name="AbsoluteInput" type="Panel" parent="Holder/Categories/Gameplay/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2

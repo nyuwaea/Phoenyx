@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using Godot;
 
@@ -136,7 +137,7 @@ public partial class Runner : Node3D
 			};
 			HitsInfo = IsReplay ? Replays[0].Notes : new float[Map.Notes.Length];
 
-			if (!IsReplay && Phoenyx.Settings.RecordReplays)
+			if (!IsReplay && Phoenyx.Settings.RecordReplays && !Map.Ephemeral)
 			{
 				ReplayFile = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/replays/{ID}.phxr", Godot.FileAccess.ModeFlags.Write);
 				ReplayFile.StoreString("phxr");	// sig
@@ -778,7 +779,7 @@ public partial class Runner : Node3D
 				QueueStop();
 			}
 		}
-		else if (!CurrentAttempt.Stopped && Phoenyx.Settings.RecordReplays && now - CurrentAttempt.LastReplayFrame >= 1000000/60)	// 60hz
+		else if (!CurrentAttempt.Stopped && Phoenyx.Settings.RecordReplays && !CurrentAttempt.Map.Ephemeral && now - CurrentAttempt.LastReplayFrame >= 1000000/60)	// 60hz
 		{
 			if (CurrentAttempt.ReplayFrames.Count == 0 || (CurrentAttempt.ReplayFrames[^1][1 .. 2] != new float[]{CurrentAttempt.CursorPosition.X, CurrentAttempt.CursorPosition.Y}))
 			{
@@ -917,12 +918,12 @@ public partial class Runner : Node3D
 		if (CurrentAttempt.Skippable)
 		{
 			TargetSkipLabelAlpha = 32f / 255f;
-			ProgressLabel.Modulate = Color.Color8(255, 255, 255, (byte)(64 + (int)(172 * (Math.Sin(Math.PI * now / 750000) / 2 + 0.5))));
+			ProgressLabel.Modulate = Color.Color8(255, 255, 255, (byte)(96 + (int)(140 * (Math.Sin(Math.PI * now / 750000) / 2 + 0.5))));
 		}
 		else
 		{
 			TargetSkipLabelAlpha = 0;
-			ProgressLabel.Modulate = Color.Color8(255, 255, 255, 64);
+			ProgressLabel.Modulate = Color.Color8(255, 255, 255, 96);
 		}
 
 		ProgressLabel.Text = $"{Lib.String.FormatTime(Math.Max(0, CurrentAttempt.Progress) / 1000)} / {Lib.String.FormatTime(MapLength / 1000)}";
@@ -1052,7 +1053,7 @@ public partial class Runner : Node3D
 	
 	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null, Replay[] replays = null)
 	{
-		CurrentAttempt = new(map, speed, mods, players, replays);
+		CurrentAttempt = new(map, speed, mods ?? [], players, replays);
 		Playing = true;
 		StopQueued = false;
 		Started = Time.GetTicksUsec();
@@ -1153,6 +1154,18 @@ public partial class Runner : Node3D
 				}
 
 				Phoenyx.Stats.PassAccuracies.Add(CurrentAttempt.Accuracy);
+
+				if (!File.Exists($"{Phoenyx.Constants.UserFolder}/pbs/{CurrentAttempt.Map.ID}"))
+				{
+					List<byte> bytes = [0, 0, 0, 0];
+					bytes.AddRange(SHA256.HashData([0, 0, 0, 0]));
+					File.WriteAllBytes($"{Phoenyx.Constants.UserFolder}/pbs/{CurrentAttempt.Map.ID}", [.. bytes]);
+				}
+
+				Leaderboard leaderboard = new(CurrentAttempt.Map.ID, $"{Phoenyx.Constants.UserFolder}/pbs/{CurrentAttempt.Map.ID}");
+
+				leaderboard.Add(new("You", CurrentAttempt.Score, CurrentAttempt.Accuracy, Time.GetUnixTimeFromSystem(), CurrentAttempt.Mods));
+				leaderboard.Save();
 			}
 		}
 

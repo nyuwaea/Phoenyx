@@ -109,6 +109,7 @@ OptionButton/styles/hover = SubResource("StyleBoxFlat_jo0jq")
 OptionButton/styles/normal = SubResource("StyleBoxFlat_4ml12")
 OptionButton/styles/pressed = SubResource("StyleBoxFlat_otipb")
 Panel/styles/panel = SubResource("StyleBoxEmpty_jpkpw")
+TabContainer/constants/side_margin = 0
 VBoxContainer/constants/separation = 10
 VScrollBar/styles/grabber = SubResource("StyleBoxFlat_codcs")
 VScrollBar/styles/grabber_highlight = SubResource("StyleBoxFlat_w8hrn")

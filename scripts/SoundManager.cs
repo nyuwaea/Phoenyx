@@ -66,7 +66,7 @@ public partial class SoundManager : Node
 			return;
 		}
 
-		Map = MapParser.Decode(JukeboxQueue[index], false);
+		Map = MapParser.Decode(JukeboxQueue[index], null, false);
 
 		if (Map.AudioBuffer == null)
 		{
@@ -92,11 +92,11 @@ public partial class SoundManager : Node
 
     public static void UpdateJukeboxQueue()
     {
-        SoundManager.JukeboxQueue = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
+        JukeboxQueue = Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/maps");
 
-        for (int i = 0; i < SoundManager.JukeboxQueue.Length; i++)
+        for (int i = 0; i < JukeboxQueue.Length; i++)
 		{
-			SoundManager.JukeboxQueueInverse[SoundManager.JukeboxQueue[i].GetFile().GetBaseName().Replace(".", "_")] = i;
+			JukeboxQueueInverse[JukeboxQueue[i].GetFile().GetBaseName()] = i;
 		}
     }
 

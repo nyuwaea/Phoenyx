@@ -14,6 +14,7 @@ public partial class MainMenu : Control
 
 	private static readonly PackedScene ChatMessage = GD.Load<PackedScene>("res://prefabs/chat_message.tscn");
 	private static readonly PackedScene MapButton = GD.Load<PackedScene>("res://prefabs/map_button.tscn");
+	private static readonly PackedScene LeaderboardScore = GD.Load<PackedScene>("res://prefabs/leaderboard_score.tscn");
 
 	private static Panel TopBar;
 	private static ColorRect Background;
@@ -39,6 +40,8 @@ public partial class MainMenu : Control
 	private static FileDialog ImportDialog;
 	private static ScrollContainer MapList;
 	private static VBoxContainer MapListContainer;
+	private static Panel LeaderboardPanel;
+	private static VBoxContainer LeaderboardContainer;
 
 	private static Panel Extras;
 
@@ -169,6 +172,38 @@ public partial class MainMenu : Control
 					}
 				}
 			}));
+			
+			//string[] args = OS.GetCmdlineArgs();
+            string[] args = [
+                "--a=\"H:\\Sound Space\\Quantum_Editors\\Sound Space Quantum Editor\\cached\\Camellia feat. Nanahira - べィスドロップ・フリークス (2018 Redrop ver.).asset\"",
+                "--t=\"H:\\Sound Space\\Quantum_Editors\\Sound Space Quantum Editor\\assets\\temp\\tempmap.txt\""
+            ];
+            
+            if (args.Length > 0)
+            {
+                string audioString = "";
+                string mapString = "";
+
+                foreach (string arg in args)
+                {
+                    switch (arg.Substr(0, 3))
+                    {
+                        case "--a":
+                            audioString = arg.Substr(5, arg.Length - 1).Trim('"');
+                            break;
+                        case "--t":
+                            mapString = arg.Substr(5, arg.Length - 1).Trim('"');
+                            break;
+                    }
+                }
+
+				//Select("tempmap", true, false);
+                
+                //Map map = MapParser.Decode(mapString, audioString, false, false);
+                //map.Ephemeral = true;
+                //SoundManager.Song.Stop();
+                //SceneManager.Load("res://scenes/game.tscn");
+            }
 		}
 
 		// General
@@ -309,7 +344,7 @@ public partial class MainMenu : Control
 			tween.Play();
 		};
 		JukeboxButton.Pressed += () => {
-			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].GetFile().GetBaseName().Replace(".", "_");
+			string fileName = SoundManager.JukeboxQueue[SoundManager.JukeboxIndex].GetFile().GetBaseName();
 			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
 			TargetScroll = Math.Clamp(mapButton.Position.Y + mapButton.Size.Y - WindowSize.Y / 2, 0, MaxScroll);
 		};
@@ -376,7 +411,9 @@ public partial class MainMenu : Control
 		ImportDialog = GetNode<FileDialog>("ImportDialog"); 
 		MapList = PlayMenu.GetNode<ScrollContainer>("MapList");
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
-		
+		LeaderboardPanel = PlayMenu.GetNode<Panel>("Leaderboard");
+		LeaderboardContainer = LeaderboardPanel.GetNode("ScrollContainer").GetNode<VBoxContainer>("VBoxContainer");
+				
 		ImportButton.Pressed += ImportDialog.Show;
 		UserFolderButton.Pressed += () => {
 			OS.ShellOpen($"{Phoenyx.Constants.UserFolder}");
@@ -596,6 +633,7 @@ public partial class MainMenu : Control
 		// Finish
 
 		SoundManager.UpdateJukeboxQueue();
+		SoundManager.JukeboxIndex = new Random().Next(0, SoundManager.JukeboxQueue.Length);
 
 		if (!SoundManager.Song.Playing)
 		{
@@ -615,6 +653,7 @@ public partial class MainMenu : Control
 		
 		UpdateJukeboxButtons();
 		UpdateSpectrumSpacing();
+		UpdateLeaderboard();
 
 		SoundManager.Song.VolumeDb = -180;
 	}
@@ -883,9 +922,13 @@ public partial class MainMenu : Control
 		}
 
 		SoundManager.UpdateJukeboxQueue();
-		UpdateMapList();
-		Search();
-		Select(maps[0].GetFile().GetBaseName(), true);
+		
+		if (SceneManager.Scene.Name == "SceneMenu")
+		{
+			UpdateMapList();
+			Search();
+			Select(maps[0].GetFile().GetBaseName(), true);
+		}
 
 		return results;
 	}
@@ -896,10 +939,11 @@ public partial class MainMenu : Control
 
 		foreach (Panel map in MapListContainer.GetChildren())
 		{
-			map.Visible = map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle) && map.GetNode("Holder").GetNode<RichTextLabel>("Extra").Text.ToLower().Contains(SearchAuthor);
+			map.Visible = !Phoenyx.Constants.TempMapMode && map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle) && map.GetNode("Holder").GetNode<RichTextLabel>("Extra").Text.ToLower().Contains(SearchAuthor);
 
 			if (map.Visible)
 			{
+				MapsOrder[map.Name] = VisibleMaps;
 				VisibleMaps++;
 			}
 		}
@@ -908,69 +952,79 @@ public partial class MainMenu : Control
 		TargetScroll = Math.Clamp(TargetScroll, 0, MaxScroll);
 	}
 
-	public static void Select(string fileName, bool fromImport = false)
+	public static void Select(string fileName, bool fromImport = false, bool selectInMapList = true)
 	{
-		Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
-
-		if (mapButton == null)
+		if (selectInMapList)
 		{
-			Logger.Log($"Tried to select map {fileName}, but it wasn't found in the map list");
-			return;
-		}
+			Panel mapButton = MapListContainer.GetNode<Panel>(fileName);
 
-		Panel holder = mapButton.GetNode<Panel>("Holder");
-
-		if (SelectedMap != null)
-		{
-			Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
-			selectedHolder.GetNode<Panel>("Normal").Visible = true;
-			selectedHolder.GetNode<Panel>("Selected").Visible = false;
-
-			Tween deselectTween = selectedHolder.CreateTween().SetParallel();
-			deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			deselectTween.TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			deselectTween.Play();
-
-			if (MapListContainer.GetNode(SelectedMap) == mapButton && !fromImport)
+			if (mapButton == null)
 			{
-				Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{fileName}.phxm");
+				Logger.Log($"Tried to select map {fileName}, but it wasn't found in the map list");
+				return;
+			}
 
-				SoundManager.Song.Stop();
-				SceneManager.Load("res://scenes/game.tscn");
-				Runner.Play(map, Lobby.Speed, Lobby.Mods);
+			Panel holder = mapButton.GetNode<Panel>("Holder");
+
+			if (SelectedMap != null)
+			{
+				Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+				selectedHolder.GetNode<Panel>("Normal").Visible = true;
+				selectedHolder.GetNode<Panel>("Selected").Visible = false;
+
+				Tween deselectTween = selectedHolder.CreateTween().SetParallel();
+				deselectTween.TweenProperty(selectedHolder, "size", new Vector2(MapListContainer.Size.X - 60, selectedHolder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+				deselectTween.TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+				deselectTween.Play();
+
+				if (MapListContainer.GetNode(SelectedMap) == mapButton && !fromImport)
+				{
+					Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{fileName}.phxm");
+
+					SoundManager.Song.Stop();
+					SceneManager.Load("res://scenes/game.tscn");
+					Runner.Play(map, Lobby.Speed, Lobby.Mods);
+				}
+			}
+
+			holder.GetNode<Panel>("Normal").Visible = false;
+			holder.GetNode<Panel>("Selected").Visible = true;
+			
+			if (fromImport)
+			{
+				holder.CallDeferred("set_size", new Vector2(MapListContainer.Size.X, holder.Size.Y));
+				holder.CallDeferred("set_position", new Vector2(0, holder.Position.Y));
+			}
+			else
+			{
+				Tween selectTween = holder.CreateTween().SetParallel();
+				selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+				selectTween.TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
+				selectTween.Play();
+			}
+
+			TargetScroll = Math.Clamp((MapsOrder[fileName] + 1) * (mapButton.Size.Y + 10) - MapList.Size.Y / 2, 0, MaxScroll);
+			
+			int index = SoundManager.JukeboxQueueInverse[mapButton.Name];
+			
+			if (SoundManager.JukeboxIndex != index)
+			{
+				SoundManager.JukeboxIndex = index;
+				SoundManager.JukeboxPaused = false;
+				SoundManager.Song.PitchScale = 1;
+				SoundManager.PlayJukebox();
+				UpdateJukeboxButtons();
 			}
 		}
 
-		holder.GetNode<Panel>("Normal").Visible = false;
-		holder.GetNode<Panel>("Selected").Visible = true;
-		
-		if (fromImport)
-		{
-			holder.CallDeferred("set_size", new Vector2(MapListContainer.Size.X, holder.Size.Y));
-			holder.CallDeferred("set_position", new Vector2(0, holder.Position.Y));
-		}
-		else
-		{
-			Tween selectTween = holder.CreateTween().SetParallel();
-			selectTween.TweenProperty(holder, "size", new Vector2(MapListContainer.Size.X, holder.Size.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			selectTween.TweenProperty(holder, "position", new Vector2(0, holder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
-			selectTween.Play();
-		}
+		bool firstTimeSelected = fileName != SelectedMap;
 
-		TargetScroll = Math.Clamp((MapsOrder[fileName] + 1) * (mapButton.Size.Y + 10) - MapList.Size.Y / 2, 0, MaxScroll);
-		
-		int index = SoundManager.JukeboxQueueInverse[mapButton.Name];
-		
-		if (SoundManager.JukeboxIndex != index)
-		{
-			SoundManager.JukeboxIndex = index;
-			SoundManager.JukeboxPaused = false;
-			SoundManager.Song.PitchScale = 1;
-			SoundManager.PlayJukebox();
-			UpdateJukeboxButtons();
-		}
+		SelectedMap = fileName;
 
-		SelectedMap = mapButton.Name;
+		if (firstTimeSelected)
+		{
+			UpdateLeaderboard();
+		}
 
 		Transition("Play");
 	}
@@ -982,7 +1036,7 @@ public partial class MainMenu : Control
 
 		for (int i = 0; i < maps.Length; i++)
 		{
-			Node mapButton = MapListContainer.GetNode(maps[i].GetFile().GetBaseName().Replace(".", "_"));
+			Node mapButton = MapListContainer.GetNode(maps[i].GetFile().GetBaseName());
 
 			if (mapButton == null)
 			{
@@ -1122,7 +1176,7 @@ public partial class MainMenu : Control
 				if (!Directory.Exists($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}"))
 				{
 					Directory.CreateDirectory($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}");
-					Map map = MapParser.Decode(mapFile, false);
+					Map map = MapParser.Decode(mapFile, null, false);
 
 					File.WriteAllText($"{Phoenyx.Constants.UserFolder}/cache/maps/{fileName}/metadata.json", map.EncodeMeta());
 
@@ -1233,6 +1287,57 @@ public partial class MainMenu : Control
 		UpdateFavoriteMapsTextures();
 
 		Logger.Log($"MAPLIST UPDATE: {(Time.GetTicksUsec() - start) / 1000}ms");
+	}
+
+	public static void UpdateLeaderboard()
+	{
+		foreach (Node child in LeaderboardContainer.GetChildren())
+		{
+			LeaderboardContainer.RemoveChild(child);
+		}
+
+		Leaderboard leaderboard = new();
+		
+		if (File.Exists($"{Phoenyx.Constants.UserFolder}/pbs/{SelectedMap}"))
+		{
+			leaderboard = new(SelectedMap, $"{Phoenyx.Constants.UserFolder}/pbs/{SelectedMap}");
+		}
+		
+		LeaderboardPanel.GetNode<Label>("NoScores").Visible = leaderboard.ScoreCount == 0;
+
+		if (!leaderboard.Valid)
+		{
+			return;
+		}
+
+		int count = 0;
+
+		foreach (Leaderboard.Score score in leaderboard.Scores)
+		{
+			Panel scorePanel = LeaderboardScore.Instantiate<Panel>();
+
+			scorePanel.GetNode<ColorRect>("Bright").Visible = (count + 1) % 2 == 0;
+			scorePanel.GetNode<Label>("Player").Text = score.Player;
+			scorePanel.GetNode<Label>("Score").Text = Lib.String.PadMagnitude(score.Value.ToString());
+			scorePanel.GetNode<Label>("Accuracy").Text = $"{score.Accuracy.ToString().PadDecimals(2)}%";
+			scorePanel.GetNode<Label>("Time").Text = Lib.String.FormatUnixTimePretty(Time.GetUnixTimeFromSystem(), score.Time);
+
+			HBoxContainer modifiersContainer = scorePanel.GetNode<HBoxContainer>("Modifiers");
+			TextureRect modifierTemplate = modifiersContainer.GetNode<TextureRect>("ModifierTemplate");
+
+			foreach (KeyValuePair<string, bool> entry in score.Modifiers)
+			{
+				if (entry.Value)
+				{
+					TextureRect mod = modifierTemplate.Duplicate() as TextureRect;
+					mod.Visible = true;
+					modifiersContainer.AddChild(mod);
+				}
+			}
+
+			LeaderboardContainer.AddChild(scorePanel);
+			count++;
+		}
 	}
 
 	public static void UpdateMaxScroll()

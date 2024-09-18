@@ -5,14 +5,6 @@ using System.IO.Compression;
 using System.Text;
 using Godot;
 
-public class NoteComparer : IComparer<Note>
-{
-	public int Compare(Note a, Note b)
-	{
-		return a.Millisecond.CompareTo(b.Millisecond);
-	}
-}
-
 public partial class MapParser : Node
 {
 	public static Dictionary<string, bool> BulkImport(string[] files)
@@ -28,7 +20,7 @@ public partial class MapParser : Node
 			
 			try
 			{
-				Decode(file, false);
+				Decode(file, null, false);
 				good++;
 				results[file] = true;
 			}
@@ -141,7 +133,7 @@ public partial class MapParser : Node
 		}
 	}
 
-	public static Map Decode(string path, bool logBenchmark = true)
+	public static Map Decode(string path, string audio = null, bool logBenchmark = true, bool save = true)
 	{
 		if (!File.Exists(path))
 		{
@@ -162,7 +154,7 @@ public partial class MapParser : Node
 				map = SSPMV2(path);
 				break;
 			case "txt":
-				map = SSMapV1(path);
+				map = SSMapV1(path, audio);
 				break;
 			default:
 				ToastNotification.Notify("File extension not supported", 2);
@@ -174,7 +166,7 @@ public partial class MapParser : Node
 			Logger.Log($"DECODING {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
 		}
 
-		if (!File.Exists($"{Phoenyx.Constants.UserFolder}/maps/{map.ID}.phxm"))
+		if (save && !File.Exists($"{Phoenyx.Constants.UserFolder}/maps/{map.ID}.phxm"))
 		{
 			Encode(map, logBenchmark);
 		}
@@ -182,7 +174,7 @@ public partial class MapParser : Node
 		return map;
 	}
 
-	public static Map SSMapV1(string path)
+	public static Map SSMapV1(string path, string audioPath = null)
 	{
 		string name = path.Split("\\")[^1].TrimSuffix(".txt");
 		Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
@@ -191,8 +183,8 @@ public partial class MapParser : Node
 		try
 		{
 			string[] split = file.GetLine().Split(",");
-			
 			Note[] notes = new Note[split.Length - 1];
+			byte[] audioBuffer = null;
 			
 			for (int i = 1; i < split.Length; i++)
 			{
@@ -200,8 +192,17 @@ public partial class MapParser : Node
 				
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
+
+			if (audioPath != null)
+			{
+				Godot.FileAccess audio = Godot.FileAccess.Open(audioPath, Godot.FileAccess.ModeFlags.Read);
+
+				audioBuffer = audio.GetBuffer((long)audio.GetLength());
+
+				audio.Close();
+			}
 			
-			map = new(path, notes, null, "", name);
+			map = new(path, notes, null, "", name, audioBuffer: audioBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -472,5 +473,13 @@ public partial class MapParser : Node
 		}
 
 		return map;
+	}
+
+	public struct NoteComparer : IComparer<Note>
+	{
+		public int Compare(Note a, Note b)
+		{
+			return a.Millisecond.CompareTo(b.Millisecond);
+		}
 	}
 }

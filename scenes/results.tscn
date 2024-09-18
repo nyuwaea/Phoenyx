@@ -227,7 +227,7 @@ grow_vertical = 2
 theme_override_constants/separation = 8
 alignment = 2
 
-[node name="ModifierTexture" type="TextureRect" parent="Holder/Modifiers/HBoxContainer"]
+[node name="ModifierTemplate" type="TextureRect" parent="Holder/Modifiers/HBoxContainer"]
 visible = false
 custom_minimum_size = Vector2(44, 0)
 layout_mode = 2
@@ -338,9 +338,9 @@ vertical_alignment = 1
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
 offset_bottom = 64.0
 theme = ExtResource("2_dgnpu")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_ttaov")
@@ -355,11 +355,12 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Logo" type="TextureRect" parent="TopBar"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
 offset_left = 6.0
 offset_top = 6.0
-offset_right = 54.0
-offset_bottom = 54.0
+offset_bottom = -6.0
 texture = ExtResource("3_vdcg2")
 expand_mode = 2
 stretch_mode = 5

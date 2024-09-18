@@ -277,7 +277,7 @@ mesh = SubResource("QuadMesh_ssyve")
 [node name="Progress" type="Label3D" parent="."]
 transform = Transform3D(3.5, 0, 0, 0, 3.38074, -0.905867, 0, 0.905867, 3.38074, 0, 7, -10)
 pixel_size = 0.0025
-modulate = Color(1, 1, 1, 0.25098)
+modulate = Color(1, 1, 1, 0.376471)
 outline_modulate = Color(0, 0, 0, 0)
 text = "0:00 / 0:00"
 font = ExtResource("12_axsek")
@@ -688,7 +688,7 @@ anchor_left = 0.35
 anchor_top = 0.15
 anchor_right = 0.65
 anchor_bottom = 0.85
-mouse_filter = 2
+mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_43mxh")
 
 [node name="Header" type="Label" parent="Menu/Holder"]
