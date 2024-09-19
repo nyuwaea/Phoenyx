@@ -1315,12 +1315,37 @@ public partial class MainMenu : Control
 		foreach (Leaderboard.Score score in leaderboard.Scores)
 		{
 			Panel scorePanel = LeaderboardScore.Instantiate<Panel>();
+			Label playerLabel = scorePanel.GetNode<Label>("Player");
+			Label scoreLabel = scorePanel.GetNode<Label>("Score");
 
+			playerLabel.Text = score.Player;
 			scorePanel.GetNode<ColorRect>("Bright").Visible = (count + 1) % 2 == 0;
-			scorePanel.GetNode<Label>("Player").Text = score.Player;
-			scorePanel.GetNode<Label>("Score").Text = Lib.String.PadMagnitude(score.Value.ToString());
 			scorePanel.GetNode<Label>("Accuracy").Text = $"{score.Accuracy.ToString().PadDecimals(2)}%";
+			scorePanel.GetNode<Label>("Speed").Text = $"{score.Speed.ToString().PadDecimals(2)}x";
 			scorePanel.GetNode<Label>("Time").Text = Lib.String.FormatUnixTimePretty(Time.GetUnixTimeFromSystem(), score.Time);
+
+			if (score.Qualifies)
+			{
+				scoreLabel.Text = Lib.String.PadMagnitude(score.Value.ToString());
+			}
+			else
+			{
+				playerLabel.LabelSettings = playerLabel.LabelSettings.Duplicate() as LabelSettings;
+				playerLabel.LabelSettings.FontColor = Color.Color8(255, 255, 255, 64);
+				scoreLabel.LabelSettings = scoreLabel.LabelSettings.Duplicate() as LabelSettings;
+				scoreLabel.LabelSettings.FontColor = Color.Color8(255, 255, 255, 64);
+				scoreLabel.Text = $"{Lib.String.FormatTime(score.Progress / 1000)} / {Lib.String.FormatTime(score.MapLength / 1000)}";
+			}
+
+			scorePanel.GetNode<Button>("Button").Pressed += () => {
+				if (File.Exists($"{Phoenyx.Constants.UserFolder}/replays/{score.AttemptID}.phxr"))
+				{
+					Replay replay = new($"{Phoenyx.Constants.UserFolder}/replays/{score.AttemptID}.phxr");
+					SoundManager.Song.Stop();
+					SceneManager.Load("res://scenes/game.tscn");
+					Runner.Play(MapParser.Decode(replay.MapFilePath), replay.Speed, replay.Modifiers, null, [replay]);
+				}
+			};
 
 			HBoxContainer modifiersContainer = scorePanel.GetNode<HBoxContainer>("Modifiers");
 			TextureRect modifierTemplate = modifiersContainer.GetNode<TextureRect>("ModifierTemplate");

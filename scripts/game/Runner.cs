@@ -465,6 +465,7 @@ public partial class Runner : Node3D
 
 			CurrentAttempt.Alive = false;
 			CurrentAttempt.Qualifies = false;
+			CurrentAttempt.DeathTime = CurrentAttempt.Progress;
 
 			Stop();
 		};
@@ -1138,23 +1139,8 @@ public partial class Runner : Node3D
 			Phoenyx.Stats.GamePlaytime += (Time.GetTicksUsec() - Started) / 1000000;
 			Phoenyx.Stats.TotalDistance += (ulong)CurrentAttempt.DistanceMM;
 
-			if (CurrentAttempt.StartOffset == 0 && CurrentAttempt.Qualifies)
+			if (CurrentAttempt.StartOffset == 0)
 			{
-				Phoenyx.Stats.Passes++;
-				Phoenyx.Stats.TotalScore += CurrentAttempt.Score;
-
-				if (CurrentAttempt.Accuracy == 100)
-				{
-					Phoenyx.Stats.FullCombos++;
-				}
-
-				if (CurrentAttempt.Score > Phoenyx.Stats.HighestScore)
-				{
-					Phoenyx.Stats.HighestScore = CurrentAttempt.Score;
-				}
-
-				Phoenyx.Stats.PassAccuracies.Add(CurrentAttempt.Accuracy);
-
 				if (!File.Exists($"{Phoenyx.Constants.UserFolder}/pbs/{CurrentAttempt.Map.ID}"))
 				{
 					List<byte> bytes = [0, 0, 0, 0];
@@ -1164,8 +1150,26 @@ public partial class Runner : Node3D
 
 				Leaderboard leaderboard = new(CurrentAttempt.Map.ID, $"{Phoenyx.Constants.UserFolder}/pbs/{CurrentAttempt.Map.ID}");
 
-				leaderboard.Add(new("You", CurrentAttempt.Score, CurrentAttempt.Accuracy, Time.GetUnixTimeFromSystem(), CurrentAttempt.Mods));
+				leaderboard.Add(new(CurrentAttempt.ID, "You", CurrentAttempt.Qualifies, CurrentAttempt.Score, CurrentAttempt.Accuracy, Time.GetUnixTimeFromSystem(), CurrentAttempt.DeathTime, CurrentAttempt.Map.Length, CurrentAttempt.Speed, CurrentAttempt.Mods));
 				leaderboard.Save();
+
+				if (CurrentAttempt.Qualifies)
+				{
+					Phoenyx.Stats.Passes++;
+					Phoenyx.Stats.TotalScore += CurrentAttempt.Score;
+
+					if (CurrentAttempt.Accuracy == 100)
+					{
+						Phoenyx.Stats.FullCombos++;
+					}
+
+					if (CurrentAttempt.Score > Phoenyx.Stats.HighestScore)
+					{
+						Phoenyx.Stats.HighestScore = CurrentAttempt.Score;
+					}
+
+					Phoenyx.Stats.PassAccuracies.Add(CurrentAttempt.Accuracy);
+				}
 			}
 		}
 

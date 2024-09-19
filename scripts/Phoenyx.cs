@@ -19,7 +19,7 @@ public partial class Phoenyx : Node
         public static readonly double GridSize = 3.0;
         public static readonly Vector2 Bounds = new((float)(GridSize / 2 - CursorSize / 2), (float)(GridSize / 2 - CursorSize / 2));
         public static readonly double HitBoxSize = 0.07;
-        public static readonly double HitWindow = 550;
+        public static readonly double HitWindow = 55;
         public static readonly int BreakTime = 4000;  // used for skipping breaks mid-map
         public static readonly string[] Difficulties = ["N/A", "Easy", "Medium", "Hard", "Expert", "Insane"];
         public static readonly Color[] DifficultyColours = [Color.FromHtml("ffffff"), Color.FromHtml("00ff00"), Color.FromHtml("ffff00"), Color.FromHtml("ff0000"), Color.FromHtml("7f00ff"), Color.FromHtml("007fff")];

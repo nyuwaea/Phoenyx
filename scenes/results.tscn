@@ -1,4 +1,4 @@
-[gd_scene load_steps=32 format=3 uid="uid://bhcvypmhm5rke"]
+[gd_scene load_steps=34 format=3 uid="uid://bhcvypmhm5rke"]
 
 [ext_resource type="Script" path="res://scripts/menu/Results.cs" id="1_llpx6"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_dgnpu"]
@@ -10,6 +10,7 @@
 [ext_resource type="Script" path="res://scripts/menu/Graph.cs" id="4_b55ol"]
 [ext_resource type="FontFile" uid="uid://dvb6fvy008bhv" path="res://fonts/Roboto-Medium.ttf" id="4_yxv8s"]
 [ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="5_eo0oh"]
+[ext_resource type="Shader" path="res://scripts/shaders/dotted.gdshader" id="8_ldb53"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rn6l"]
 shader = ExtResource("2_oatel")
@@ -69,6 +70,9 @@ font_size = 42
 font = ExtResource("3_rsbg1")
 font_size = 11
 font_color = Color(0.627451, 0.627451, 0.627451, 1)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b4pmo"]
+shader = ExtResource("8_ldb53")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ttaov"]
 
@@ -333,6 +337,16 @@ text = "55ms"
 label_settings = SubResource("LabelSettings_6anxq")
 horizontal_alignment = 2
 vertical_alignment = 1
+
+[node name="ScoreDropoffLine" type="ColorRect" parent="Holder/Graph"]
+material = SubResource("ShaderMaterial_b4pmo")
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.455
+anchor_right = 1.0
+anchor_bottom = 0.455
+offset_bottom = 1.0
+color = Color(1, 1, 1, 0.12549)
 
 [node name="TopBar" type="Panel" parent="."]
 layout_mode = 1

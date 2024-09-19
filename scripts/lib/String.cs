@@ -30,19 +30,19 @@ public class String
 
         if (days > 0)
         {
-            formatted = $"{days} day" + (days > 1 ? "s" : "");
+            formatted = $"{PadMagnitude(days.ToString())} day" + (days > 1 ? "s" : "");
         }
         else if (hours > 0)
         {
-            formatted = $"{hours} hour" + (hours > 1 ? "s" : "");
+            formatted = $"{PadMagnitude(hours.ToString())} hour" + (hours > 1 ? "s" : "");
         }
         else if (minutes > 0)
         {
-            formatted = $"{minutes} minute" + (minutes > 1 ? "s" : "");
+            formatted = $"{PadMagnitude(minutes.ToString())} minute" + (minutes > 1 ? "s" : "");
         }
         else if (seconds > 0)
         {
-            formatted = $"{seconds} second" + (seconds > 1 ? "s" : "");
+            formatted = $"{PadMagnitude(seconds.ToString())} second" + (seconds > 1 ? "s" : "");
         }
         else
         {
