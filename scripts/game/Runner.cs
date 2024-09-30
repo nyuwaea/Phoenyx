@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using Godot;
 
@@ -11,6 +10,7 @@ public partial class Runner : Node3D
 	private static readonly PackedScene PlayerScore = GD.Load<PackedScene>("res://prefabs/player_score.tscn");
 	private static readonly PackedScene HitFeedback = GD.Load<PackedScene>("res://prefabs/hit_popup.tscn");
 	private static readonly PackedScene MissFeedback = GD.Load<PackedScene>("res://prefabs/miss_icon.tscn");
+	private static readonly PackedScene ModifierIcon = GD.Load<PackedScene>("res://prefabs/modifier.tscn");
 
 	private static Panel Menu;
 	private static Label FPSCounter;
@@ -92,7 +92,6 @@ public partial class Runner : Node3D
 		public double Speed = 1;
 		public double StartFrom = 0;
 		public ulong FirstNote = 0;
-		public string[] RawMods;
 		public Dictionary<string, bool> Mods;
 		public string[] Players = [];
 		public bool Alive = true;
@@ -118,7 +117,7 @@ public partial class Runner : Node3D
 		public Vector2 RawCursorPosition = Vector2.Zero;
 		public double DistanceMM = 0;
 
-		public Attempt(Map map, double speed, double startFrom, string[] mods, string[] players = null, Replay[] replays = null)
+		public Attempt(Map map, double speed, double startFrom, Dictionary<string, bool> mods, string[] players = null, Replay[] replays = null)
 		{
 			ID = $"{map.ID}_{OS.GetUniqueId()}_{Time.GetDatetimeStringFromUnixTime((long)Time.GetUnixTimeFromSystem())}".Replace(":", "_");
 			Replays = replays;
@@ -129,16 +128,13 @@ public partial class Runner : Node3D
 			Players = players ?? [];
 			Progress = -1000 - Phoenyx.Settings.ApproachTime * 1000 + StartFrom;
 			ComboMultiplierIncrement = Math.Max(2, (uint)Map.Notes.Length / 200);
-			RawMods = IsReplay ? Replays[0].Modifiers : mods;
-			Mods = new(){
-				["NoFail"] = mods.Contains("NoFail"),
-				["Ghost"] = mods.Contains("Ghost"),
-				["Spin"] = mods.Contains("Spin"),
-				["Masked"] = mods.Contains("Masked"),
-				["Chaos"] = mods.Contains("Chaos"),
-				["HardRock"] = mods.Contains("HardRock")
-			};
+			Mods = [];
 			HitsInfo = IsReplay ? Replays[0].Notes : new float[Map.Notes.Length];
+
+			foreach (KeyValuePair<string, bool> mod in mods)
+			{
+				Mods[mod.Key] = mod.Value;
+			}
 
 			if (StartFrom > 0)
 			{
@@ -490,6 +486,26 @@ public partial class Runner : Node3D
 		MultiplierProgressMaterial = MultiplierProgressPanel.Material as ShaderMaterial;
 		Video = GetNode("VideoViewport").GetNode<VideoStreamPlayer>("VideoStreamPlayer");
 
+		List<string> activeMods = [];
+
+		foreach (KeyValuePair<string, bool> mod in CurrentAttempt.Mods)
+		{
+			if (mod.Value)
+			{
+				activeMods.Add(mod.Key);
+			}
+		}
+
+		for (int i = 0; i < activeMods.Count; i++)
+		{
+			Sprite3D icon = ModifierIcon.Instantiate<Sprite3D>();
+
+			AddChild(icon);
+
+			icon.Position = new(i * 1.5f - activeMods.Count / 1.5f, -8.5f, -10f);
+			icon.Texture = Phoenyx.Util.GetModIcon(activeMods[i]);
+		}
+
 		Panel menuButtonsHolder = Menu.GetNode<Panel>("Holder");
 
 		Menu.GetNode<Button>("Button").Pressed += HideMenu;
@@ -697,7 +713,7 @@ public partial class Runner : Node3D
 
 			for (int i = 0; i < CurrentAttempt.Replays.Length; i++)
 			{
-				if (CurrentAttempt.Mods["Spin"] && !CurrentAttempt.Replays[i].Modifiers.Contains("Spin"))
+				if (!CurrentAttempt.Replays[i].Modifiers["Spin"])
 				{
 					CurrentAttempt.Mods["Spin"] = false;
 				}
@@ -1109,7 +1125,7 @@ public partial class Runner : Node3D
 		}
 	}
 	
-	public static void Play(Map map, double speed = 1, double startFrom = 0, string[] mods = null, string[] players = null, Replay[] replays = null)
+	public static void Play(Map map, double speed = 1, double startFrom = 0, Dictionary<string, bool> mods = null, string[] players = null, Replay[] replays = null)
 	{
 		CurrentAttempt = new(map, speed, startFrom, mods ?? [], players, replays);
 		Playing = true;
@@ -1138,7 +1154,7 @@ public partial class Runner : Node3D
 		CurrentAttempt.Qualifies = false;
 		Stop(false);
 		Node3D.GetTree().ReloadCurrentScene();
-		Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.StartFrom, CurrentAttempt.RawMods, CurrentAttempt.Players, CurrentAttempt.Replays);
+		Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.StartFrom, CurrentAttempt.Mods, CurrentAttempt.Players, CurrentAttempt.Replays);
 	}
 
 	public static void Skip()

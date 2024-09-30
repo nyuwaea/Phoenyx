@@ -8,7 +8,14 @@ public class Lobby
     public static Map Map;
     public static double Speed = 1;
     public static double StartFrom = 0;
-    public static string[] Mods = [];
+    public static Dictionary<string, bool> Mods = new(){
+        ["NoFail"] = false,
+        ["Ghost"] = false,
+        ["Spin"] = false,
+        ["Flashlight"] = false,
+        ["Chaos"] = false,
+        ["HardRock"] = false
+    };
 
     public delegate void AllReadyEventHandler();
     public static event AllReadyEventHandler AllReady;

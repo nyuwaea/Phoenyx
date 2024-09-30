@@ -890,6 +890,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="Flashlight" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+visible = false
 self_modulate = Color(1, 1, 1, 0.501961)
 texture_filter = 4
 texture_repeat = 1
@@ -901,6 +902,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="Chaos" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+visible = false
 self_modulate = Color(1, 1, 1, 0.501961)
 texture_filter = 4
 texture_repeat = 1
@@ -912,6 +914,7 @@ ignore_texture_size = true
 stretch_mode = 5
 
 [node name="HardRock" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+visible = false
 self_modulate = Color(1, 1, 1, 0.501961)
 texture_filter = 4
 texture_repeat = 1

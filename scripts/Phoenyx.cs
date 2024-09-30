@@ -155,6 +155,12 @@ public partial class Phoenyx : Node
         public static ImageTexture JukeboxPauseImage {get; set;} = new();
         public static ImageTexture JukeboxSkipImage {get; set;} = new();
         public static ImageTexture FavoriteImage {get; set;} = new();
+        public static ImageTexture ModNofailImage {get; set;} = new();
+        public static ImageTexture ModSpinImage {get; set;} = new();
+        public static ImageTexture ModGhostImage {get; set;} = new();
+        public static ImageTexture ModChaosImage {get; set;} = new();
+        public static ImageTexture ModFlashlightImage {get; set;} = new();
+        public static ImageTexture ModHardrockImage {get; set;} = new();
         public static byte[] HitSoundBuffer {get; set;} = [];
         public static byte[] FailSoundBuffer {get; set;} = [];
         public static ArrayMesh NoteMesh {get; set;} = new();
@@ -346,7 +352,7 @@ public partial class Phoenyx : Node
         private static bool Initialized = false;
         private static bool Loaded = false;
         private static string[] UserDirectories = ["maps", "profiles", "skins", "replays", "pbs"];
-        private static string[] SkinFiles = ["cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "hit.mp3", "fail.mp3", "colors.txt"];
+        private static string[] SkinFiles = ["cursor.png", "grid.png", "health.png", "hits.png", "misses.png", "miss_feedback.png", "health_background.png", "progress.png", "progress_background.png", "panel_left_background.png", "panel_right_background.png", "jukebox_play.png", "jukebox_pause.png", "jukebox_skip.png", "favorite.png", "mod_nofail.png", "mod_spin.png", "mod_ghost.png", "mod_chaos.png", "mod_flashlight.png", "mod_hardrock.png", "hit.mp3", "fail.mp3", "colors.txt"];
 
         public static GodotObject DiscordRPC = (GodotObject)GD.Load<GDScript>("res://scripts/DiscordRPC.gd").New();
         public static GodotObject OBJParser = (GodotObject)GD.Load<GDScript>("res://scripts/OBJParser.gd").New();
@@ -558,6 +564,35 @@ public partial class Phoenyx : Node
         public static string GetProfile()
         {
             return File.ReadAllText($"{Constants.UserFolder}/current_profile.txt");
+        }
+
+        public static ImageTexture GetModIcon(string mod)
+        {
+            ImageTexture tex = new();
+
+            switch (mod)
+			{
+				case "NoFail":
+					tex = Phoenyx.Skin.ModNofailImage;
+					break;
+				case "Spin":
+					tex = Phoenyx.Skin.ModSpinImage;
+					break;
+				case "Ghost":
+					tex = Phoenyx.Skin.ModGhostImage;
+					break;
+				case "Chaos":
+					tex = Phoenyx.Skin.ModChaosImage;
+					break;
+				case "Flashlight":
+					tex = Phoenyx.Skin.ModFlashlightImage;
+					break;
+				case "HardRock":
+					tex = Phoenyx.Skin.ModHardrockImage;
+					break;
+			}
+
+            return tex;
         }
     }
 

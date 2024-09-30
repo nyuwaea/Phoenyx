@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 public partial class Results : Control
@@ -33,6 +34,22 @@ public partial class Results : Control
 		Holder.GetNode<Label>("Hits").Text = $"{Lib.String.PadMagnitude(Runner.CurrentAttempt.Hits.ToString())} / {Lib.String.PadMagnitude(Runner.CurrentAttempt.Sum.ToString())}";
 		Holder.GetNode<Label>("Status").Text = Runner.CurrentAttempt.IsReplay ? Runner.CurrentAttempt.Replays[0].Status : Runner.CurrentAttempt.Alive ? (Runner.CurrentAttempt.Qualifies ? "PASSED" : "DISQUALIFIED") : "FAILED";
 		Holder.GetNode<Label>("Speed").Text = $"{Runner.CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
+
+		HBoxContainer modifiersContainer = Holder.GetNode("Modifiers").GetNode<HBoxContainer>("HBoxContainer");
+		TextureRect modTemplate = modifiersContainer.GetNode<TextureRect>("ModifierTemplate");
+
+		foreach (KeyValuePair<string, bool> mod in Runner.CurrentAttempt.Mods)
+		{
+			if (mod.Value)
+			{
+				TextureRect icon = modTemplate.Duplicate() as TextureRect;
+
+				icon.Visible = true;
+				icon.Texture = Phoenyx.Util.GetModIcon(mod.Key);
+
+				modifiersContainer.AddChild(icon);
+			}
+		}
 
 		if (Runner.CurrentAttempt.Map.CoverBuffer != null)
 		{
@@ -136,7 +153,7 @@ public partial class Results : Control
 		map.Ephemeral = Runner.CurrentAttempt.Map.Ephemeral;
 		SoundManager.Song.Stop();
 		SceneManager.Load("res://scenes/game.tscn");
-		Runner.Play(map, Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.StartFrom, Runner.CurrentAttempt.RawMods);
+		Runner.Play(map, Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.StartFrom, Runner.CurrentAttempt.Mods);
 	}
 
 	public static void Stop()

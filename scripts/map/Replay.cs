@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Security.Cryptography;
 using Godot;
@@ -19,7 +20,7 @@ public struct Replay
     public double Speed;
     public double StartFrom;
     public ulong FirstNote;
-    public string[] Modifiers;
+    public Dictionary<string, bool> Modifiers;
     public double ApproachRate;
     public double ApproachDistance;
     public double ApproachTime;
@@ -96,7 +97,17 @@ public struct Replay
             ushort status = FileBuffer.GetUInt8();
             Status = status == 0 ? "PASSED" : status == 1 ? "DISQUALIFIED" : "FAILED";
 
-            Modifiers = FileBuffer.GetString((int)FileBuffer.GetUInt32()).Split("_");
+            List<string> rawMods = [.. FileBuffer.GetString((int)FileBuffer.GetUInt32()).Split("_")];
+
+            Modifiers = new(){
+				["NoFail"] = rawMods.Contains("NoFail"),
+				["Ghost"] = rawMods.Contains("Ghost"),
+				["Spin"] = rawMods.Contains("Spin"),
+				["Flashlight"] = rawMods.Contains("Flashlight"),
+				["Chaos"] = rawMods.Contains("Chaos"),
+				["HardRock"] = rawMods.Contains("HardRock")
+			};
+
             MapID = FileBuffer.GetString((int)FileBuffer.GetUInt32());
             MapNoteCount = FileBuffer.GetUInt64();
             MapFilePath = $"{Phoenyx.Constants.UserFolder}/maps/{MapID}.phxm";

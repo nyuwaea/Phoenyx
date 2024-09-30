@@ -49,6 +49,7 @@ public partial class MainMenu : Control
 	private static Panel StartFromPanel;
 	private static HSlider StartFromSlider;
 	private static LineEdit StartFromEdit;
+	private static List<TextureButton> ModifierButtons;
 
 	private static Panel Extras;
 
@@ -428,7 +429,18 @@ public partial class MainMenu : Control
 		StartFromPanel = ModifiersPanel.GetNode<Panel>("StartFrom");
 		StartFromSlider = StartFromPanel.GetNode<HSlider>("HSlider");
 		StartFromEdit = StartFromPanel.GetNode<LineEdit>("LineEdit");
-				
+		ModifierButtons = [];
+
+		foreach (TextureButton mod in ModifiersPanel.GetNode("Decrease").GetChildren())
+		{
+			ModifierButtons.Add(mod);
+		}
+
+		foreach (TextureButton mod in ModifiersPanel.GetNode("Increase").GetChildren())
+		{
+			ModifierButtons.Add(mod);
+		}
+		
 		ImportButton.Pressed += ImportDialog.Show;
 		UserFolderButton.Pressed += () => {
 			OS.ShellOpen($"{Phoenyx.Constants.UserFolder}");
@@ -623,6 +635,18 @@ public partial class MainMenu : Control
 			StartFromSlider.Value = Math.Clamp(text.ToFloat(), 0, 1);
 			StartFromEdit.ReleaseFocus();
 		};
+
+		foreach (TextureButton modButton in ModifierButtons)
+		{
+			modButton.SelfModulate = Color.Color8(255, 255, 255, (byte)(Lobby.Mods[modButton.Name] ? 255 : 128));
+			modButton.Pressed += () => {
+				Lobby.Mods[modButton.Name] = !Lobby.Mods[modButton.Name];
+
+				Tween tween = modButton.CreateTween();
+				tween.TweenProperty(modButton, "self_modulate", Color.Color8(255, 255, 255, (byte)(Lobby.Mods[modButton.Name] ? 255 : 128)), 1/4);
+				tween.Play();
+			};
+		}
 		
 		SpeedSlider.Value = Lobby.Speed * 100;
 		StartFromSlider.Value = Lobby.StartFrom / Math.Max(1, CurrentMap.Length);
@@ -1414,6 +1438,7 @@ public partial class MainMenu : Control
 				if (entry.Value)
 				{
 					TextureRect mod = modifierTemplate.Duplicate() as TextureRect;
+					mod.Texture = Phoenyx.Util.GetModIcon(entry.Key);
 					mod.Visible = true;
 					modifiersContainer.AddChild(mod);
 				}

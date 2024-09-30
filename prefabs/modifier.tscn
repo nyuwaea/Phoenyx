@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://djj2vhi3pxe1s"]
+
+[ext_resource type="Texture2D" uid="uid://bevth7guc4yc4" path="res://skin/mod_spin.png" id="1_ppbqk"]
+
+[node name="Modifier" type="Sprite3D"]
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -8.5, -10)
+modulate = Color(1, 1, 1, 0.376471)
+pixel_size = 0.0039
+double_sided = false
+no_depth_test = true
+texture = ExtResource("1_ppbqk")

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Godot;
 using Menu;
@@ -110,10 +111,10 @@ public partial class ClientManager : Node
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
-    public void ReceiveAllReady(string fileName, float speed = 1, float startFrom = 0, string[] mods = null)
+    public void ReceiveAllReady(string fileName, float speed = 1, float startFrom = 0, Dictionary<string, bool> mods = null)
     {
         SceneManager.Load("res://scenes/game.tscn");
-		Runner.Play(MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{fileName}"), speed, startFrom, mods ?? Array.Empty<string>());
+		Runner.Play(MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{fileName}"), speed, startFrom, mods ?? []);
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
