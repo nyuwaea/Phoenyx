@@ -1,0 +1,1530 @@
+[gd_scene load_steps=14 format=3 uid="uid://dkxy83ajqf2kq"]
+
+[ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="1_8p7x0"]
+[ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="2_cmtjb"]
+[ext_resource type="Theme" uid="uid://birpbaoexunde" path="res://theme/settings_categories_theme.tres" id="3_esq7m"]
+[ext_resource type="Texture2D" uid="uid://men3chmi3esy" path="res://textures/add.png" id="4_fgxmn"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_8skyv"]
+bg_color = Color(0.0360807, 0.0300716, 0.0527505, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_m7m67"]
+bg_color = Color(0.0235294, 0.0196078, 0.0352941, 1)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l24nh"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mgaml"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_glkuk"]
+font = ExtResource("2_cmtjb")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_yp26f"]
+bg_color = Color(0.0235294, 0.0196078, 0.0352941, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_osuri"]
+font_size = 26
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_6q5ho"]
+bg_color = Color(0.117647, 0.117647, 0.117647, 1)
+border_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pwsiv"]
+bg_color = Color(0, 0, 0, 1)
+border_color = Color(1, 1, 1, 1)
+
+[node name="Settings" type="ColorRect"]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.501961)
+
+[node name="Deselect" type="Button" parent="."]
+self_modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+action_mode = 0
+button_mask = 3
+
+[node name="Holder" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.25
+anchor_top = 0.25
+anchor_right = 0.75
+anchor_bottom = 0.75
+theme = ExtResource("1_8p7x0")
+theme_override_styles/panel = SubResource("StyleBoxFlat_8skyv")
+
+[node name="Dim" type="Panel" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.2
+anchor_bottom = 1.0
+offset_top = 40.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_styles/panel = SubResource("StyleBoxFlat_m7m67")
+
+[node name="Categories" type="Panel" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.00001
+offset_top = 48.0
+offset_right = -8.0
+offset_bottom = -8.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_l24nh")
+
+[node name="Gameplay" type="ScrollContainer" parent="Holder/Categories"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Container" type="VBoxContainer" parent="Holder/Categories/Gameplay"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="Sensitivity" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/Sensitivity"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Sensitivity"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Gameplay/Container/Sensitivity"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+max_value = 3.0
+step = 0.01
+value = 0.66
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Gameplay/Container/Sensitivity"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0.5"
+placeholder_text = "0.5"
+max_length = 5
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="AbsoluteInput" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "This is useful for pen & tablet setups"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/AbsoluteInput"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Absolute Input"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Gameplay/Container/AbsoluteInput"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+flat = true
+
+[node name="CursorDrift" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "A.K.A. \"Buffer cursor\""
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/CursorDrift"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Drift"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Gameplay/Container/CursorDrift"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="ApproachRate" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/ApproachRate"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Approach Rate"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Gameplay/Container/ApproachRate"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+min_value = 1.0
+max_value = 60.0
+step = 0.5
+value = 35.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Gameplay/Container/ApproachRate"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "32"
+placeholder_text = "32"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="ApproachDistance" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Note spawn distance"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/ApproachDistance"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Approach Distance"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Gameplay/Container/ApproachDistance"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+min_value = 1.0
+max_value = 60.0
+step = 0.5
+value = 16.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Gameplay/Container/ApproachDistance"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "20"
+placeholder_text = "20"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="FadeIn" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Note fade in length (in %)"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/FadeIn"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Fade In"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Gameplay/Container/FadeIn"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+rounded = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Gameplay/Container/FadeIn"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "15"
+placeholder_text = "15"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="FadeOut" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "A.K.A. \"Half-ghost\""
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/FadeOut"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Fade Out"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Gameplay/Container/FadeOut"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="Pushback" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Having pushback off will make the notes hide as soon as they reach the grid, while having it on takes into account the full hit window."
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/Pushback"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Pushback"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Gameplay/Container/Pushback"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="Parallax" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/Parallax"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Parallax"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Gameplay/Container/Parallax"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+max_value = 1.0
+step = 0.025
+value = 1.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Gameplay/Container/Parallax"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0.1"
+placeholder_text = "0.1"
+max_length = 5
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="FoV" type="Panel" parent="Holder/Categories/Gameplay/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/FoV"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "FoV
+"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Gameplay/Container/FoV"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+min_value = 20.0
+max_value = 179.0
+value = 70.0
+rounded = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Gameplay/Container/FoV"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "70"
+placeholder_text = "70"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="Visuals" type="ScrollContainer" parent="Holder/Categories"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Container" type="VBoxContainer" parent="Holder/Categories/Visuals"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="Skin" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/Skin"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Skin"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="OptionsButton" type="OptionButton" parent="Holder/Categories/Visuals/Container/Skin"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_bottom = -4.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 1
+popup/item_0/text = "default"
+
+[node name="SkinFolder" type="Button" parent="Holder/Categories/Visuals/Container/Skin"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.575
+anchor_right = 0.8
+anchor_bottom = 1.0
+offset_top = 4.0
+offset_bottom = -4.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Skin Folder"
+
+[node name="Colors" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Hexadecimal format only, separated by a comma"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/Colors"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Colors"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Visuals/Container/Colors"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 1.0
+anchor_bottom = 1.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "00ffed,ff8ff9"
+placeholder_text = "00ffed,ff8ff9"
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="Space" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "The background environment. \"skin\" will use your current skin's space."
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/Space"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Space"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="OptionsButton" type="OptionButton" parent="Holder/Categories/Visuals/Container/Space"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.8
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 4.0
+offset_bottom = -4.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+alignment = 1
+selected = 0
+fit_to_longest_item = false
+item_count = 3
+popup/item_0/text = "skin"
+popup/item_1/text = "void"
+popup/item_1/id = 1
+popup/item_2/text = "grid"
+popup/item_2/id = 2
+
+[node name="NoteSize" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "This does not affect the hit box size"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/NoteSize"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Note Size"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Visuals/Container/NoteSize"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+max_value = 2.0
+step = 0.025
+value = 0.875
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Visuals/Container/NoteSize"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0.875"
+placeholder_text = "0.875"
+max_length = 5
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="CursorScale" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/CursorScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Scale"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Visuals/Container/CursorScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+max_value = 4.0
+step = 0.025
+value = 1.0
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Visuals/Container/CursorScale"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "1"
+placeholder_text = "1"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="CursorTrail" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Does not apply in menu"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/CursorTrail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Cursor Trail"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Visuals/Container/CursorTrail"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+flat = true
+
+[node name="TrailTime" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/TrailTime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Trail Time"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Visuals/Container/TrailTime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+max_value = 1.0
+step = 0.01
+value = 0.05
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Visuals/Container/TrailTime"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0.05"
+placeholder_text = "0.05"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="TrailDetail" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Not yet implemented"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/TrailDetail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Trail Detail"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Visuals/Container/TrailDetail"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+max_value = 10.0
+step = 0.05
+value = 1.0
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Visuals/Container/TrailDetail"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "1"
+placeholder_text = "1"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="VideoDim" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/VideoDim"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Video BG Dim"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Visuals/Container/VideoDim"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+value = 80.0
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Visuals/Container/VideoDim"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "80"
+placeholder_text = "80"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="VideoRenderScale" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/VideoRenderScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Video BG Render Scale"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Visuals/Container/VideoRenderScale"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+value = 100.0
+rounded = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Visuals/Container/VideoRenderScale"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "100"
+placeholder_text = "100"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="SimpleHUD" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Only shows misses"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/SimpleHUD"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Simple HUD"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Visuals/Container/SimpleHUD"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+flat = true
+
+[node name="HitPopups" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Only shows misses"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/HitPopups"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Hit Score Popups"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Visuals/Container/HitPopups"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="MissPopups" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Only shows misses"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/MissPopups"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Miss Popups"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Visuals/Container/MissPopups"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="Video" type="ScrollContainer" parent="Holder/Categories"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Container" type="VBoxContainer" parent="Holder/Categories/Video"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="Fullscreen" type="Panel" parent="Holder/Categories/Video/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "F11 or ALT + ENTER"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Video/Container/Fullscreen"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Fullscreen"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Video/Container/Fullscreen"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+flat = true
+
+[node name="Audio" type="ScrollContainer" parent="Holder/Categories"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Container" type="VBoxContainer" parent="Holder/Categories/Audio"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="VolumeMaster" type="Panel" parent="Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Audio/Container/VolumeMaster"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Master Volume"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Audio/Container/VolumeMaster"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+value = 50.0
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Audio/Container/VolumeMaster"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "50"
+placeholder_text = "50"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="VolumeMusic" type="Panel" parent="Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Audio/Container/VolumeMusic"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Music Volume"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Audio/Container/VolumeMusic"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+value = 50.0
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Audio/Container/VolumeMusic"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "50"
+placeholder_text = "50"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="VolumeSFX" type="Panel" parent="Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Audio/Container/VolumeSFX"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "SFX Volume"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Audio/Container/VolumeSFX"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+value = 50.0
+allow_greater = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Audio/Container/VolumeSFX"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "50"
+placeholder_text = "50"
+max_length = 16
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="AlwaysPlayHitSound" type="Panel" parent="Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Audio/Container/AlwaysPlayHitSound"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Always Play Hit Sound"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Audio/Container/AlwaysPlayHitSound"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+flat = true
+
+[node name="AutoplayJukebox" type="Panel" parent="Holder/Categories/Audio/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Audio/Container/AutoplayJukebox"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Autoplay Jukebox"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Audio/Container/AutoplayJukebox"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="Other" type="ScrollContainer" parent="Holder/Categories"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Container" type="VBoxContainer" parent="Holder/Categories/Other"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 2
+
+[node name="RhythiaImport" type="Panel" parent="Holder/Categories/Other/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Other/Container/RhythiaImport"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Rhythia Settings Import"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="Button" type="Button" parent="Holder/Categories/Other/Container/RhythiaImport"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.7
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 4.0
+offset_right = -4.0
+offset_bottom = -4.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "1-Click Import"
+
+[node name="RecordReplays" type="Panel" parent="Holder/Categories/Other/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Other/Container/RecordReplays"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Record Replays"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Other/Container/RecordReplays"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="Sidebar" type="ScrollContainer" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.2
+anchor_bottom = 1.0
+offset_top = 40.0
+
+[node name="Container" type="VBoxContainer" parent="Holder/Sidebar"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_8p7x0")
+theme_override_constants/separation = 0
+
+[node name="Gameplay" type="ColorRect" parent="Holder/Sidebar/Container"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+color = Color(1, 1, 1, 0.0313726)
+
+[node name="Button" type="Button" parent="Holder/Sidebar/Container/Gameplay"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 50.0
+focus_mode = 0
+theme = ExtResource("3_esq7m")
+text = "  GAMEPLAY"
+alignment = 0
+
+[node name="Visuals" type="ColorRect" parent="Holder/Sidebar/Container"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Button" type="Button" parent="Holder/Sidebar/Container/Visuals"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 50.0
+focus_mode = 0
+theme = ExtResource("3_esq7m")
+text = "  VISUALS"
+alignment = 0
+
+[node name="Video" type="ColorRect" parent="Holder/Sidebar/Container"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Button" type="Button" parent="Holder/Sidebar/Container/Video"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 50.0
+focus_mode = 0
+theme = ExtResource("3_esq7m")
+text = "  VIDEO"
+alignment = 0
+
+[node name="Audio" type="ColorRect" parent="Holder/Sidebar/Container"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Button" type="Button" parent="Holder/Sidebar/Container/Audio"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 50.0
+focus_mode = 0
+theme = ExtResource("3_esq7m")
+text = "  AUDIO"
+alignment = 0
+
+[node name="Other" type="ColorRect" parent="Holder/Sidebar/Container"]
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Button" type="Button" parent="Holder/Sidebar/Container/Other"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 50.0
+focus_mode = 0
+theme = ExtResource("3_esq7m")
+text = "  OTHER"
+alignment = 0
+
+[node name="Header" type="Panel" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_bottom = 40.0
+theme = ExtResource("1_8p7x0")
+theme_override_styles/panel = SubResource("StyleBoxFlat_yp26f")
+
+[node name="Title" type="Label" parent="Holder/Header"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.6
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("1_8p7x0")
+text = "SETTINGS"
+label_settings = SubResource("LabelSettings_osuri")
+vertical_alignment = 1
+
+[node name="Profiles" type="OptionButton" parent="Holder/Header"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.75
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = -32.0
+offset_bottom = -8.0
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+alignment = 1
+text_overrun_behavior = 3
+clip_text = true
+selected = 0
+fit_to_longest_item = false
+item_count = 1
+popup/item_0/text = "default"
+
+[node name="CreateProfile" type="Button" parent="Holder/Header"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -28.0
+offset_top = 10.0
+offset_right = -8.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+tooltip_text = "Create Profile"
+focus_mode = 0
+theme_override_styles/hover = SubResource("StyleBoxFlat_6q5ho")
+theme_override_styles/normal = SubResource("StyleBoxFlat_pwsiv")
+icon = ExtResource("4_fgxmn")
+icon_alignment = 1
+
+[node name="ProfileEdit" type="LineEdit" parent="Holder/Header"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = 128.0
+offset_bottom = -8.0
+tooltip_text = "Create Profile"
+focus_mode = 1
+mouse_default_cursor_shape = 0
+theme_override_styles/normal = SubResource("StyleBoxFlat_pwsiv")
+placeholder_text = "profile name"
+caret_blink = true

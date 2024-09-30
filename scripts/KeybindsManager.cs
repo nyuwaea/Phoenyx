@@ -1,7 +1,6 @@
 using System;
 using Godot;
 using Menu;
-using Phoenyx;
 
 public partial class KeybindsManager : Node
 {
@@ -32,9 +31,14 @@ public partial class KeybindsManager : Node
             {
                 bool value = DisplayServer.WindowGetMode() == DisplayServer.WindowMode.Windowed;
 
-                Settings.Fullscreen = value;
+                Phoenyx.Settings.Fullscreen = value;
                 DisplayServer.WindowSetMode(value ? DisplayServer.WindowMode.ExclusiveFullscreen : DisplayServer.WindowMode.Windowed);
-                MainMenu.UpdateSettings();
+                
+                if (SceneManager.Scene.Name == "SceneMenu")
+                {
+                    SettingsManager.UpdateSettings();
+                    MainMenu.UpdateSpectrumSpacing();
+                }
             }
         }
     }
@@ -48,19 +52,19 @@ public partial class KeybindsManager : Node
 				switch (eventMouseButton.ButtonIndex)
 				{
 					case MouseButton.WheelUp:
-						Settings.VolumeMaster = Math.Min(100, Settings.VolumeMaster + 5f);
+						Phoenyx.Settings.VolumeMaster = Math.Min(100, Phoenyx.Settings.VolumeMaster + 5f);
 						break;
 					case MouseButton.WheelDown:
-						Settings.VolumeMaster = Math.Max(0, Settings.VolumeMaster - 5f);
+						Phoenyx.Settings.VolumeMaster = Math.Max(0, Phoenyx.Settings.VolumeMaster - 5f);
 						break;
 				}
 
                 Panel volumePopup = SceneManager.Scene.GetNode<Panel>("Volume");
                 Label label = volumePopup.GetNode<Label>("Label");
-                label.Text = Settings.VolumeMaster.ToString();
+                label.Text = Phoenyx.Settings.VolumeMaster.ToString();
                 Tween tween = volumePopup.CreateTween();
                 tween.TweenProperty(volumePopup, "modulate", Color.FromHtml("ffffffff"), 0.25).SetTrans(Tween.TransitionType.Quad);
-                tween.Parallel().TweenProperty(volumePopup.GetNode<ColorRect>("Main"), "anchor_right", Settings.VolumeMaster / 100, 0.15).SetTrans(Tween.TransitionType.Quad);
+                tween.Parallel().TweenProperty(volumePopup.GetNode<ColorRect>("Main"), "anchor_right", Phoenyx.Settings.VolumeMaster / 100, 0.15).SetTrans(Tween.TransitionType.Quad);
                 tween.Parallel().TweenProperty(label, "anchor_bottom", 0, 0.15).SetTrans(Tween.TransitionType.Quad);
                 tween.Play();
 
@@ -76,7 +80,8 @@ public partial class KeybindsManager : Node
                     case "SceneGame":
                         Runner.UpdateVolume();
                         break;
-                    default:
+                    case "SceneResults":
+                        Results.UpdateVolume();
                         break;
                 }
 			}

@@ -1,5 +1,4 @@
 using Godot;
-using System.Collections.Generic;
 
 public partial class Graph : ColorRect
 {
@@ -9,15 +8,25 @@ public partial class Graph : ColorRect
 		Color hitColor = Color.FromHtml("00ff00ff");
 		Color missColor = Color.FromHtml("ff000044");
 
-		foreach (int miss in Runner.CurrentAttempt.MissesInfo)
+		for (ulong i = Runner.CurrentAttempt.FirstNote; i < (ulong)Runner.CurrentAttempt.HitsInfo.Length; i++)
 		{
-			int position = (int)(Size.X * miss / Runner.CurrentAttempt.Map.Length);
-			DrawLine(Vector2.Right * position, new Vector2(position, Size.Y), missColor, 1);
+			float offset = Runner.CurrentAttempt.HitsInfo[i];
+
+			if (offset < 0)
+			{
+				int position = (int)(Size.X * Runner.CurrentAttempt.Map.Notes[i].Millisecond / Runner.CurrentAttempt.Map.Length);
+				DrawLine(Vector2.Right * position, new(position, Size.Y), missColor, 1);
+			}
+			else
+			{
+				DrawRect(new(Size.X * (Runner.CurrentAttempt.Map.Notes[i].Millisecond / (float)Runner.CurrentAttempt.Map.Length), Size.Y * (offset / 55), Vector2.One), hitColor);
+			}
 		}
 
-		foreach (Dictionary<string, int> hit in Runner.CurrentAttempt.HitsInfo)
+		if (Runner.CurrentAttempt.DeathTime >= 0)
 		{
-			DrawRect(new(Size.X * (hit["Time"] / (float)Runner.CurrentAttempt.Map.Length), Size.Y * (hit["Offset"] / 55f), Vector2.One), hitColor);
+			int position = (int)(Size.X * Runner.CurrentAttempt.DeathTime / Runner.CurrentAttempt.Map.Length);
+			DrawLine(Vector2.Right * position, new(position, Size.Y), Color.Color8(255, 255, 0), 3);
 		}
 
 		Logger.Log($"RESULTS GRAPH: {(Time.GetTicksUsec() - start) / 1000}ms");

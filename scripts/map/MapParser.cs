@@ -4,30 +4,25 @@ using System.IO;
 using System.IO.Compression;
 using System.Text;
 using Godot;
-using Phoenyx;
-
-public class NoteComparer : IComparer<Note>
-{
-	public int Compare(Note a, Note b)
-	{
-		return a.Millisecond.CompareTo(b.Millisecond);
-	}
-}
 
 public partial class MapParser : Node
 {
-	public static void Import(string[] files)
+	public static Dictionary<string, bool> BulkImport(string[] files)
 	{
 		double start = Time.GetTicksUsec();
 		int good = 0;
 		int corrupted = 0;
+		Dictionary<string, bool> results = [];
 		
 		foreach (string file in files)
 		{
+			results[file] = false;
+			
 			try
 			{
-				Decode(file, false);
+				Decode(file, null, false);
 				good++;
+				results[file] = true;
 			}
 			catch
 			{
@@ -37,25 +32,27 @@ public partial class MapParser : Node
 		}
 
 		Logger.Log($"BULK IMPORT: {(Time.GetTicksUsec() - start) / 1000}ms; TOTAL: {good + corrupted}; CORRUPT: {corrupted}");
+
+		return results;
 	}
 
 	public static void Encode(Map map, bool logBenchmark = true)
 	{
 		double start = Time.GetTicksUsec();
 
-		if (File.Exists($"{Constants.UserFolder}/maps/{map.ID}.phxm"))
+		if (File.Exists($"{Phoenyx.Constants.UserFolder}/maps/{map.ID}.phxm"))
 		{
-			File.Delete($"{Constants.UserFolder}/maps/{map.ID}.phxm");
+			File.Delete($"{Phoenyx.Constants.UserFolder}/maps/{map.ID}.phxm");
 		}
 
-		if (!Directory.Exists($"{Constants.UserFolder}/cache/phxmencode"))
+		if (!Directory.Exists($"{Phoenyx.Constants.UserFolder}/cache/phxmencode"))
 		{
-			Directory.CreateDirectory($"{Constants.UserFolder}/cache/phxmencode");
+			Directory.CreateDirectory($"{Phoenyx.Constants.UserFolder}/cache/phxmencode");
 		}
 		
-		File.WriteAllText($"{Constants.UserFolder}/cache/phxmencode/metadata.json", map.EncodeMeta());
+		File.WriteAllText($"{Phoenyx.Constants.UserFolder}/cache/phxmencode/metadata.json", map.EncodeMeta());
 
-		Godot.FileAccess objects = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/objects.phxmo", Godot.FileAccess.ModeFlags.Write);
+		Godot.FileAccess objects = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/phxmencode/objects.phxmo", Godot.FileAccess.ModeFlags.Write);
 
 		/*
 			uint32; ms
@@ -102,33 +99,33 @@ public partial class MapParser : Node
 
 		if (map.AudioBuffer != null)
 		{
-			Godot.FileAccess audio = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/audio.{map.AudioExt}", Godot.FileAccess.ModeFlags.Write);
+			Godot.FileAccess audio = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/phxmencode/audio.{map.AudioExt}", Godot.FileAccess.ModeFlags.Write);
 			audio.StoreBuffer(map.AudioBuffer);
 			audio.Close();
 		}
 
 		if (map.CoverBuffer != null)
 		{
-			Godot.FileAccess cover = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/cover.png", Godot.FileAccess.ModeFlags.Write);
+			Godot.FileAccess cover = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/phxmencode/cover.png", Godot.FileAccess.ModeFlags.Write);
 			cover.StoreBuffer(map.CoverBuffer);
 			cover.Close();
 		}
 
 		if (map.VideoBuffer != null)
 		{
-			Godot.FileAccess video = Godot.FileAccess.Open($"{Constants.UserFolder}/cache/phxmencode/video.mp4", Godot.FileAccess.ModeFlags.Write);
+			Godot.FileAccess video = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/cache/phxmencode/video.mp4", Godot.FileAccess.ModeFlags.Write);
 			video.StoreBuffer(map.VideoBuffer);
 			video.Close();
 		}
 
-		ZipFile.CreateFromDirectory($"{Constants.UserFolder}/cache/phxmencode", $"{Constants.UserFolder}/maps/{map.ID}.phxm", CompressionLevel.NoCompression, false);
+		ZipFile.CreateFromDirectory($"{Phoenyx.Constants.UserFolder}/cache/phxmencode", $"{Phoenyx.Constants.UserFolder}/maps/{map.ID}.phxm", CompressionLevel.NoCompression, false);
 
-		foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/cache/phxmencode"))
+		foreach (string filePath in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/cache/phxmencode"))
 		{
 			File.Delete(filePath);
 		}
 
-		Directory.Delete($"{Constants.UserFolder}/cache/phxmencode");
+		Directory.Delete($"{Phoenyx.Constants.UserFolder}/cache/phxmencode");
 
 		if (logBenchmark)
 		{
@@ -136,7 +133,7 @@ public partial class MapParser : Node
 		}
 	}
 
-	public static Map Decode(string path, bool logBenchmark = true)
+	public static Map Decode(string path, string audio = null, bool logBenchmark = true, bool save = true)
 	{
 		if (!File.Exists(path))
 		{
@@ -157,7 +154,7 @@ public partial class MapParser : Node
 				map = SSPMV2(path);
 				break;
 			case "txt":
-				map = SSMapV1(path);
+				map = SSMapV1(path, audio);
 				break;
 			default:
 				ToastNotification.Notify("File extension not supported", 2);
@@ -169,7 +166,7 @@ public partial class MapParser : Node
 			Logger.Log($"DECODING {ext.ToUpper()}: {(Time.GetTicksUsec() - start) / 1000}ms");
 		}
 
-		if (!File.Exists($"{Constants.UserFolder}/maps/{map.ID}.phxm"))
+		if (save && !File.Exists($"{Phoenyx.Constants.UserFolder}/maps/{map.ID}.phxm"))
 		{
 			Encode(map, logBenchmark);
 		}
@@ -177,7 +174,7 @@ public partial class MapParser : Node
 		return map;
 	}
 
-	public static Map SSMapV1(string path)
+	public static Map SSMapV1(string path, string audioPath = null)
 	{
 		string name = path.Split("\\")[^1].TrimSuffix(".txt");
 		Godot.FileAccess file = Godot.FileAccess.Open(path, Godot.FileAccess.ModeFlags.Read);
@@ -186,8 +183,8 @@ public partial class MapParser : Node
 		try
 		{
 			string[] split = file.GetLine().Split(",");
-			
 			Note[] notes = new Note[split.Length - 1];
+			byte[] audioBuffer = null;
 			
 			for (int i = 1; i < split.Length; i++)
 			{
@@ -195,8 +192,17 @@ public partial class MapParser : Node
 				
 				notes[i - 1] = new Note(i - 1, subsplit[2].ToInt(), -subsplit[0].ToFloat() + 1, subsplit[1].ToFloat() - 1);
 			}
+
+			if (audioPath != null)
+			{
+				Godot.FileAccess audio = Godot.FileAccess.Open(audioPath, Godot.FileAccess.ModeFlags.Read);
+
+				audioBuffer = audio.GetBuffer((long)audio.GetLength());
+
+				audio.Close();
+			}
 			
-			map = new(path, notes, null, "", name);
+			map = new(path, notes, null, "", name, audioBuffer: audioBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -218,12 +224,12 @@ public partial class MapParser : Node
 		{
 			if (file.GetString(4) != "SS+m")
 			{
-				throw new Exception("Incorrect file signature");
+				throw new("Incorrect file signature");
 			}
 
 			if (file.GetUInt16() != 2)
 			{
-				throw new Exception("Old SSPM format");
+				throw new("Old SSPM format");
 			}
 
 			file.Skip(4);	// reserved
@@ -362,7 +368,7 @@ public partial class MapParser : Node
 				notes[i].Index = i;
 			}
 			
-			map = new Map(path, notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
+			map = new(path, notes, id, artist, song, 0, mappers, difficulty, difficultyName, (int)mapLength, audioBuffer, coverBuffer);
 		}
 		catch (Exception exception)
 		{
@@ -375,14 +381,14 @@ public partial class MapParser : Node
 
 	public static Map PHXM(string path)
 	{
-		if (Directory.Exists($"{Constants.UserFolder}/cache/phxmdecode"))
+		if (Directory.Exists($"{Phoenyx.Constants.UserFolder}/cache/phxmdecode"))
 		{
-			foreach (string filePath in Directory.GetFiles($"{Constants.UserFolder}/cache/phxmdecode"))
+			foreach (string filePath in Directory.GetFiles($"{Phoenyx.Constants.UserFolder}/cache/phxmdecode"))
 			{
 				File.Delete(filePath);
 			}
 
-			Directory.Delete($"{Constants.UserFolder}/cache/phxmdecode");
+			Directory.Delete($"{Phoenyx.Constants.UserFolder}/cache/phxmdecode");
 		}
 		
 		Map map;
@@ -467,5 +473,13 @@ public partial class MapParser : Node
 		}
 
 		return map;
+	}
+
+	public struct NoteComparer : IComparer<Note>
+	{
+		public int Compare(Note a, Note b)
+		{
+			return a.Millisecond.CompareTo(b.Millisecond);
+		}
 	}
 }

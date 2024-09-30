@@ -1,69 +1,94 @@
-[gd_scene load_steps=27 format=3 uid="uid://bhcvypmhm5rke"]
+[gd_scene load_steps=34 format=3 uid="uid://bhcvypmhm5rke"]
 
 [ext_resource type="Script" path="res://scripts/menu/Results.cs" id="1_llpx6"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_dgnpu"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="2_f4qdi"]
 [ext_resource type="Shader" path="res://scripts/shaders/alpha_gradient.gdshader" id="2_oatel"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="2_ow183"]
-[ext_resource type="Shader" path="res://scripts/shaders/canvas_blur.gdshader" id="2_vg5t8"]
 [ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="3_rsbg1"]
 [ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="3_vdcg2"]
 [ext_resource type="Script" path="res://scripts/menu/Graph.cs" id="4_b55ol"]
 [ext_resource type="FontFile" uid="uid://dvb6fvy008bhv" path="res://fonts/Roboto-Medium.ttf" id="4_yxv8s"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_k33hc"]
-shader = ExtResource("2_vg5t8")
+[ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="5_eo0oh"]
+[ext_resource type="Shader" path="res://scripts/shaders/dotted.gdshader" id="8_ldb53"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rn6l"]
 shader = ExtResource("2_oatel")
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_wqycr"]
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p7eil"]
+shader = ExtResource("5_eo0oh")
+shader_parameter/brightness = 1.25
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1olmk"]
+
 [sub_resource type="LabelSettings" id="LabelSettings_13vky"]
 font = ExtResource("2_f4qdi")
-font_size = 32
+font_size = 64
 outline_size = 6
 outline_color = Color(0, 0, 0, 0.376471)
 
 [sub_resource type="LabelSettings" id="LabelSettings_wwu1g"]
 font = ExtResource("3_rsbg1")
-font_size = 24
+font_size = 36
 font_color = Color(0.627451, 0.627451, 0.627451, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 0.376471)
 
 [sub_resource type="LabelSettings" id="LabelSettings_sbrx2"]
 font = ExtResource("3_rsbg1")
-font_size = 18
+font_size = 24
 font_color = Color(0.627451, 0.627451, 0.627451, 1)
+outline_size = 4
+outline_color = Color(0, 0, 0, 0.376471)
+
+[sub_resource type="LabelSettings" id="LabelSettings_utq7d"]
+font = ExtResource("2_f4qdi")
+font_size = 42
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_l8mvi"]
 
 [sub_resource type="LabelSettings" id="LabelSettings_e5ove"]
 font = ExtResource("2_f4qdi")
-font_size = 48
-
-[sub_resource type="LabelSettings" id="LabelSettings_7f2j3"]
-font = ExtResource("2_f4qdi")
-font_size = 32
+font_size = 64
 
 [sub_resource type="LabelSettings" id="LabelSettings_18ny7"]
 font = ExtResource("2_f4qdi")
-font_size = 32
+font_size = 64
 font_color = Color(0.627451, 0.627451, 0.627451, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_7f2j3"]
+font = ExtResource("2_f4qdi")
+font_size = 42
 
 [sub_resource type="LabelSettings" id="LabelSettings_yaaow"]
 font = ExtResource("2_f4qdi")
-font_size = 32
+font_size = 42
 
 [sub_resource type="LabelSettings" id="LabelSettings_6anxq"]
 font = ExtResource("3_rsbg1")
 font_size = 11
 font_color = Color(0.627451, 0.627451, 0.627451, 1)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_b4pmo"]
+shader = ExtResource("8_ldb53")
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ttaov"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_v6imt"]
+shader = ExtResource("5_eo0oh")
+shader_parameter/brightness = 1.25
 
 [sub_resource type="LabelSettings" id="LabelSettings_f104l"]
 font = ExtResource("4_yxv8s")
 font_size = 32
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bop88"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_4a50n"]
+shader = ExtResource("5_eo0oh")
+shader_parameter/brightness = 1.25
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dc6lk"]
 
@@ -91,7 +116,7 @@ grow_vertical = 2
 color = Color(0.0252979, 0.0178548, 0.0358456, 1)
 
 [node name="CoverBackground" type="TextureRect" parent="."]
-material = SubResource("ShaderMaterial_k33hc")
+modulate = Color(1, 1, 1, 0.14902)
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
@@ -117,13 +142,27 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_wqycr")
 
+[node name="GraphBlur" type="Panel" parent="Holder"]
+material = SubResource("ShaderMaterial_p7eil")
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 0.6
+anchor_bottom = 1.0
+offset_left = 32.0
+offset_top = -256.0
+offset_bottom = -96.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_1olmk")
+
 [node name="Title" type="Label" parent="Holder"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 offset_left = 32.0
 offset_top = 96.0
-offset_right = -7.0
+offset_right = -32.0
 offset_bottom = 160.0
 text = "AAAAAAAAAAAAAAAAA"
 label_settings = SubResource("LabelSettings_13vky")
@@ -135,9 +174,9 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 offset_left = 32.0
-offset_top = 160.0
+offset_top = 168.0
 offset_right = -7.0
-offset_bottom = 190.0
+offset_bottom = 210.0
 text = "very hard"
 label_settings = SubResource("LabelSettings_wwu1g")
 vertical_alignment = 1
@@ -148,46 +187,76 @@ layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 offset_left = 32.0
-offset_top = 198.0
+offset_top = 212.0
 offset_right = -7.0
-offset_bottom = 220.0
+offset_bottom = 240.0
 text = "by abcdef, ghiklmnop, qrstvuwxyz"
 label_settings = SubResource("LabelSettings_sbrx2")
 vertical_alignment = 1
 text_overrun_behavior = 3
+
+[node name="Speed" type="Label" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.2
+offset_left = 32.0
+offset_top = 248.0
+offset_right = -32.0
+offset_bottom = 296.0
+text = "1.00x"
+label_settings = SubResource("LabelSettings_utq7d")
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Modifiers" type="Panel" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.25
+anchor_right = 1.0
+offset_left = 32.0
+offset_top = 248.0
+offset_right = -32.0
+offset_bottom = 296.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_l8mvi")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Holder/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 2.0
+offset_bottom = -2.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 8
+alignment = 2
+
+[node name="ModifierTemplate" type="TextureRect" parent="Holder/Modifiers/HBoxContainer"]
+visible = false
+custom_minimum_size = Vector2(44, 0)
+layout_mode = 2
+texture = ExtResource("2_ow183")
+expand_mode = 1
 
 [node name="Separator" type="ColorRect" parent="Holder"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
 offset_left = 32.0
-offset_top = 233.0
+offset_top = 300.0
 offset_right = -32.0
-offset_bottom = 234.0
+offset_bottom = 302.0
 
 [node name="Accuracy" type="Label" parent="Holder"]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 0.3
 offset_left = 32.0
-offset_top = 240.0
+offset_top = 308.0
 offset_right = 21.0
-offset_bottom = 300.0
+offset_bottom = 380.0
 text = "100.00%"
 label_settings = SubResource("LabelSettings_e5ove")
-vertical_alignment = 1
-text_overrun_behavior = 3
-
-[node name="Score" type="Label" parent="Holder"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-offset_left = 32.0
-offset_top = 300.0
-offset_right = 21.0
-offset_bottom = 360.0
-text = "1,000,000"
-label_settings = SubResource("LabelSettings_7f2j3")
 vertical_alignment = 1
 text_overrun_behavior = 3
 
@@ -197,12 +266,25 @@ anchors_preset = -1
 anchor_left = 0.3
 anchor_right = 1.0
 offset_left = 333.6
-offset_top = 240.0
+offset_top = 308.0
 offset_right = -32.0
-offset_bottom = 300.0
+offset_bottom = 380.0
 text = "9,999 / 9,999"
 label_settings = SubResource("LabelSettings_18ny7")
 horizontal_alignment = 2
+vertical_alignment = 1
+text_overrun_behavior = 3
+
+[node name="Score" type="Label" parent="Holder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+offset_left = 32.0
+offset_top = 388.0
+offset_right = 21.0
+offset_bottom = 436.0
+text = "1,000,000"
+label_settings = SubResource("LabelSettings_7f2j3")
 vertical_alignment = 1
 text_overrun_behavior = 3
 
@@ -212,9 +294,9 @@ anchors_preset = -1
 anchor_left = 0.3
 anchor_right = 1.0
 offset_left = 333.6
-offset_top = 300.0
+offset_top = 388.0
 offset_right = -32.0
-offset_bottom = 360.0
+offset_bottom = 436.0
 text = "DISQUALIFIED"
 label_settings = SubResource("LabelSettings_yaaow")
 horizontal_alignment = 2
@@ -230,7 +312,7 @@ anchor_bottom = 1.0
 offset_left = 32.0
 offset_top = -256.0
 offset_bottom = -96.0
-color = Color(1, 1, 1, 0.0313726)
+color = Color(1, 1, 1, 0)
 script = ExtResource("4_b55ol")
 
 [node name="OffsetTop" type="Label" parent="Holder/Graph"]
@@ -256,32 +338,43 @@ label_settings = SubResource("LabelSettings_6anxq")
 horizontal_alignment = 2
 vertical_alignment = 1
 
+[node name="ScoreDropoffLine" type="ColorRect" parent="Holder/Graph"]
+material = SubResource("ShaderMaterial_b4pmo")
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.455
+anchor_right = 1.0
+anchor_bottom = 0.455
+offset_bottom = 1.0
+color = Color(1, 1, 1, 0.12549)
+
 [node name="TopBar" type="Panel" parent="."]
 layout_mode = 1
 anchors_preset = -1
 anchor_right = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
 offset_bottom = 64.0
 theme = ExtResource("2_dgnpu")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_ttaov")
 
 [node name="Background" type="ColorRect" parent="TopBar"]
+material = SubResource("ShaderMaterial_v6imt")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.0313726)
 
 [node name="Logo" type="TextureRect" parent="TopBar"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
 offset_left = 6.0
 offset_top = 6.0
-offset_right = 54.0
-offset_bottom = 54.0
+offset_bottom = -6.0
 texture = ExtResource("3_vdcg2")
 expand_mode = 2
 stretch_mode = 5
@@ -314,13 +407,13 @@ theme = ExtResource("2_dgnpu")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bop88")
 
 [node name="Background" type="ColorRect" parent="Footer"]
+material = SubResource("ShaderMaterial_4a50n")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.0313726)
 
 [node name="Back" type="Button" parent="Footer"]
 layout_mode = 1
@@ -347,6 +440,21 @@ offset_bottom = -8.0
 focus_mode = 0
 theme_override_font_sizes/font_size = 22
 text = "Play"
+flat = true
+
+[node name="Replay" type="Button" parent="Footer"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.925
+anchor_right = 0.925
+anchor_bottom = 1.0
+offset_top = 8.0
+offset_right = -32.0
+offset_bottom = -8.0
+grow_horizontal = 0
+focus_mode = 0
+theme_override_font_sizes/font_size = 22
+text = "Watch Replay"
 flat = true
 
 [node name="Volume" type="Panel" parent="."]

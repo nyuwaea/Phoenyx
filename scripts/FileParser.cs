@@ -6,12 +6,14 @@ public class FileParser
 {
     public byte[] Buffer;
     public int Pointer;
+    public long Length;
 
     public FileParser(string path)
     {
         FileAccess file = FileAccess.Open(path, FileAccess.ModeFlags.Read);
 
-        Buffer = file.GetBuffer((long)file.GetLength());
+        Length = (long)file.GetLength();
+        Buffer = file.GetBuffer(Length);
         Pointer = 0;
 
         file.Close();
@@ -19,6 +21,7 @@ public class FileParser
 
     public FileParser(byte[] buffer)
     {
+        Length = buffer.Length;
         Buffer = buffer;
         Pointer = 0;
     }
@@ -55,6 +58,17 @@ public class FileParser
     {
         Pointer += 4;
         return BitConverter.ToSingle(Buffer, Pointer - 4);
+    }
+
+    public double GetDouble()
+    {
+        Pointer += 8;
+        return BitConverter.ToDouble(Buffer, Pointer - 8);
+    }
+
+    public ushort GetUInt8()
+    {
+        return Get(1)[0];
     }
 
     public ushort GetUInt16()

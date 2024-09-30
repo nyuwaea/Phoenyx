@@ -1,8 +1,8 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Godot;
 using Menu;
-using Phoenyx;
 
 public partial class ClientManager : Node
 {
@@ -83,7 +83,7 @@ public partial class ClientManager : Node
     [Rpc(MultiplayerApi.RpcMode.Authority)]
     public void ReceiveMapName(string fileName)
     {
-        if (false && File.Exists($"{Constants.UserFolder}/maps/{fileName}"))
+        if (false && File.Exists($"{Phoenyx.Constants.UserFolder}/maps/{fileName}"))
         {
             Node.Rpc("ReceiveClientReady", true);
         }
@@ -96,7 +96,7 @@ public partial class ClientManager : Node
     [Rpc]
     public void ReceiveMapBuffer(string fileName, byte[] buffer)
     {
-        Godot.FileAccess file = Godot.FileAccess.Open($"{Constants.UserFolder}/maps/{fileName}", Godot.FileAccess.ModeFlags.Write);
+        Godot.FileAccess file = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/maps/{fileName}", Godot.FileAccess.ModeFlags.Write);
 
         file.StoreBuffer(buffer);
         file.Close();
@@ -111,10 +111,10 @@ public partial class ClientManager : Node
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]
-    public void ReceiveAllReady(string fileName, float speed = 1, string[] mods = null)
+    public void ReceiveAllReady(string fileName, float speed = 1, float startFrom = 0, Dictionary<string, bool> mods = null)
     {
         SceneManager.Load("res://scenes/game.tscn");
-		Runner.Play(MapParser.Decode($"{Constants.UserFolder}/maps/{fileName}"), speed, mods ?? Array.Empty<string>());
+		Runner.Play(MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{fileName}"), speed, startFrom, mods ?? []);
     }
 
     [Rpc(MultiplayerApi.RpcMode.AnyPeer, CallLocal = true)]

@@ -1,19 +1,30 @@
-[gd_scene load_steps=31 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=60 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
+[ext_resource type="FontFile" uid="uid://dotb3skhwouha" path="res://fonts/Roboto-Bold.ttf" id="2_nj0d7"]
 [ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="3_cp44m"]
+[ext_resource type="Shader" path="res://scripts/shaders/p.gdshader" id="3_gfhy0"]
+[ext_resource type="Texture2D" uid="uid://dqr46iek4sfxo" path="res://textures/p.png" id="4_dbx8x"]
 [ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="4_iqqm8"]
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
 [ext_resource type="StyleBox" uid="uid://bfimbyi3x5h0n" path="res://theme/line_edit_stylebox_normal.tres" id="6_6ryry"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="6_degwo"]
 [ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="7_8ivsy"]
 [ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="8_jfynb"]
-[ext_resource type="Theme" uid="uid://birpbaoexunde" path="res://theme/settings_categories_theme.tres" id="8_ygdpt"]
 [ext_resource type="Texture2D" uid="uid://8du82a5dxjdk" path="res://skin/jukebox_play.png" id="9_wc4q0"]
 [ext_resource type="Texture2D" uid="uid://bpsvcunhigs6c" path="res://skin/jukebox_skip.png" id="10_i0l4j"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="10_j4s1w"]
-[ext_resource type="Texture2D" uid="uid://men3chmi3esy" path="res://textures/add.png" id="13_h750m"]
+[ext_resource type="Texture2D" uid="uid://ct67kupv6bmny" path="res://textures/discord.png" id="11_vckcj"]
+[ext_resource type="Texture2D" uid="uid://co5ul5mlsanna" path="res://skin/mod_nofail.png" id="12_h7cn2"]
+[ext_resource type="Texture2D" uid="uid://d1c7yqqmohmv1" path="res://skin/mod_ghost.png" id="13_4nn4s"]
+[ext_resource type="Texture2D" uid="uid://d3buklvnhgqcy" path="res://textures/discord_hovered.png" id="13_lpi1s"]
+[ext_resource type="Texture2D" uid="uid://bevth7guc4yc4" path="res://skin/mod_spin.png" id="14_hd5ug"]
+[ext_resource type="Texture2D" uid="uid://3bg5xrocd55i" path="res://skin/mod_flashlight.png" id="15_2j6xq"]
+[ext_resource type="Texture2D" uid="uid://c0wbm1qc5npty" path="res://textures/discord_pressed.png" id="15_sy0m2"]
+[ext_resource type="Texture2D" uid="uid://ba8nnsyx5yiw8" path="res://skin/mod_chaos.png" id="16_sro6u"]
+[ext_resource type="Texture2D" uid="uid://bugx1qn5t88e3" path="res://skin/mod_hardrock.png" id="17_0m5iv"]
+[ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="21_bm8r1"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -23,7 +34,108 @@ subpixel_positioning = 0
 resource_name = "Phoenix"
 default_font = SubResource("SystemFont_lsskb")
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yiicd"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_bl404"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_tkeab"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_osb3p"]
+shader = ExtResource("3_gfhy0")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dr6yk"]
+shader = ExtResource("21_bm8r1")
+shader_parameter/brightness = 2.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c87ec"]
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_0uejd"]
+font = ExtResource("2_nj0d7")
+font_size = 42
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5gt56"]
+bg_color = Color(1, 1, 1, 0.0156863)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wc1go"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(1, 1, 1, 0.0235294)
+border_width_top = 8
+border_width_bottom = 8
+border_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5ycqf"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(1, 1, 1, 0)
+border_width_top = 8
+border_width_bottom = 8
+border_color = Color(1, 1, 1, 0)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_keb1d"]
+content_margin_left = 8.0
+content_margin_right = 8.0
+bg_color = Color(1, 1, 1, 0.0470588)
+border_width_top = 8
+border_width_bottom = 8
+border_color = Color(1, 1, 1, 0)
+
+[sub_resource type="Theme" id="Theme_m671i"]
+Button/font_sizes/font_size = 32
+Button/fonts/font = ExtResource("2_nj0d7")
+Button/styles/focus = SubResource("StyleBoxFlat_wc1go")
+Button/styles/hover = SubResource("StyleBoxFlat_wc1go")
+Button/styles/normal = SubResource("StyleBoxFlat_5ycqf")
+Button/styles/pressed = SubResource("StyleBoxFlat_keb1d")
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_6pifw"]
+
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_18lcc"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_omwck"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_l7ueg"]
+shader = ExtResource("21_bm8r1")
+shader_parameter/brightness = 2.0
+
+[sub_resource type="LabelSettings" id="LabelSettings_73f6f"]
+font = ExtResource("8_jfynb")
+font_color = Color(1, 1, 1, 0.25098)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_v77in"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ptq8h"]
+font = ExtResource("8_jfynb")
+
+[sub_resource type="LabelSettings" id="LabelSettings_cltbi"]
+font = ExtResource("8_jfynb")
+font_size = 14
+font_color = Color(1, 1, 1, 0.501961)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooiyf"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ruka0"]
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="LabelSettings" id="LabelSettings_5g0q6"]
+font = ExtResource("2_nj0d7")
+font_size = 32
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3x0tp"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_fsvfi"]
+font = ExtResource("10_j4s1w")
+
+[sub_resource type="LabelSettings" id="LabelSettings_5pcip"]
+font = ExtResource("8_jfynb")
+
+[sub_resource type="LabelSettings" id="LabelSettings_1o5ig"]
+font_color = Color(1, 1, 1, 0.188235)
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_h3j6r"]
+shader = ExtResource("21_bm8r1")
+shader_parameter/brightness = 2.0
 
 [sub_resource type="LabelSettings" id="LabelSettings_wksxa"]
 font = ExtResource("8_jfynb")
@@ -32,33 +144,6 @@ outline_size = 6
 outline_color = Color(0, 0, 0, 0.501961)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_t0m3h"]
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4xjus"]
-bg_color = Color(0.0360807, 0.0300716, 0.0527505, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wwrgs"]
-bg_color = Color(0.0235294, 0.0196078, 0.0352941, 1)
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_xcpmx"]
-
-[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yol12"]
-
-[sub_resource type="LabelSettings" id="LabelSettings_15nul"]
-font = ExtResource("8_jfynb")
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_wntef"]
-bg_color = Color(0.0235294, 0.0196078, 0.0352941, 1)
-
-[sub_resource type="LabelSettings" id="LabelSettings_txd3p"]
-font_size = 26
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4u8wr"]
-bg_color = Color(0.117647, 0.117647, 0.117647, 1)
-border_color = Color(1, 1, 1, 1)
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_pr6rv"]
-bg_color = Color(0, 0, 0, 1)
-border_color = Color(1, 1, 1, 1)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_0ne5a"]
 
@@ -109,7 +194,383 @@ grow_vertical = 2
 mouse_filter = 2
 color = Color(0.0235294, 0.0196078, 0.0352941, 1)
 
-[node name="Multiplayer" type="Panel" parent="."]
+[node name="TileHolder" type="Panel" parent="Background"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 64.0
+offset_bottom = -64.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_yiicd")
+
+[node name="0" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.667
+anchor_right = 0.333
+anchor_bottom = 1.0
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="1" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.333
+anchor_top = 0.667
+anchor_right = 0.667
+anchor_bottom = 1.0
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="2" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.667
+anchor_top = 0.667
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="3" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.333
+anchor_right = 0.333
+anchor_bottom = 0.667
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="4" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.333
+anchor_top = 0.333
+anchor_right = 0.667
+anchor_bottom = 0.667
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="5" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.667
+anchor_top = 0.333
+anchor_right = 1.0
+anchor_bottom = 0.667
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="6" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.333
+anchor_bottom = 0.333
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="7" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.333
+anchor_right = 0.667
+anchor_bottom = 0.333
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="8" type="ColorRect" parent="Background/TileHolder"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.667
+anchor_right = 1.0
+anchor_bottom = 0.333
+offset_right = -1.0
+mouse_filter = 2
+color = Color(1, 1, 1, 0)
+
+[node name="Menus" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_bl404")
+
+[node name="Main" type="Panel" parent="Menus"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_tkeab")
+
+[node name="Peruchor" type="TextureRect" parent="Menus/Main"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_osb3p")
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 0.8
+texture = ExtResource("4_dbx8x")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="News" type="Panel" parent="Menus/Main"]
+material = SubResource("ShaderMaterial_dr6yk")
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.6
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 0.8
+offset_top = 96.0
+offset_right = -96.0
+offset_bottom = -96.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_c87ec")
+
+[node name="Header" type="Label" parent="Menus/Main/News"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 8.0
+offset_right = -24.0
+offset_bottom = 32.0
+text = "NEWS"
+label_settings = SubResource("LabelSettings_0uejd")
+
+[node name="Panel" type="Panel" parent="Menus/Main/News"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 60.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_5gt56")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Menus/Main/News/Panel"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+theme = ExtResource("2_46xtp")
+theme_override_fonts/normal_font = ExtResource("8_jfynb")
+bbcode_enabled = true
+text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
+[font_size=24]Changelog
+
+[font_size=16][i]FEATURES & MAIN CHANGES[/i][ul]
+ Proper main menu
+ Extras (& statistics) menu
+ Search by map author
+ Spaces (background environments)[ul]
+ Void
+ Grid
+[/ul]
+ Replays (supports viewing multiple at once)
+ Local leaderboards
+ Fully customizable combo progress widget (will become editable when skin editor is implemented)
+ Pause menu
+ Settings profiles
+ Start from
+ New settings[ul]
+ Video background render scale
+ Absolute input
+ Record replays
+ Toggle hit score popup
+ Toggle miss popup
+ Ghost modifier
+[/ul]
+ Made score dropoff more lenient (20ms for perfect hit -> 25ms, lowest multiplier 0.65x -> 0.8x)
+ This panel :)
+[/ul]
+
+[i]QoL CHANGES[/i][ul]
+ Jukebox will now account for keyboards with media keys
+ Map difficulty names' colour now represents the difficulty
+ The delay when starting a map now accounts for your approach time
+ Smooth song transitions from the game scene, to results, then menus
+ Automatically import every non-phxm file in map folder on launch
+ Improved game scene HUD
+ Many more that I did not keep track of
+[/ul]
+
+[i]BUG FIXES[/i][ul]
+ Settings values now round properly
+ Skipping a break in a map with a video background no longer desyncs the video
+ Playing a map you just imported will actually work
+ Consistent map order
+ Many, many more that I did not keep track of"
+shortcut_keys_enabled = false
+
+[node name="Buttons" type="VBoxContainer" parent="Menus/Main"]
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
+offset_left = 64.0
+offset_top = 80.0
+offset_right = 512.0
+offset_bottom = -80.0
+alignment = 1
+
+[node name="Play" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "PLAY"
+alignment = 0
+
+[node name="Settings" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "SETTINGS"
+alignment = 0
+
+[node name="Extras" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "EXTRAS"
+alignment = 0
+
+[node name="Quit" type="Button" parent="Menus/Main/Buttons"]
+layout_mode = 2
+focus_mode = 0
+theme = SubResource("Theme_m671i")
+text = "QUIT"
+alignment = 0
+
+[node name="Play" type="Panel" parent="Menus"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_6pifw")
+
+[node name="SubTopBar" type="Panel" parent="Menus/Play"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 64.0
+offset_right = -8.0
+offset_bottom = 128.0
+theme = ExtResource("2_46xtp")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+
+[node name="Import" type="Button" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -448.0
+offset_top = 14.0
+offset_right = -374.0
+offset_bottom = 46.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Import"
+
+[node name="UserFolder" type="Button" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -556.0
+offset_top = 14.0
+offset_right = -456.0
+offset_bottom = 46.0
+grow_horizontal = 0
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "User Folder"
+
+[node name="Settings" type="Button" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -644.0
+offset_top = 14.0
+offset_right = -564.0
+offset_bottom = 46.0
+grow_horizontal = 0
+tooltip_text = "CTRL + O"
+focus_mode = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+text = "Settings"
+
+[node name="Search" type="LineEdit" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -258.0
+offset_top = 14.0
+offset_right = -8.0
+offset_bottom = 46.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = ExtResource("6_6ryry")
+placeholder_text = "Search"
+caret_blink = true
+
+[node name="SearchAuthor" type="LineEdit" parent="Menus/Play/SubTopBar"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -366.0
+offset_top = 14.0
+offset_right = -266.0
+offset_bottom = 46.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme = ExtResource("2_46xtp")
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_styles/focus = ExtResource("6_6ryry")
+placeholder_text = "Author"
+caret_blink = true
+
+[node name="Multiplayer" type="Panel" parent="Menus/Play"]
 visible = false
 layout_mode = 1
 anchors_preset = -1
@@ -120,7 +581,7 @@ anchor_bottom = 0.9
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Host" type="Button" parent="Multiplayer"]
+[node name="Host" type="Button" parent="Menus/Play/Multiplayer"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -138,7 +599,7 @@ theme_override_styles/pressed = ExtResource("4_iqqm8")
 theme_override_styles/normal = ExtResource("3_cp44m")
 text = "Host"
 
-[node name="Join" type="Button" parent="Multiplayer"]
+[node name="Join" type="Button" parent="Menus/Play/Multiplayer"]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
@@ -156,7 +617,7 @@ theme_override_styles/pressed = ExtResource("4_iqqm8")
 theme_override_styles/normal = ExtResource("3_cp44m")
 text = "Join"
 
-[node name="Port" type="LineEdit" parent="Multiplayer"]
+[node name="Port" type="LineEdit" parent="Menus/Play/Multiplayer"]
 layout_mode = 0
 offset_left = 155.0
 offset_top = 10.0
@@ -166,7 +627,7 @@ tooltip_text = "Don't forget to port forward!"
 theme = ExtResource("2_46xtp")
 placeholder_text = "44220"
 
-[node name="IP" type="LineEdit" parent="Multiplayer"]
+[node name="IP" type="LineEdit" parent="Menus/Play/Multiplayer"]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 10.0
@@ -176,7 +637,7 @@ tooltip_text = "Set this to your local IPv4 (192.168.X.XXX) "
 theme = ExtResource("2_46xtp")
 placeholder_text = "127.0.0.1"
 
-[node name="ChatInput" type="LineEdit" parent="Multiplayer"]
+[node name="ChatInput" type="LineEdit" parent="Menus/Play/Multiplayer"]
 layout_mode = 0
 offset_left = 10.0
 offset_top = 152.4
@@ -185,7 +646,7 @@ offset_bottom = 183.4
 tooltip_text = "Chat"
 theme = ExtResource("2_46xtp")
 
-[node name="Chat" type="ScrollContainer" parent="Multiplayer"]
+[node name="Chat" type="ScrollContainer" parent="Menus/Play/Multiplayer"]
 layout_mode = 1
 anchors_preset = 12
 anchor_top = 1.0
@@ -198,120 +659,916 @@ offset_bottom = -43.4
 grow_horizontal = 2
 grow_vertical = 0
 
-[node name="Holder" type="VBoxContainer" parent="Multiplayer/Chat"]
+[node name="Holder" type="VBoxContainer" parent="Menus/Play/Multiplayer/Chat"]
 custom_minimum_size = Vector2(440.8, 100)
 layout_mode = 2
 size_flags_horizontal = 4
 
-[node name="TopBar" type="Panel" parent="."]
+[node name="MapList" type="ScrollContainer" parent="Menus/Play"]
 layout_mode = 1
 anchors_preset = -1
+anchor_left = 0.5
 anchor_right = 1.0
-offset_left = 4.0
-offset_top = 4.0
-offset_right = -4.0
-offset_bottom = 64.0
+anchor_bottom = 1.0
+offset_top = 128.0
+offset_right = -8.0
+offset_bottom = -72.0
+grow_horizontal = 0
+mouse_filter = 2
 theme = ExtResource("2_46xtp")
-theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+horizontal_scroll_mode = 0
 
-[node name="Background" type="ColorRect" parent="TopBar"]
+[node name="Container" type="VBoxContainer" parent="Menus/Play/MapList"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.0
+theme = ExtResource("2_46xtp")
+
+[node name="Leaderboard" type="Panel" parent="Menus/Play"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.4
+anchor_right = 0.25
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_bottom = -72.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_omwck")
+
+[node name="Background" type="ColorRect" parent="Menus/Play/Leaderboard"]
+material = SubResource("ShaderMaterial_l7ueg")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.0313726)
 
-[node name="Import" type="Button" parent="TopBar"]
+[node name="NoScores" type="Label" parent="Menus/Play/Leaderboard"]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
+anchors_preset = 15
 anchor_right = 1.0
-offset_left = -448.0
-offset_top = 14.0
-offset_right = -374.0
-offset_bottom = 46.0
-grow_horizontal = 0
-focus_mode = 0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "no scores yet :("
+label_settings = SubResource("LabelSettings_73f6f")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Menus/Play/Leaderboard"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Import"
 
-[node name="UserFolder" type="Button" parent="TopBar"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -556.0
-offset_top = 14.0
-offset_right = -456.0
-offset_bottom = 46.0
-grow_horizontal = 0
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "User Folder"
+[node name="VBoxContainer" type="VBoxContainer" parent="Menus/Play/Leaderboard/ScrollContainer"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
 
-[node name="Settings" type="Button" parent="TopBar"]
+[node name="Modifiers" type="Panel" parent="Menus/Play"]
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -644.0
-offset_top = 14.0
-offset_right = -564.0
-offset_bottom = 46.0
-grow_horizontal = 0
-tooltip_text = "CTRL + O"
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Settings"
+anchors_preset = -1
+anchor_right = 0.25
+anchor_bottom = 0.4
+offset_left = 8.0
+offset_top = 128.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_omwck")
 
-[node name="Search" type="LineEdit" parent="TopBar"]
+[node name="Background" type="ColorRect" parent="Menus/Play/Modifiers"]
+material = SubResource("ShaderMaterial_l7ueg")
 layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
+anchors_preset = 15
 anchor_right = 1.0
-offset_left = -258.0
-offset_top = 14.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Speed" type="Panel" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.2
+offset_left = 8.0
 offset_right = -8.0
-offset_bottom = 46.0
-grow_horizontal = 0
-mouse_default_cursor_shape = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_styles/focus = ExtResource("6_6ryry")
-placeholder_text = "Search"
-caret_blink = true
+theme_override_styles/panel = SubResource("StyleBoxEmpty_v77in")
 
-[node name="SearchAuthor" type="LineEdit" parent="TopBar"]
+[node name="Label" type="Label" parent="Menus/Play/Modifiers/Speed"]
 layout_mode = 1
-anchors_preset = 1
+anchors_preset = -1
+anchor_right = 0.2
+anchor_bottom = 1.0
+text = "Speed"
+label_settings = SubResource("LabelSettings_ptq8h")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Menus/Play/Modifiers/Speed"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -67.0
+theme = ExtResource("2_46xtp")
+min_value = 50.0
+max_value = 200.0
+step = 5.0
+value = 100.0
+rounded = true
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Menus/Play/Modifiers/Speed"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -366.0
-offset_top = 14.0
-offset_right = -266.0
-offset_bottom = 46.0
+anchor_bottom = 1.0
+offset_left = 8.0
 grow_horizontal = 0
 mouse_default_cursor_shape = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-theme_override_styles/focus = ExtResource("6_6ryry")
-placeholder_text = "Author"
+theme_override_font_sizes/font_size = 16
+text = "100"
+placeholder_text = "100"
+max_length = 5
+context_menu_enabled = false
+flat = true
 caret_blink = true
+
+[node name="LabelDecrease" type="Label" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 0.2
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = 17.0
+text = "Difficulty Decrease"
+label_settings = SubResource("LabelSettings_cltbi")
+horizontal_alignment = 1
+
+[node name="Decrease" type="HBoxContainer" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 8.0
+offset_top = 22.0
+offset_right = -8.0
+offset_bottom = -5.0
+theme_override_constants/separation = 4
+
+[node name="NoFail" type="TextureButton" parent="Menus/Play/Modifiers/Decrease"]
+self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("12_h7cn2")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="LabelIncrease" type="Label" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = 17.0
+text = "Difficulty Increase"
+label_settings = SubResource("LabelSettings_cltbi")
+horizontal_alignment = 1
+
+[node name="Increase" type="HBoxContainer" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.8
+offset_left = 8.0
+offset_top = 22.0
+offset_right = -8.0
+offset_bottom = -5.0
+theme_override_constants/separation = 4
+
+[node name="Ghost" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("13_4nn4s")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Spin" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("14_hd5ug")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Flashlight" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+visible = false
+self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("15_2j6xq")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Chaos" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+visible = false
+self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("16_sro6u")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="HardRock" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+visible = false
+self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("17_0m5iv")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="StartFrom" type="Panel" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.8
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -8.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_v77in")
+
+[node name="Label" type="Label" parent="Menus/Play/Modifiers/StartFrom"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.2
+anchor_bottom = 1.0
+text = "Start From"
+label_settings = SubResource("LabelSettings_ptq8h")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Menus/Play/Modifiers/StartFrom"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -67.0
+theme = ExtResource("2_46xtp")
+max_value = 1.0
+step = 0.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Menus/Play/Modifiers/StartFrom"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0:00"
+placeholder_text = "0:00"
+max_length = 5
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="Extras" type="Panel" parent="Menus"]
+visible = false
+modulate = Color(1, 1, 1, 0)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_ooiyf")
+
+[node name="Logo" type="TextureRect" parent="Menus/Extras"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -32.0
+offset_top = 72.0
+offset_right = 32.0
+offset_bottom = 172.0
+grow_horizontal = 2
+mouse_filter = 2
+texture = ExtResource("7_8ivsy")
+expand_mode = 3
+
+[node name="SoundSpace" type="Button" parent="Menus/Extras"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -96.0
+offset_top = 64.0
+offset_right = 96.0
+offset_bottom = 204.0
+grow_horizontal = 2
+focus_mode = 0
+theme_override_colors/font_color = Color(1, 1, 1, 0.25098)
+theme_override_fonts/font = ExtResource("10_j4s1w")
+flat = true
+
+[node name="RichTextLabel" type="RichTextLabel" parent="Menus/Extras/SoundSpace"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -24.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
+theme_override_fonts/normal_font = ExtResource("10_j4s1w")
+bbcode_enabled = true
+text = "[center][color=ffffff40]Inspired by Sound Space"
+scroll_active = false
+
+[node name="Stats" type="Panel" parent="Menus/Extras"]
+material = SubResource("ShaderMaterial_dr6yk")
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.4
+anchor_bottom = 1.0
+offset_left = 196.0
+offset_top = 204.0
+offset_bottom = -80.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_ruka0")
+
+[node name="Header" type="Label" parent="Menus/Extras/Stats"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 8.0
+grow_horizontal = 2
+text = "STATISTICS"
+label_settings = SubResource("LabelSettings_5g0q6")
+horizontal_alignment = 1
+
+[node name="ScrollContainer" type="ScrollContainer" parent="Menus/Extras/Stats"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = 54.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = ExtResource("2_46xtp")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Menus/Extras/Stats/ScrollContainer"]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 0
+
+[node name="GamePlaytime" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Time spent strictly being in a map"
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamePlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Game Playtime"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamePlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0h"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="TotalPlaytime" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalPlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Total Playtime"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalPlaytime"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0h"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="GamesOpened" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamesOpened"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Games Opened"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/GamesOpened"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="TotalDistance" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Adjusted to 1000 DPI"
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalDistance"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Total Distance"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalDistance"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0m"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="NotesHit" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesHit"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Notes Hit"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesHit"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="NotesMissed" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesMissed"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Notes Missed"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/NotesMissed"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="HighestCombo" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestCombo"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Highest Combo"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestCombo"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="Attempts" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Attempts"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Attempts"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Attempts"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="Passes" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Passes"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Passes"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/Passes"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="FullCombos" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FullCombos"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Full Combos"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FullCombos"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="HighestScore" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Highest Score"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/HighestScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="TotalScore" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Total Score"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/TotalScore"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="AverageAccuracy" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/AverageAccuracy"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Average Accuracy"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/AverageAccuracy"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0%"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="RageQuits" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/RageQuits"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_right = -4.0
+text = "Rage Quits"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/RageQuits"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+text = "0"
+label_settings = SubResource("LabelSettings_5pcip")
+vertical_alignment = 1
+
+[node name="FavouriteMap" type="Panel" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer"]
+custom_minimum_size = Vector2(380, 32)
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 1
+theme_override_styles/panel = SubResource("StyleBoxEmpty_3x0tp")
+
+[node name="Key" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FavouriteMap"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_top = 6.0
+offset_right = -4.0
+text = "Favourite Map"
+label_settings = SubResource("LabelSettings_fsvfi")
+horizontal_alignment = 2
+
+[node name="Value" type="Label" parent="Menus/Extras/Stats/ScrollContainer/VBoxContainer/FavouriteMap"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.5
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = 6.0
+label_settings = SubResource("LabelSettings_5pcip")
+autowrap_mode = 3
+
+[node name="TopBar" type="Panel" parent="."]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 64.0
+theme = ExtResource("2_46xtp")
+theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
+
+[node name="Background" type="ColorRect" parent="TopBar"]
+material = SubResource("ShaderMaterial_l7ueg")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
 
 [node name="Logo" type="TextureRect" parent="TopBar"]
-layout_mode = 0
+layout_mode = 1
+anchors_preset = -1
+anchor_bottom = 1.0
 offset_left = 6.0
 offset_top = 6.0
-offset_right = 54.0
-offset_bottom = 54.0
+offset_right = 50.0
+offset_bottom = -6.0
 texture = ExtResource("7_8ivsy")
 expand_mode = 2
 stretch_mode = 5
+
+[node name="Version" type="Label" parent="TopBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 64.0
+grow_vertical = 2
+text = "Phoenyx v1.0.0"
+label_settings = SubResource("LabelSettings_1o5ig")
+vertical_alignment = 1
+
+[node name="Discord" type="TextureButton" parent="TopBar"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 184.0
+offset_top = -16.0
+offset_right = 216.0
+offset_bottom = 16.0
+grow_vertical = 2
+focus_mode = 0
+texture_normal = ExtResource("11_vckcj")
+texture_pressed = ExtResource("15_sy0m2")
+texture_hover = ExtResource("13_lpi1s")
 
 [node name="Jukebox" type="Panel" parent="."]
 layout_mode = 1
@@ -319,21 +1576,21 @@ anchors_preset = -1
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 4.0
+offset_left = 8.0
 offset_top = -64.0
-offset_right = -4.0
-offset_bottom = -4.0
+offset_right = -8.0
+offset_bottom = -8.0
 theme = ExtResource("2_46xtp")
 theme_override_styles/panel = SubResource("StyleBoxEmpty_18lcc")
 
 [node name="Background" type="ColorRect" parent="Jukebox"]
+material = SubResource("ShaderMaterial_h3j6r")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(1, 1, 1, 0.0313726)
 
 [node name="Spectrum" type="HBoxContainer" parent="Jukebox"]
 layout_mode = 1
@@ -926,10 +2183,11 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -17.0
+offset_left = -15.0
 offset_top = 13.0
-offset_right = 17.0
+offset_right = 15.0
 offset_bottom = -13.0
+focus_mode = 1
 texture_normal = ExtResource("9_wc4q0")
 ignore_texture_size = true
 stretch_mode = 0
@@ -943,8 +2201,9 @@ anchor_right = 0.5
 anchor_bottom = 1.0
 offset_left = 20.0
 offset_top = 13.0
-offset_right = 54.0
+offset_right = 50.0
 offset_bottom = -13.0
+focus_mode = 1
 texture_normal = ExtResource("10_i0l4j")
 ignore_texture_size = true
 stretch_mode = 0
@@ -956,10 +2215,11 @@ anchors_preset = -1
 anchor_left = 0.5
 anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = -54.0
+offset_left = -50.0
 offset_top = 13.0
 offset_right = -20.0
 offset_bottom = -13.0
+focus_mode = 1
 texture_normal = ExtResource("10_i0l4j")
 ignore_texture_size = true
 stretch_mode = 0
@@ -972,9 +2232,8 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 64.0
-offset_top = -1.0
+offset_top = -2.0
 offset_right = -64.0
-offset_bottom = 1.0
 mouse_filter = 2
 
 [node name="Background" type="ColorRect" parent="Jukebox/Progress"]
@@ -1001,32 +2260,12 @@ anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = -210.0
-offset_top = -110.0
+offset_top = -172.0
 offset_right = -10.0
-offset_bottom = -10.0
+offset_bottom = -72.0
 grow_horizontal = 0
 grow_vertical = 0
 alignment = 2
-
-[node name="MapList" type="ScrollContainer" parent="."]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.5
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 72.0
-offset_bottom = -72.0
-grow_horizontal = 0
-mouse_filter = 2
-theme = ExtResource("2_46xtp")
-horizontal_scroll_mode = 0
-
-[node name="Container" type="VBoxContainer" parent="MapList"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.0
-theme = ExtResource("2_46xtp")
 
 [node name="ContextMenu" type="Panel" parent="."]
 visible = false
@@ -1102,1371 +2341,6 @@ text = "Remove Video"
 flat = true
 alignment = 0
 
-[node name="Settings" type="ColorRect" parent="."]
-modulate = Color(1, 1, 1, 0)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 0.501961)
-
-[node name="Deselect" type="Button" parent="Settings"]
-self_modulate = Color(1, 1, 1, 0)
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-action_mode = 0
-button_mask = 3
-
-[node name="Holder" type="Panel" parent="Settings"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.25
-anchor_top = 0.25
-anchor_right = 0.75
-anchor_bottom = 0.75
-theme = ExtResource("2_46xtp")
-theme_override_styles/panel = SubResource("StyleBoxFlat_4xjus")
-
-[node name="Dim" type="Panel" parent="Settings/Holder"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.2
-anchor_bottom = 1.0
-offset_top = 40.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_styles/panel = SubResource("StyleBoxFlat_wwrgs")
-
-[node name="Categories" type="Panel" parent="Settings/Holder"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.2
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.00001
-offset_top = 48.0
-offset_right = -8.0
-offset_bottom = -8.0
-theme_override_styles/panel = SubResource("StyleBoxEmpty_xcpmx")
-
-[node name="Gameplay" type="ScrollContainer" parent="Settings/Holder/Categories"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Gameplay"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 2
-
-[node name="Sensitivity" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/Sensitivity"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Sensitivity"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Gameplay/Container/Sensitivity"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 3.0
-step = 0.01
-value = 0.66
-allow_greater = true
-allow_lesser = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/Sensitivity"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "0.66"
-placeholder_text = "0.66"
-max_length = 5
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="CameraLock" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/CameraLock"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Camera Lock"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Gameplay/Container/CameraLock"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-button_pressed = true
-flat = true
-
-[node name="CursorDrift" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "A.K.A. \"Buffer cursor\""
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/CursorDrift"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Cursor Drift"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Gameplay/Container/CursorDrift"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-button_pressed = true
-flat = true
-
-[node name="ApproachRate" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/ApproachRate"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Approach Rate"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Gameplay/Container/ApproachRate"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-min_value = 1.0
-max_value = 60.0
-step = 0.5
-value = 35.0
-allow_greater = true
-allow_lesser = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/ApproachRate"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "35"
-placeholder_text = "35"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="ApproachDistance" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Note spawn distance"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/ApproachDistance"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Approach Distance"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Gameplay/Container/ApproachDistance"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-min_value = 1.0
-max_value = 60.0
-step = 0.5
-value = 16.0
-allow_greater = true
-allow_lesser = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/ApproachDistance"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "16"
-placeholder_text = "16"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="FadeIn" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Note fade in length (in %)"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/FadeIn"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Fade In"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Gameplay/Container/FadeIn"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-rounded = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/FadeIn"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "0"
-placeholder_text = "0"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="FadeOut" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "A.K.A. \"Half-ghost\""
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/FadeOut"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Fade Out"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Gameplay/Container/FadeOut"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-button_pressed = true
-flat = true
-
-[node name="Pushback" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/Pushback"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Pushback"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Gameplay/Container/Pushback"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-button_pressed = true
-flat = true
-
-[node name="Parallax" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/Parallax"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Parallax"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Gameplay/Container/Parallax"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 1.0
-step = 0.025
-value = 1.0
-allow_greater = true
-allow_lesser = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/Parallax"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "0.1"
-placeholder_text = "0.1"
-max_length = 5
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="FoV" type="Panel" parent="Settings/Holder/Categories/Gameplay/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Gameplay/Container/FoV"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "FoV
-"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Gameplay/Container/FoV"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-min_value = 20.0
-max_value = 179.0
-value = 70.0
-rounded = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Gameplay/Container/FoV"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "70"
-placeholder_text = "70"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="Visuals" type="ScrollContainer" parent="Settings/Holder/Categories"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Visuals"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 2
-
-[node name="Skin" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Skin"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="OptionsButton" type="OptionButton" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.8
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 4.0
-offset_bottom = -4.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-alignment = 1
-selected = 0
-fit_to_longest_item = false
-item_count = 1
-popup/item_0/text = "default"
-
-[node name="SkinFolder" type="Button" parent="Settings/Holder/Categories/Visuals/Container/Skin"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.575
-anchor_right = 0.8
-anchor_bottom = 1.0
-offset_top = 4.0
-offset_bottom = -4.0
-grow_horizontal = 0
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "Skin Folder"
-
-[node name="Colors" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Hexadecimal format only, separated by a comma"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/Colors"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Colors"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/Colors"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 1.0
-anchor_bottom = 1.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "00ffed,ff8ff9"
-placeholder_text = "00ffed,ff8ff9"
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="NoteSize" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "This does not affect the hit box size"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Note Size"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 2.0
-step = 0.025
-value = 0.875
-allow_greater = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/NoteSize"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "0.875"
-placeholder_text = "0.875"
-max_length = 5
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="CursorScale" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Cursor Scale"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 4.0
-step = 0.025
-value = 1.0
-allow_greater = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/CursorScale"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "1"
-placeholder_text = "1"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="CursorTrail" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Does not apply in menu"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/CursorTrail"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Cursor Trail"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Visuals/Container/CursorTrail"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-flat = true
-
-[node name="TrailTime" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Trail Time"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 1.0
-step = 0.01
-value = 0.05
-allow_greater = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/TrailTime"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "0.05"
-placeholder_text = "0.05"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="TrailDetail" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Not yet implemented"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Trail Detail"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-max_value = 10.0
-step = 0.05
-value = 1.0
-allow_greater = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/TrailDetail"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "1"
-placeholder_text = "1"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="VideoDim" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/VideoDim"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Video BG Dim"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/VideoDim"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-value = 80.0
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/VideoDim"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "80"
-placeholder_text = "80"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="VideoRenderScale" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/VideoRenderScale"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Video BG Render Scale"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Visuals/Container/VideoRenderScale"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-value = 100.0
-rounded = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Visuals/Container/VideoRenderScale"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "100"
-placeholder_text = "100"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="SimpleHUD" type="Panel" parent="Settings/Holder/Categories/Visuals/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "Only shows misses"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Visuals/Container/SimpleHUD"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Simple HUD"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Visuals/Container/SimpleHUD"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-flat = true
-
-[node name="Video" type="ScrollContainer" parent="Settings/Holder/Categories"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Video"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 2
-
-[node name="Fullscreen" type="Panel" parent="Settings/Holder/Categories/Video/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-tooltip_text = "F11 or ALT + ENTER"
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Video/Container/Fullscreen"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Fullscreen"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Video/Container/Fullscreen"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-flat = true
-
-[node name="Audio" type="ScrollContainer" parent="Settings/Holder/Categories"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Audio"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 2
-
-[node name="VolumeMaster" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/VolumeMaster"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Master Volume"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Audio/Container/VolumeMaster"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-value = 50.0
-allow_greater = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeMaster"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "50"
-placeholder_text = "50"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="VolumeMusic" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/VolumeMusic"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Music Volume"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Audio/Container/VolumeMusic"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-value = 50.0
-allow_greater = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeMusic"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "50"
-placeholder_text = "50"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="VolumeSFX" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/VolumeSFX"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "SFX Volume"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="HSlider" type="HSlider" parent="Settings/Holder/Categories/Audio/Container/VolumeSFX"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.3
-anchor_right = 0.9
-anchor_bottom = 1.0
-theme = ExtResource("2_46xtp")
-value = 50.0
-allow_greater = true
-scrollable = false
-
-[node name="LineEdit" type="LineEdit" parent="Settings/Holder/Categories/Audio/Container/VolumeSFX"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-mouse_default_cursor_shape = 0
-theme_override_font_sizes/font_size = 16
-text = "50"
-placeholder_text = "50"
-max_length = 16
-context_menu_enabled = false
-flat = true
-caret_blink = true
-
-[node name="AlwaysPlayHitSound" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/AlwaysPlayHitSound"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Always Play Hit Sound"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Audio/Container/AlwaysPlayHitSound"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-flat = true
-
-[node name="AutoplayJukebox" type="Panel" parent="Settings/Holder/Categories/Audio/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Audio/Container/AutoplayJukebox"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Autoplay Jukebox"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="CheckButton" type="CheckButton" parent="Settings/Holder/Categories/Audio/Container/AutoplayJukebox"]
-clip_contents = true
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.9
-anchor_right = 0.9
-anchor_bottom = 1.0
-offset_left = 8.0
-grow_vertical = 2
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-button_pressed = true
-flat = true
-
-[node name="Other" type="ScrollContainer" parent="Settings/Holder/Categories"]
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Categories/Other"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme_override_constants/separation = 2
-
-[node name="RhythiaImport" type="Panel" parent="Settings/Holder/Categories/Other/Container"]
-custom_minimum_size = Vector2(0, 32)
-layout_mode = 2
-theme_override_styles/panel = SubResource("StyleBoxEmpty_yol12")
-
-[node name="Label" type="Label" parent="Settings/Holder/Categories/Other/Container/RhythiaImport"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.3
-anchor_bottom = 1.0
-text = "Rhythia Settings Import"
-label_settings = SubResource("LabelSettings_15nul")
-vertical_alignment = 1
-clip_text = true
-text_overrun_behavior = 3
-
-[node name="Button" type="Button" parent="Settings/Holder/Categories/Other/Container/RhythiaImport"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.7
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 4.0
-offset_right = -4.0
-offset_bottom = -4.0
-grow_horizontal = 0
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-theme_override_colors/font_color = Color(1, 1, 1, 1)
-text = "1-Click Import"
-
-[node name="Sidebar" type="ScrollContainer" parent="Settings/Holder"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.2
-anchor_bottom = 1.0
-offset_top = 40.0
-
-[node name="Container" type="VBoxContainer" parent="Settings/Holder/Sidebar"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-theme = ExtResource("2_46xtp")
-theme_override_constants/separation = 0
-
-[node name="Gameplay" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-color = Color(1, 1, 1, 0.0313726)
-
-[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Gameplay"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_bottom = 50.0
-focus_mode = 0
-theme = ExtResource("8_ygdpt")
-text = "  GAMEPLAY"
-alignment = 0
-
-[node name="Visuals" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-color = Color(1, 1, 1, 0)
-
-[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Visuals"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_bottom = 50.0
-focus_mode = 0
-theme = ExtResource("8_ygdpt")
-text = "  VISUALS"
-alignment = 0
-
-[node name="Video" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-color = Color(1, 1, 1, 0)
-
-[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Video"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_bottom = 50.0
-focus_mode = 0
-theme = ExtResource("8_ygdpt")
-text = "  VIDEO"
-alignment = 0
-
-[node name="Audio" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-color = Color(1, 1, 1, 0)
-
-[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Audio"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_bottom = 50.0
-focus_mode = 0
-theme = ExtResource("8_ygdpt")
-text = "  AUDIO"
-alignment = 0
-
-[node name="Other" type="ColorRect" parent="Settings/Holder/Sidebar/Container"]
-custom_minimum_size = Vector2(0, 50)
-layout_mode = 2
-color = Color(1, 1, 1, 0)
-
-[node name="Button" type="Button" parent="Settings/Holder/Sidebar/Container/Other"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_bottom = 50.0
-focus_mode = 0
-theme = ExtResource("8_ygdpt")
-text = "  OTHER"
-alignment = 0
-
-[node name="Header" type="Panel" parent="Settings/Holder"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 1.0
-offset_bottom = 40.0
-theme = ExtResource("2_46xtp")
-theme_override_styles/panel = SubResource("StyleBoxFlat_wntef")
-
-[node name="Title" type="Label" parent="Settings/Holder/Header"]
-layout_mode = 1
-anchors_preset = -1
-anchor_right = 0.6
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_right = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-theme = ExtResource("2_46xtp")
-text = "SETTINGS"
-label_settings = SubResource("LabelSettings_txd3p")
-vertical_alignment = 1
-
-[node name="Profiles" type="OptionButton" parent="Settings/Holder/Header"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 0.75
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 8.0
-offset_right = -32.0
-offset_bottom = -8.0
-focus_mode = 0
-theme = ExtResource("2_46xtp")
-alignment = 1
-text_overrun_behavior = 3
-clip_text = true
-selected = 0
-fit_to_longest_item = false
-item_count = 1
-popup/item_0/text = "default"
-
-[node name="CreateProfile" type="Button" parent="Settings/Holder/Header"]
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = -28.0
-offset_top = 10.0
-offset_right = -8.0
-offset_bottom = -10.0
-grow_horizontal = 2
-grow_vertical = 2
-tooltip_text = "Create Profile"
-focus_mode = 0
-theme_override_styles/hover = SubResource("StyleBoxFlat_4u8wr")
-theme_override_styles/normal = SubResource("StyleBoxFlat_pr6rv")
-icon = ExtResource("13_h750m")
-icon_alignment = 1
-
-[node name="ProfileEdit" type="LineEdit" parent="Settings/Holder/Header"]
-visible = false
-layout_mode = 1
-anchors_preset = -1
-anchor_left = 1.0
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_top = 8.0
-offset_right = 128.0
-offset_bottom = -8.0
-tooltip_text = "Create Profile"
-focus_mode = 1
-mouse_default_cursor_shape = 0
-theme_override_styles/normal = SubResource("StyleBoxFlat_pr6rv")
-placeholder_text = "profile name"
-caret_blink = true
-
 [node name="Volume" type="Panel" parent="."]
 modulate = Color(1, 1, 1, 0)
 layout_mode = 1
@@ -2519,6 +2393,7 @@ grow_vertical = 2
 mouse_filter = 2
 
 [node name="Cursor" type="TextureRect" parent="."]
+z_index = 1
 layout_mode = 0
 offset_right = 32.0
 offset_bottom = 32.0
@@ -2528,6 +2403,7 @@ expand_mode = 1
 
 [node name="Transition" type="ColorRect" parent="."]
 self_modulate = Color(1, 1, 1, 0)
+z_index = 2
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
