@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Security.Cryptography;
 using Godot;
@@ -167,6 +168,7 @@ public partial class Runner : Node3D
 				ReplayFile.StoreDouble(Phoenyx.Settings.Parallax);
 				ReplayFile.StoreDouble(Phoenyx.Settings.FoV);
 				ReplayFile.StoreDouble(Phoenyx.Settings.NoteSize);
+				ReplayFile.StoreDouble(Phoenyx.Settings.Sensitivity);
 
 				ReplayAttemptStatusOffset = (uint)ReplayFile.GetPosition();
 
@@ -813,7 +815,7 @@ public partial class Runner : Node3D
 
 			if (CurrentAttempt.Mods["Spin"])
 			{
-				mouseDelta *= new Vector2(1, -1) * (float)Math.PI / 2 * 100;
+				mouseDelta *= new Vector2(1, -1) / (float)CurrentAttempt.Replays[0].Sensitivity * 106;	// idk lol
 			}
 
 			UpdateCursor(mouseDelta);
@@ -1300,15 +1302,17 @@ public partial class Runner : Node3D
 
 	public static void UpdateCursor(Vector2 mouseDelta)
 	{
+		float sensitivity = (float)(CurrentAttempt.IsReplay ? CurrentAttempt.Replays[0].Sensitivity : Phoenyx.Settings.Sensitivity);
+
 		if (!CurrentAttempt.Mods["Spin"])
 		{
 			if (Phoenyx.Settings.CursorDrift)
 			{
-				CurrentAttempt.CursorPosition = (CurrentAttempt.CursorPosition + new Vector2(1, -1) * mouseDelta / 120 * (float)Phoenyx.Settings.Sensitivity).Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
+				CurrentAttempt.CursorPosition = (CurrentAttempt.CursorPosition + new Vector2(1, -1) * mouseDelta / 120 * sensitivity).Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
 			}
 			else
 			{
-				CurrentAttempt.RawCursorPosition += new Vector2(1, -1) * mouseDelta / 120 * (float)Phoenyx.Settings.Sensitivity;
+				CurrentAttempt.RawCursorPosition += new Vector2(1, -1) * mouseDelta / 120 * sensitivity;
 				CurrentAttempt.CursorPosition = CurrentAttempt.RawCursorPosition.Clamp(-Phoenyx.Constants.Bounds, Phoenyx.Constants.Bounds);
 			}
 			
@@ -1320,7 +1324,7 @@ public partial class Runner : Node3D
 		}
 		else
 		{
-			Camera.Rotation += new Vector3(-mouseDelta.Y / 120 * (float)Phoenyx.Settings.Sensitivity / (float)Math.PI, -mouseDelta.X / 120 * (float)Phoenyx.Settings.Sensitivity / (float)Math.PI, 0);
+			Camera.Rotation += new Vector3(-mouseDelta.Y / 120 * sensitivity / (float)Math.PI, -mouseDelta.X / 120 * sensitivity / (float)Math.PI, 0);
 			Camera.Rotation = new Vector3((float)Math.Clamp(Camera.Rotation.X, Mathf.DegToRad(-90), Mathf.DegToRad(90)), Camera.Rotation.Y, Camera.Rotation.Z);
 			Camera.Position = new Vector3(0, 0, 3.5f) + Camera.Basis.Z / 4;
 			

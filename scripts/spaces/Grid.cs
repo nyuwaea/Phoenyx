@@ -24,7 +24,6 @@ public partial class Grid : Node3D
         Colour = Colour.Lerp(Runner.CurrentAttempt.LastHitColour, (float)delta * 8);
 
         TileMaterial.AlbedoColor = Colour;
-        TileMaterial.Uv1Offset += Vector3.Up * (float)delta * 2;
-        //Environment.FogLightColor = Colour / 15;
+        TileMaterial.Uv1Offset += Vector3.Up * (float)delta * 3;
     }
 }

@@ -30,6 +30,7 @@ public struct Replay
     public double Parallax;
     public double FoV;
     public double NoteSize;
+    public double Sensitivity;
 
     public bool Complete;
     public ulong LastNote;
@@ -93,6 +94,7 @@ public struct Replay
             Parallax = FileBuffer.GetDouble();
             FoV = FileBuffer.GetDouble();
             NoteSize = FileBuffer.GetDouble();
+            Sensitivity = FileBuffer.GetDouble();
 
             ushort status = FileBuffer.GetUInt8();
             Status = status == 0 ? "PASSED" : status == 1 ? "DISQUALIFIED" : "FAILED";

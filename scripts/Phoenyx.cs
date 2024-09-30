@@ -573,22 +573,22 @@ public partial class Phoenyx : Node
             switch (mod)
 			{
 				case "NoFail":
-					tex = Phoenyx.Skin.ModNofailImage;
+					tex = Skin.ModNofailImage;
 					break;
 				case "Spin":
-					tex = Phoenyx.Skin.ModSpinImage;
+					tex = Skin.ModSpinImage;
 					break;
 				case "Ghost":
-					tex = Phoenyx.Skin.ModGhostImage;
+					tex = Skin.ModGhostImage;
 					break;
 				case "Chaos":
-					tex = Phoenyx.Skin.ModChaosImage;
+					tex = Skin.ModChaosImage;
 					break;
 				case "Flashlight":
-					tex = Phoenyx.Skin.ModFlashlightImage;
+					tex = Skin.ModFlashlightImage;
 					break;
 				case "HardRock":
-					tex = Phoenyx.Skin.ModHardrockImage;
+					tex = Skin.ModHardrockImage;
 					break;
 			}
 
