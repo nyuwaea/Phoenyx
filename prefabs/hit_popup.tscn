@@ -3,7 +3,7 @@
 [ext_resource type="FontFile" uid="uid://dotb3skhwouha" path="res://fonts/Roboto-Bold.ttf" id="1_yp6xf"]
 
 [node name="HitPopup" type="Label3D"]
-modulate = Color(0.784314, 1, 0.784314, 0.25098)
+modulate = Color(1, 1, 1, 0.188235)
 outline_modulate = Color(0, 0, 0, 0)
 text = "100"
 font = ExtResource("1_yp6xf")

@@ -47,6 +47,7 @@ public partial class MainMenu : Control
 	private static HSlider SpeedSlider;
 	private static LineEdit SpeedEdit;
 	private static Panel StartFromPanel;
+	private static HSlider StartFromSlider;
 	private static LineEdit StartFromEdit;
 
 	private static Panel Extras;
@@ -75,7 +76,8 @@ public partial class MainMenu : Control
 	private static Dictionary<Panel, bool> FavoritedMaps = [];
 	private static TextureRect[] FavoriteMapsTextures = [];
 	private static int VisibleMaps = 0;
-	private static string SelectedMap = null;
+	private static string SelectedMapID = null;
+	private static Map SelectedMap = new();
 	private static string CurrentMenu = "Main";
 	private static string LastMenu = CurrentMenu;
 	private static string SearchTitle = "";
@@ -173,7 +175,7 @@ public partial class MainMenu : Control
 							
 							SoundManager.Song.Stop();
 							SceneManager.Load("res://scenes/game.tscn");
-							Runner.Play(MapParser.Decode(matching[0].MapFilePath), matching[0].Speed, matching[0].Modifiers, null, [.. matching]);
+							Runner.Play(MapParser.Decode(matching[0].MapFilePath), matching[0].Speed, matching[0].StartFrom, matching[0].Modifiers, null, [.. matching]);
 							break;
 					}
 				}
@@ -424,6 +426,7 @@ public partial class MainMenu : Control
 		SpeedSlider = SpeedPanel.GetNode<HSlider>("HSlider");
 		SpeedEdit = SpeedPanel.GetNode<LineEdit>("LineEdit");
 		StartFromPanel = ModifiersPanel.GetNode<Panel>("StartFrom");
+		StartFromSlider = StartFromPanel.GetNode<HSlider>("HSlider");
 		StartFromEdit = StartFromPanel.GetNode<LineEdit>("LineEdit");
 				
 		ImportButton.Pressed += ImportDialog.Show;
@@ -601,7 +604,28 @@ public partial class MainMenu : Control
 		};
 		SpeedEdit.TextSubmitted += (string text) => {
 			SpeedSlider.Value = Math.Clamp(text.ToFloat(), 25, 1000);
+			SpeedEdit.ReleaseFocus();
 		};
+
+		StartFromSlider.ValueChanged += (double value) => {
+			value *= SelectedMap.Length;
+
+			StartFromEdit.Text = $"{Lib.String.FormatTime(value / 1000)}";
+			Lobby.StartFrom = Math.Floor(value);
+		};
+		StartFromSlider.DragEnded += (bool _) => {
+			if (!SoundManager.JukeboxPaused)
+			{
+				SoundManager.Song.Seek((float)StartFromSlider.Value * SelectedMap.Length / 1000);
+			}
+		};
+		StartFromEdit.TextSubmitted += (string text) => {
+			StartFromSlider.Value = Math.Clamp(text.ToFloat(), 0, 1);
+			StartFromEdit.ReleaseFocus();
+		};
+		
+		SpeedSlider.Value = Lobby.Speed * 100;
+		StartFromSlider.Value = Lobby.StartFrom / Math.Max(1, CurrentMap.Length);
 
 		// Extras
 
@@ -700,9 +724,9 @@ public partial class MainMenu : Control
 
 			Search();
 
-			if (SelectedMap != null)
+			if (SelectedMapID != null)
 			{
-				Panel selectedMapHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+				Panel selectedMapHolder = MapListContainer.GetNode(SelectedMapID).GetNode<Panel>("Holder");
 				selectedMapHolder.GetNode<Panel>("Normal").Visible = false;
 				selectedMapHolder.GetNode<Panel>("Selected").Visible = true;
 				selectedMapHolder.Size = new Vector2(MapListContainer.Size.X, selectedMapHolder.Size.Y);
@@ -788,13 +812,13 @@ public partial class MainMenu : Control
 			switch (eventKey.Keycode)
 			{
 				case Key.Space:
-					if (SelectedMap != null && !SearchEdit.HasFocus() && !SearchAuthorEdit.HasFocus())
+					if (SelectedMapID != null && !SearchEdit.HasFocus() && !SearchAuthorEdit.HasFocus())
 					{
-						Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{SelectedMap}.phxm");
+						Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{SelectedMapID}.phxm");
 
 						SoundManager.Song.Stop();
 						SceneManager.Load("res://scenes/game.tscn");
-						Runner.Play(map, Lobby.Speed, Lobby.Mods);
+						Runner.Play(map, Lobby.Speed, Lobby.StartFrom, Lobby.Mods);
 					}
 					break;
 				case Key.Mediaplay:
@@ -993,9 +1017,9 @@ public partial class MainMenu : Control
 
 			Panel holder = mapButton.GetNode<Panel>("Holder");
 
-			if (SelectedMap != null)
+			if (SelectedMapID != null)
 			{
-				Panel selectedHolder = MapListContainer.GetNode(SelectedMap).GetNode<Panel>("Holder");
+				Panel selectedHolder = MapListContainer.GetNode(SelectedMapID).GetNode<Panel>("Holder");
 				selectedHolder.GetNode<Panel>("Normal").Visible = true;
 				selectedHolder.GetNode<Panel>("Selected").Visible = false;
 
@@ -1004,13 +1028,13 @@ public partial class MainMenu : Control
 				deselectTween.TweenProperty(selectedHolder, "position", new Vector2(60, selectedHolder.Position.Y), 0.25).SetTrans(Tween.TransitionType.Quad);
 				deselectTween.Play();
 
-				if (MapListContainer.GetNode(SelectedMap) == mapButton && !fromImport)
+				if (MapListContainer.GetNode(SelectedMapID) == mapButton && !fromImport)
 				{
 					Map map = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{fileName}.phxm");
 
 					SoundManager.Song.Stop();
 					SceneManager.Load("res://scenes/game.tscn");
-					Runner.Play(map, Lobby.Speed, Lobby.Mods);
+					Runner.Play(map, Lobby.Speed, Lobby.StartFrom, Lobby.Mods);
 				}
 			}
 
@@ -1044,9 +1068,17 @@ public partial class MainMenu : Control
 			}
 		}
 
-		bool firstTimeSelected = fileName != SelectedMap;
+		bool firstTimeSelected = fileName != SelectedMapID;
 
-		SelectedMap = fileName;
+		if (SelectedMapID != fileName)
+		{
+			StartFromSlider.Value = 0;
+			StartFromEdit.Text = "0:00";
+			Lobby.StartFrom = 0;
+		}
+
+		SelectedMapID = fileName;
+		SelectedMap = MapParser.Decode($"{Phoenyx.Constants.UserFolder}/maps/{SelectedMapID}.phxm");
 
 		if (firstTimeSelected)
 		{
@@ -1325,9 +1357,9 @@ public partial class MainMenu : Control
 
 		Leaderboard leaderboard = new();
 		
-		if (File.Exists($"{Phoenyx.Constants.UserFolder}/pbs/{SelectedMap}"))
+		if (File.Exists($"{Phoenyx.Constants.UserFolder}/pbs/{SelectedMapID}"))
 		{
-			leaderboard = new(SelectedMap, $"{Phoenyx.Constants.UserFolder}/pbs/{SelectedMap}");
+			leaderboard = new(SelectedMapID, $"{Phoenyx.Constants.UserFolder}/pbs/{SelectedMapID}");
 		}
 		
 		LeaderboardPanel.GetNode<Label>("NoScores").Visible = leaderboard.ScoreCount == 0;
@@ -1370,7 +1402,7 @@ public partial class MainMenu : Control
 					Replay replay = new($"{Phoenyx.Constants.UserFolder}/replays/{score.AttemptID}.phxr");
 					SoundManager.Song.Stop();
 					SceneManager.Load("res://scenes/game.tscn");
-					Runner.Play(MapParser.Decode(replay.MapFilePath), replay.Speed, replay.Modifiers, null, [replay]);
+					Runner.Play(MapParser.Decode(replay.MapFilePath), replay.Speed, replay.StartFrom, replay.Modifiers, null, [replay]);
 				}
 			};
 

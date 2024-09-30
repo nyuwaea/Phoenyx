@@ -17,6 +17,8 @@ public struct Replay
     public string Status;
 
     public double Speed;
+    public double StartFrom;
+    public ulong FirstNote;
     public string[] Modifiers;
     public double ApproachRate;
     public double ApproachDistance;
@@ -80,6 +82,7 @@ public struct Replay
         {
             ID = path.GetFile().GetBaseName();
             Speed = FileBuffer.GetDouble();
+            StartFrom = FileBuffer.GetDouble();
             ApproachRate = FileBuffer.GetDouble();
             ApproachDistance = FileBuffer.GetDouble();
             ApproachTime = ApproachDistance / ApproachRate;
@@ -125,16 +128,21 @@ public struct Replay
 
             Length = Frames.Length > 0 ? Frames[^1].Progress : 0;
             Notes = new float[MapNoteCount];
+            FirstNote = FileBuffer.GetUInt64();
             ReplayNoteCount = FileBuffer.GetUInt64();
 
-            for (ulong i = 0; i < ReplayNoteCount; i++)
+            for (ulong i = 0; i < FirstNote; i++)
+            {
+                Notes[i] = -1;
+            }
+
+            for (ulong i = FirstNote; i < FirstNote + ReplayNoteCount; i++)
             {
                 ushort note = FileBuffer.GetUInt8();
-
                 Notes[i] = note == 255 ? -1 : note / (254 / 55);
             }
 
-            for (ulong i = ReplayNoteCount; i < MapNoteCount; i++)
+            for (ulong i = FirstNote + ReplayNoteCount; i < MapNoteCount; i++)
             {
                 Notes[i] = -1;
             }
@@ -158,7 +166,7 @@ public struct Replay
     public override readonly int GetHashCode()
     {
         int hashCode = 0;
-        byte[] bytes = $"{MapID}{Valid}{Speed}{Modifiers}".ToUtf16Buffer();
+        byte[] bytes = $"{MapID}{Valid}{Speed}{StartFrom}{Modifiers}".ToUtf16Buffer();
         byte[] hash = SHA256.HashData(bytes);
 
         for (int i = 0; i < hash.Length; i += 4)

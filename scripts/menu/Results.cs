@@ -81,7 +81,7 @@ public partial class Results : Control
 				Replay replay = new(path);
 				SoundManager.Song.Stop();
 				SceneManager.Load("res://scenes/game.tscn");
-				Runner.Play(MapParser.Decode(replay.MapFilePath), replay.Speed, replay.Modifiers, null, [replay]);
+				Runner.Play(MapParser.Decode(replay.MapFilePath), replay.Speed, replay.StartFrom, replay.Modifiers, null, [replay]);
 			}
 		};
 	}
@@ -136,7 +136,7 @@ public partial class Results : Control
 		map.Ephemeral = Runner.CurrentAttempt.Map.Ephemeral;
 		SoundManager.Song.Stop();
 		SceneManager.Load("res://scenes/game.tscn");
-		Runner.Play(map, Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.RawMods);
+		Runner.Play(map, Runner.CurrentAttempt.Speed, Runner.CurrentAttempt.StartFrom, Runner.CurrentAttempt.RawMods);
 	}
 
 	public static void Stop()

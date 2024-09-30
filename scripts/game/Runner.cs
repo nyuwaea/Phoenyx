@@ -88,9 +88,10 @@ public partial class Runner : Node3D
 		public uint ReplayAttemptStatusOffset = 0;
 		public Godot.FileAccess ReplayFile;
 		public double Progress = 0;	// ms
-		public double StartOffset = 0;
 		public Map Map = new();
 		public double Speed = 1;
+		public double StartFrom = 0;
+		public ulong FirstNote = 0;
 		public string[] RawMods;
 		public Dictionary<string, bool> Mods;
 		public string[] Players = [];
@@ -117,15 +118,16 @@ public partial class Runner : Node3D
 		public Vector2 RawCursorPosition = Vector2.Zero;
 		public double DistanceMM = 0;
 
-		public Attempt(Map map, double speed, string[] mods, string[] players = null, Replay[] replays = null)
+		public Attempt(Map map, double speed, double startFrom, string[] mods, string[] players = null, Replay[] replays = null)
 		{
 			ID = $"{map.ID}_{OS.GetUniqueId()}_{Time.GetDatetimeStringFromUnixTime((long)Time.GetUnixTimeFromSystem())}".Replace(":", "_");
 			Replays = replays;
 			IsReplay = Replays != null;
 			Map = map;
 			Speed = speed;
+			StartFrom = startFrom;
 			Players = players ?? [];
-			Progress = -1000 - Phoenyx.Settings.ApproachTime * 1000;
+			Progress = -1000 - Phoenyx.Settings.ApproachTime * 1000 + StartFrom;
 			ComboMultiplierIncrement = Math.Max(2, (uint)Map.Notes.Length / 200);
 			RawMods = IsReplay ? Replays[0].Modifiers : mods;
 			Mods = new(){
@@ -138,6 +140,19 @@ public partial class Runner : Node3D
 			};
 			HitsInfo = IsReplay ? Replays[0].Notes : new float[Map.Notes.Length];
 
+			if (StartFrom > 0)
+			{
+				Qualifies = false;
+
+				foreach (Note note in Map.Notes)
+				{
+					if (note.Millisecond < StartFrom)
+					{
+						FirstNote = (ulong)note.Index + 1;
+					}
+				}
+			}
+
 			if (!IsReplay && Phoenyx.Settings.RecordReplays && !Map.Ephemeral)
 			{
 				ReplayFile = Godot.FileAccess.Open($"{Phoenyx.Constants.UserFolder}/replays/{ID}.phxr", Godot.FileAccess.ModeFlags.Write);
@@ -147,6 +162,7 @@ public partial class Runner : Node3D
 				string mapFileName = Map.FilePath.GetFile().GetBaseName();
 
 				ReplayFile.StoreDouble(Speed);
+				ReplayFile.StoreDouble(StartFrom);
 				ReplayFile.StoreDouble(Phoenyx.Settings.ApproachRate);
 				ReplayFile.StoreDouble(Phoenyx.Settings.ApproachDistance);
 				ReplayFile.StoreDouble(Phoenyx.Settings.FadeIn);
@@ -324,7 +340,7 @@ public partial class Runner : Node3D
 			//	JesusTween.Play();
 			//}
 
-			if (Health <= 0)
+			if (!IsReplay && Health <= 0)
 			{
 				if (Alive)
 				{
@@ -356,12 +372,12 @@ public partial class Runner : Node3D
 			MissTween.TweenProperty(MissesLabel.LabelSettings, "font_color", Color.Color8(255, 255, 255, 160), 1);
 			MissTween.Play();
 
-			if (!Phoenyx.Settings.MissPopups || HitPopups >= 64)
+			if (!Phoenyx.Settings.MissPopups || MissPopups >= 64)
 			{
 				return;
 			}
 
-			HitPopups++;
+			MissPopups++;
 
 			Sprite3D icon = MissFeedback.Instantiate<Sprite3D>();
 			Node3D.AddChild(icon);
@@ -372,7 +388,7 @@ public partial class Runner : Node3D
 			tween.TweenProperty(icon, "transparency", 1, 0.25f);
 			tween.Parallel().TweenProperty(icon, "position", icon.Position + Vector3.Up / 4f, 0.25f).SetTrans(Tween.TransitionType.Quint).SetEase(Tween.EaseType.Out);
 			tween.TweenCallback(Callable.From(() => {
-				HitPopups--;
+				MissPopups--;
 				icon.QueueFree();
 			}));
 			tween.Play();
@@ -403,9 +419,10 @@ public partial class Runner : Node3D
 				}
 
 				ReplayFile.Seek(ReplayFile.GetLength());
+				ReplayFile.Store64(FirstNote);
 				ReplayFile.Store64(Sum);
 
-				for (int i = 0; i < Sum; i++)
+				for (ulong i = FirstNote; i < FirstNote + Sum; i++)
 				{
 					ReplayFile.Store8((byte)(HitsInfo[i] == -1 ? 255 : Math.Min(254, HitsInfo[i] * (254 / 55))));
 				}
@@ -425,7 +442,7 @@ public partial class Runner : Node3D
 
 				ReplayFile.StoreBuffer(hash);
 				ReplayFile.Close();
-
+				
 				CurrentAttempt.HitsInfo = CurrentAttempt.HitsInfo[0 .. (int)PassedNotes];
 			}
 			else if (IsReplay)
@@ -836,6 +853,7 @@ public partial class Runner : Node3D
 			else if (!SoundManager.Song.Playing && CurrentAttempt.Progress >= 0)
 			{
 				SoundManager.Song.Play();
+				SoundManager.Song.Seek((float)CurrentAttempt.Progress / 1000);
 			}
 		}
 
@@ -873,6 +891,11 @@ public partial class Runner : Node3D
 		for (uint i = CurrentAttempt.PassedNotes; i < CurrentAttempt.Map.Notes.Length; i++)
 		{
 			Note note = CurrentAttempt.Map.Notes[i];
+
+			if (note.Millisecond < CurrentAttempt.StartFrom)
+			{
+				continue;
+			}
 
 			if (note.Millisecond + Phoenyx.Constants.HitWindow * CurrentAttempt.Speed < CurrentAttempt.Progress)	// past hit window
 			{
@@ -959,10 +982,6 @@ public partial class Runner : Node3D
 		HealthTexture.Size = HealthTexture.Size.Lerp(new Vector2(32 + (float)CurrentAttempt.Health * 10.24f, 80), Math.Min(1, (float)delta * 64));
 		ProgressBarTexture.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
 		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
-
-		// temporary remember to remove 
-		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
-		SpeedLabel.Modulate = Color.Color8(255, 255, 255, (byte)(CurrentAttempt.Speed == 1 ? 0 : 32));
 
 		if (StopQueued)
 		{
@@ -1090,9 +1109,9 @@ public partial class Runner : Node3D
 		}
 	}
 	
-	public static void Play(Map map, double speed = 1, string[] mods = null, string[] players = null, Replay[] replays = null)
+	public static void Play(Map map, double speed = 1, double startFrom = 0, string[] mods = null, string[] players = null, Replay[] replays = null)
 	{
-		CurrentAttempt = new(map, speed, mods ?? [], players, replays);
+		CurrentAttempt = new(map, speed, startFrom, mods ?? [], players, replays);
 		Playing = true;
 		StopQueued = false;
 		Started = Time.GetTicksUsec();
@@ -1119,7 +1138,7 @@ public partial class Runner : Node3D
 		CurrentAttempt.Qualifies = false;
 		Stop(false);
 		Node3D.GetTree().ReloadCurrentScene();
-		Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.RawMods, CurrentAttempt.Players, CurrentAttempt.Replays);
+		Play(MapParser.Decode(CurrentAttempt.Map.FilePath), CurrentAttempt.Speed, CurrentAttempt.StartFrom, CurrentAttempt.RawMods, CurrentAttempt.Players, CurrentAttempt.Replays);
 	}
 
 	public static void Skip()
@@ -1177,7 +1196,7 @@ public partial class Runner : Node3D
 			Phoenyx.Stats.GamePlaytime += (Time.GetTicksUsec() - Started) / 1000000;
 			Phoenyx.Stats.TotalDistance += (ulong)CurrentAttempt.DistanceMM;
 
-			if (CurrentAttempt.StartOffset == 0)
+			if (CurrentAttempt.StartFrom == 0)
 			{
 				if (!File.Exists($"{Phoenyx.Constants.UserFolder}/pbs/{CurrentAttempt.Map.ID}"))
 				{

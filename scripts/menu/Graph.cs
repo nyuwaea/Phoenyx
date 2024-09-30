@@ -8,7 +8,7 @@ public partial class Graph : ColorRect
 		Color hitColor = Color.FromHtml("00ff00ff");
 		Color missColor = Color.FromHtml("ff000044");
 
-		for (int i = 0; i < Runner.CurrentAttempt.HitsInfo.Length; i++)
+		for (ulong i = Runner.CurrentAttempt.FirstNote; i < (ulong)Runner.CurrentAttempt.HitsInfo.Length; i++)
 		{
 			float offset = Runner.CurrentAttempt.HitsInfo[i];
 

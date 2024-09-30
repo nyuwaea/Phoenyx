@@ -310,7 +310,6 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bl404")
 
 [node name="Main" type="Panel" parent="Menus"]
-visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -395,13 +394,17 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
  Grid
 [/ul]
  Replays (supports viewing multiple at once)
+ Local leaderboards
  Fully customizable combo progress widget (will become editable when skin editor is implemented)
- Proper pause menu
+ Pause menu
  Settings profiles
+ Start from
  New settings[ul]
  Video background render scale
  Absolute input
  Record replays
+ Toggle hit score popup
+ Toggle miss popup
 [/ul]
  Made score dropoff more lenient (20ms for perfect hit -> 25ms, lowest multiplier 0.65x -> 0.8x)
  This panel :)
@@ -464,6 +467,8 @@ text = "QUIT"
 alignment = 0
 
 [node name="Play" type="Panel" parent="Menus"]
+visible = false
+modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -828,6 +833,8 @@ theme_override_constants/separation = 4
 
 [node name="NoFail" type="TextureButton" parent="Menus/Play/Modifiers/Decrease"]
 self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
 custom_minimum_size = Vector2(4, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -862,6 +869,8 @@ theme_override_constants/separation = 4
 
 [node name="Ghost" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
 self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
 custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -871,6 +880,8 @@ stretch_mode = 5
 
 [node name="Spin" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
 self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
 custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -880,6 +891,8 @@ stretch_mode = 5
 
 [node name="Flashlight" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
 self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
 custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -889,6 +902,8 @@ stretch_mode = 5
 
 [node name="Chaos" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
 self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
 custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
 size_flags_horizontal = 3
@@ -898,6 +913,8 @@ stretch_mode = 5
 
 [node name="HardRock" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
 self_modulate = Color(1, 1, 1, 0.501961)
+texture_filter = 4
+texture_repeat = 1
 custom_minimum_size = Vector2(24, 0)
 layout_mode = 2
 size_flags_horizontal = 3
