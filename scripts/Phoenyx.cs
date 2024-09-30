@@ -27,10 +27,10 @@ public partial class Phoenyx : Node
         public static readonly Godot.Collections.Dictionary<string, double> ModsMultiplierIncrement = new(){
             ["NoFail"] = 0,
             ["Ghost"] = 0.0675,
-			["Spin"] = 0,
-			["Masked"] = 0,
-			["Chaos"] = 0,
-			["HardRock"] = 0
+			["Spin"] = 0.18,
+			["Flashlight"] = 0.1,
+			["Chaos"] = 0.07,
+			["HardRock"] = 0.08
         };
     }
 
@@ -64,6 +64,8 @@ public partial class Phoenyx : Node
         public static string Space {get; set;} = "skin";
         public static bool AbsoluteInput {get; set;} = false;
         public static bool RecordReplays {get; set;} = true;
+        public static bool HitPopups {get; set;} = true;
+        public static bool MissPopups {get; set;} = true;
 
         public static void Save(string profile = null)
         {
@@ -402,39 +404,36 @@ public partial class Phoenyx : Node
             {
                 try
                 {
-                    if (!File.Exists($"{Constants.UserFolder}/skins/default/{skinFile}"))
+                    byte[] buffer = [];
+
+                    if (skinFile.GetExtension() == "txt")
                     {
-                        byte[] buffer = [];
-
-                        if (skinFile.GetExtension() == "txt")
-                        {
-                            Godot.FileAccess file = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
-                            buffer = file.GetBuffer((long)file.GetLength());
-                        }
-                        else
-                        {
-                            var source = ResourceLoader.Load($"res://skin/{skinFile}");
-
-                            switch (source.GetType().Name)
-                            {
-                                case "CompressedTexture2D":
-                                    buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
-                                    break;
-                                case "AudioStreamMP3":
-                                    buffer = (source as AudioStreamMP3).Data;
-                                    break;
-                            }
-                        }
-
-                        if (buffer.Length == 0)
-                        {
-                            continue;
-                        }
-
-                        Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
-                        target.StoreBuffer(buffer);
-                        target.Close();
+                        Godot.FileAccess file = Godot.FileAccess.Open($"res://skin/{skinFile}", Godot.FileAccess.ModeFlags.Read);
+                        buffer = file.GetBuffer((long)file.GetLength());
                     }
+                    else
+                    {
+                        var source = ResourceLoader.Load($"res://skin/{skinFile}");
+
+                        switch (source.GetType().Name)
+                        {
+                            case "CompressedTexture2D":
+                                buffer = (source as CompressedTexture2D).GetImage().SavePngToBuffer();
+                                break;
+                            case "AudioStreamMP3":
+                                buffer = (source as AudioStreamMP3).Data;
+                                break;
+                        }
+                    }
+
+                    if (buffer.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    Godot.FileAccess target = Godot.FileAccess.Open($"{Constants.UserFolder}/skins/default/{skinFile}", Godot.FileAccess.ModeFlags.Write);
+                    target.StoreBuffer(buffer);
+                    target.Close();
                 }
                 catch (Exception exception)
                 {
@@ -474,6 +473,22 @@ public partial class Phoenyx : Node
             }
             catch
             {
+                Stats.GamePlaytime = 0;
+                Stats.TotalPlaytime = 0;
+                Stats.GamesOpened = 0;
+                Stats.TotalDistance = 0;
+                Stats.NotesHit = 0;
+                Stats.NotesMissed = 0;
+                Stats.HighestCombo = 0;
+                Stats.Attempts = 0;
+                Stats.Passes = 0;
+                Stats.FullCombos = 0;
+                Stats.HighestScore = 0;
+                Stats.TotalScore = 0;
+                Stats.RageQuits = 0;
+                Stats.PassAccuracies = [];
+                Stats.FavouriteMaps = [];
+
                 Stats.Save();
             }
 

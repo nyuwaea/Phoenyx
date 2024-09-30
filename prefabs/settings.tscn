@@ -383,6 +383,7 @@ flat = true
 [node name="Pushback" type="Panel" parent="Holder/Categories/Gameplay/Container"]
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+tooltip_text = "Having pushback off will make the notes hide as soon as they reach the grid, while having it on takes into account the full hit window."
 theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
 
 [node name="Label" type="Label" parent="Holder/Categories/Gameplay/Container/Pushback"]
@@ -971,6 +972,68 @@ offset_left = 8.0
 grow_vertical = 2
 focus_mode = 0
 theme = ExtResource("1_8p7x0")
+flat = true
+
+[node name="HitPopups" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Only shows misses"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/HitPopups"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Hit Score Popups"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Visuals/Container/HitPopups"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
+flat = true
+
+[node name="MissPopups" type="Panel" parent="Holder/Categories/Visuals/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Only shows misses"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Visuals/Container/MissPopups"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Miss Popups"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Visuals/Container/MissPopups"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+button_pressed = true
 flat = true
 
 [node name="Video" type="ScrollContainer" parent="Holder/Categories"]

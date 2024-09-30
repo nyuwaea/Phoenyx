@@ -585,7 +585,7 @@ layout_mode = 1
 anchors_preset = -1
 offset_right = 40.0
 grow_vertical = 0
-text = "Press Space to toggle"
+text = "Press F1 to toggle"
 label_settings = SubResource("LabelSettings_a70tm")
 
 [node name="Time" type="Label" parent="ReplayViewer"]

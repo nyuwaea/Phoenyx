@@ -42,6 +42,12 @@ public partial class MainMenu : Control
 	private static VBoxContainer MapListContainer;
 	private static Panel LeaderboardPanel;
 	private static VBoxContainer LeaderboardContainer;
+	private static Panel ModifiersPanel;
+	private static Panel SpeedPanel;
+	private static HSlider SpeedSlider;
+	private static LineEdit SpeedEdit;
+	private static Panel StartFromPanel;
+	private static LineEdit StartFromEdit;
 
 	private static Panel Extras;
 
@@ -373,7 +379,7 @@ public partial class MainMenu : Control
 				{
 					case "Pause":
 						SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
-						SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+						SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : (float)Lobby.Speed;	// bruh
 						UpdateJukeboxButtons();
 						break;
 					case "Skip":
@@ -413,6 +419,12 @@ public partial class MainMenu : Control
 		MapListContainer = MapList.GetNode<VBoxContainer>("Container");
 		LeaderboardPanel = PlayMenu.GetNode<Panel>("Leaderboard");
 		LeaderboardContainer = LeaderboardPanel.GetNode("ScrollContainer").GetNode<VBoxContainer>("VBoxContainer");
+		ModifiersPanel = PlayMenu.GetNode<Panel>("Modifiers");
+		SpeedPanel = ModifiersPanel.GetNode<Panel>("Speed");
+		SpeedSlider = SpeedPanel.GetNode<HSlider>("HSlider");
+		SpeedEdit = SpeedPanel.GetNode<LineEdit>("LineEdit");
+		StartFromPanel = ModifiersPanel.GetNode<Panel>("StartFrom");
+		StartFromEdit = StartFromPanel.GetNode<LineEdit>("LineEdit");
 				
 		ImportButton.Pressed += ImportDialog.Show;
 		UserFolderButton.Pressed += () => {
@@ -576,6 +588,21 @@ public partial class MainMenu : Control
 			ToastNotification.Notify("Successfully added video to map");
 		};
 
+		// Modifiers
+
+		SpeedSlider.ValueChanged += (double value) => {
+			SpeedEdit.Text = value.ToString();
+			Lobby.Speed = value / 100;
+
+			if (!SoundManager.JukeboxPaused)
+			{
+				SoundManager.Song.PitchScale = (float)Lobby.Speed;
+			}
+		};
+		SpeedEdit.TextSubmitted += (string text) => {
+			SpeedSlider.Value = Math.Clamp(text.ToFloat(), 25, 1000);
+		};
+
 		// Extras
 
 		Button soundSpace = Extras.GetNode<Button>("SoundSpace");
@@ -649,7 +676,7 @@ public partial class MainMenu : Control
 			Transition("Play", true);
 		}
 
-		SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+		SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : (float)Lobby.Speed;	// bruh
 		
 		UpdateJukeboxButtons();
 		UpdateSpectrumSpacing();
@@ -772,7 +799,7 @@ public partial class MainMenu : Control
 					break;
 				case Key.Mediaplay:
 					SoundManager.JukeboxPaused = !SoundManager.JukeboxPaused;
-					SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : 1;	// bruh
+					SoundManager.Song.PitchScale = SoundManager.JukeboxPaused ? 0.00000000001f : (float)Lobby.Speed;	// bruh
 					UpdateJukeboxButtons();
 					break;
 				case Key.Medianext:
@@ -795,7 +822,7 @@ public partial class MainMenu : Control
 					SoundManager.LastRewind = now;
 					break;
 				default:
-					if (SettingsManager.FocusedLineEdit == null && !SearchAuthorEdit.HasFocus() && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
+					if (SettingsManager.FocusedLineEdit == null && !SearchAuthorEdit.HasFocus() && !SpeedEdit.HasFocus() && !StartFromEdit.HasFocus() && !eventKey.CtrlPressed && !eventKey.AltPressed && eventKey.Keycode != Key.Ctrl && eventKey.Keycode != Key.Shift && eventKey.Keycode != Key.Alt && eventKey.Keycode != Key.Escape && eventKey.Keycode != Key.Enter && eventKey.Keycode != Key.F11)
 					{
 						SearchEdit.GrabFocus();
 					}
@@ -939,7 +966,7 @@ public partial class MainMenu : Control
 
 		foreach (Panel map in MapListContainer.GetChildren())
 		{
-			map.Visible = !Phoenyx.Constants.TempMapMode && map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle) && map.GetNode("Holder").GetNode<RichTextLabel>("Extra").Text.ToLower().Contains(SearchAuthor);
+			map.Visible = !Phoenyx.Constants.TempMapMode && map.GetNode("Holder").GetNode<Label>("Title").Text.ToLower().Contains(SearchTitle) && map.GetNode("Holder").GetNode<RichTextLabel>("Extra").Text.ToLower().Split(" - ")[^1].Contains(SearchAuthor);
 
 			if (map.Visible)
 			{
@@ -1011,7 +1038,7 @@ public partial class MainMenu : Control
 			{
 				SoundManager.JukeboxIndex = index;
 				SoundManager.JukeboxPaused = false;
-				SoundManager.Song.PitchScale = 1;
+				SoundManager.Song.PitchScale = (float)Lobby.Speed;
 				SoundManager.PlayJukebox();
 				UpdateJukeboxButtons();
 			}

@@ -250,6 +250,12 @@ public partial class SettingsManager : Control
 			case "RecordReplays":
 				Phoenyx.Settings.RecordReplays = (bool)value;
 				break;
+			case "HitPopups":
+				Phoenyx.Settings.HitPopups = (bool)value;
+				break;
+			case "MissPopups":
+				Phoenyx.Settings.MissPopups = (bool)value;
+				break;
 		}
 
 		UpdateSettings();

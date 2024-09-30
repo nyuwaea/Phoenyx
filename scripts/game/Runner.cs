@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
 using System.Security.Cryptography;
 using Godot;
 
@@ -10,6 +9,7 @@ public partial class Runner : Node3D
 {
 	private static Node3D Node3D;
 	private static readonly PackedScene PlayerScore = GD.Load<PackedScene>("res://prefabs/player_score.tscn");
+	private static readonly PackedScene HitFeedback = GD.Load<PackedScene>("res://prefabs/hit_popup.tscn");
 	private static readonly PackedScene MissFeedback = GD.Load<PackedScene>("res://prefabs/miss_icon.tscn");
 
 	private static Panel Menu;
@@ -50,7 +50,8 @@ public partial class Runner : Node3D
 	private static Tween HitTween;
 	private static Tween MissTween;
 	private static bool StopQueued = false;
-	private static int MissIcons = 0;
+	private static int HitPopups = 0;
+	private static int MissPopups = 0;
 	private static bool ReplayViewerSeekHovered = false;
 	private static bool LeftMouseButtonDown = false;
 
@@ -243,7 +244,9 @@ public partial class Runner : Node3D
 				}
 			}
 
-			Score += (uint)(100 * ComboMultiplier * ModsMultiplier * factor);
+			uint hitScore = (uint)(100 * ComboMultiplier * ModsMultiplier * factor * ((Speed - 1) / 2.5 + 1));
+
+			Score += hitScore;
 			HealthStep = Math.Max(HealthStep / 1.45, 15);
 			Health = Math.Min(100, Health + HealthStep / 1.75);
 			Map.Notes[index].Hit = true;
@@ -265,6 +268,27 @@ public partial class Runner : Node3D
 			HitTween = HitsLabel.CreateTween();
 			HitTween.TweenProperty(HitsLabel.LabelSettings, "font_color", Color.Color8(255, 255, 255, 160), 1);
 			HitTween.Play();
+
+			if (!Phoenyx.Settings.HitPopups || HitPopups >= 64)
+			{
+				return;
+			}
+
+			HitPopups++;
+
+			Label3D popup = HitFeedback.Instantiate<Label3D>();
+			Node3D.AddChild(popup);
+			popup.GlobalPosition = new Vector3(Map.Notes[index].X, -1.4f, 0);
+			popup.Text = hitScore.ToString();
+
+			Tween tween = popup.CreateTween();
+			tween.TweenProperty(popup, "transparency", 1, 0.25f);
+			tween.Parallel().TweenProperty(popup, "position", popup.Position + Vector3.Up / 4f, 0.25f).SetTrans(Tween.TransitionType.Quint).SetEase(Tween.EaseType.Out);
+			tween.TweenCallback(Callable.From(() => {
+				HitPopups--;
+				popup.QueueFree();
+			}));
+			tween.Play();
 
 			if (Lobby.PlayerCount > 1)
 			{
@@ -332,12 +356,12 @@ public partial class Runner : Node3D
 			MissTween.TweenProperty(MissesLabel.LabelSettings, "font_color", Color.Color8(255, 255, 255, 160), 1);
 			MissTween.Play();
 
-			if (MissIcons >= 64)
+			if (!Phoenyx.Settings.MissPopups || HitPopups >= 64)
 			{
 				return;
 			}
 
-			MissIcons++;
+			HitPopups++;
 
 			Sprite3D icon = MissFeedback.Instantiate<Sprite3D>();
 			Node3D.AddChild(icon);
@@ -348,7 +372,7 @@ public partial class Runner : Node3D
 			tween.TweenProperty(icon, "transparency", 1, 0.25f);
 			tween.Parallel().TweenProperty(icon, "position", icon.Position + Vector3.Up / 4f, 0.25f).SetTrans(Tween.TransitionType.Quint).SetEase(Tween.EaseType.Out);
 			tween.TweenCallback(Callable.From(() => {
-				MissIcons--;
+				HitPopups--;
 				icon.QueueFree();
 			}));
 			tween.Play();
@@ -465,7 +489,11 @@ public partial class Runner : Node3D
 
 			CurrentAttempt.Alive = false;
 			CurrentAttempt.Qualifies = false;
-			CurrentAttempt.DeathTime = CurrentAttempt.Progress;
+			
+			if (CurrentAttempt.DeathTime == -1)
+			{
+				CurrentAttempt.DeathTime = CurrentAttempt.Progress;
+			}
 
 			Stop();
 		};
@@ -932,6 +960,10 @@ public partial class Runner : Node3D
 		ProgressBarTexture.Size = new Vector2(32 + (float)(CurrentAttempt.Progress / MapLength) * 1024, 80);
 		SkipLabel.Modulate = Color.Color8(255, 255, 255, (byte)(SkipLabelAlpha * 255));
 
+		// temporary remember to remove 
+		SpeedLabel.Text = $"{CurrentAttempt.Speed.ToString().PadDecimals(2)}x";
+		SpeedLabel.Modulate = Color.Color8(255, 255, 255, (byte)(CurrentAttempt.Speed == 1 ? 0 : 32));
+
 		if (StopQueued)
 		{
 			StopQueued = false;
@@ -1012,15 +1044,22 @@ public partial class Runner : Node3D
 					{
 						ShowMenu(!MenuShown);	
 					}
-
 					break;
 				case Key.Quoteleft:
 					Restart();
 					break;
-				case Key.Space:
+				case Key.F1:
 					if (CurrentAttempt.IsReplay)
 					{
 						ShowReplayViewer(!ReplayViewerShown);
+					}
+					break;
+				case Key.Space:
+					if (CurrentAttempt.IsReplay)
+					{
+						Playing = !Playing;
+						SoundManager.Song.PitchScale = Playing ? (float)CurrentAttempt.Speed : 0.00000000000001f;	// ooohh my goood
+						ReplayViewerPause.TextureNormal = GD.Load<Texture2D>(Playing ? "res://textures/pause.png" : "res://textures/play.png");
 					}
 					else
 					{
@@ -1031,7 +1070,6 @@ public partial class Runner : Node3D
 						
 						Skip();
 					}
-
 					break;
 				case Key.F:
 					Phoenyx.Settings.FadeOut = !Phoenyx.Settings.FadeOut;

@@ -1,4 +1,4 @@
-[gd_scene load_steps=51 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=60 format=3 uid="uid://do18270a428ma"]
 
 [ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
@@ -16,8 +16,14 @@
 [ext_resource type="Texture2D" uid="uid://bpsvcunhigs6c" path="res://skin/jukebox_skip.png" id="10_i0l4j"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="10_j4s1w"]
 [ext_resource type="Texture2D" uid="uid://ct67kupv6bmny" path="res://textures/discord.png" id="11_vckcj"]
+[ext_resource type="Texture2D" uid="uid://co5ul5mlsanna" path="res://skin/mod_nofail.png" id="12_h7cn2"]
+[ext_resource type="Texture2D" uid="uid://d1c7yqqmohmv1" path="res://skin/mod_ghost.png" id="13_4nn4s"]
 [ext_resource type="Texture2D" uid="uid://d3buklvnhgqcy" path="res://textures/discord_hovered.png" id="13_lpi1s"]
+[ext_resource type="Texture2D" uid="uid://bevth7guc4yc4" path="res://skin/mod_spin.png" id="14_hd5ug"]
+[ext_resource type="Texture2D" uid="uid://3bg5xrocd55i" path="res://skin/mod_flashlight.png" id="15_2j6xq"]
 [ext_resource type="Texture2D" uid="uid://c0wbm1qc5npty" path="res://textures/discord_pressed.png" id="15_sy0m2"]
+[ext_resource type="Texture2D" uid="uid://ba8nnsyx5yiw8" path="res://skin/mod_chaos.png" id="16_sro6u"]
+[ext_resource type="Texture2D" uid="uid://bugx1qn5t88e3" path="res://skin/mod_hardrock.png" id="17_0m5iv"]
 [ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="21_bm8r1"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
@@ -96,6 +102,16 @@ shader_parameter/brightness = 2.0
 [sub_resource type="LabelSettings" id="LabelSettings_73f6f"]
 font = ExtResource("8_jfynb")
 font_color = Color(1, 1, 1, 0.25098)
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_v77in"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ptq8h"]
+font = ExtResource("8_jfynb")
+
+[sub_resource type="LabelSettings" id="LabelSettings_cltbi"]
+font = ExtResource("8_jfynb")
+font_size = 14
+font_color = Color(1, 1, 1, 0.501961)
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_ooiyf"]
 
@@ -294,6 +310,7 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("StyleBoxEmpty_bl404")
 
 [node name="Main" type="Panel" parent="Menus"]
+visible = false
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -447,8 +464,6 @@ text = "QUIT"
 alignment = 0
 
 [node name="Play" type="Panel" parent="Menus"]
-visible = false
-modulate = Color(1, 1, 1, 0)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -730,6 +745,218 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+
+[node name="Speed" type="Panel" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 1.0
+anchor_bottom = 0.2
+offset_left = 8.0
+offset_right = -8.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_v77in")
+
+[node name="Label" type="Label" parent="Menus/Play/Modifiers/Speed"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.2
+anchor_bottom = 1.0
+text = "Speed"
+label_settings = SubResource("LabelSettings_ptq8h")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Menus/Play/Modifiers/Speed"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -67.0
+theme = ExtResource("2_46xtp")
+min_value = 50.0
+max_value = 200.0
+step = 5.0
+value = 100.0
+rounded = true
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Menus/Play/Modifiers/Speed"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "100"
+placeholder_text = "100"
+max_length = 5
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
+[node name="LabelDecrease" type="Label" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 0.2
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = 17.0
+text = "Difficulty Decrease"
+label_settings = SubResource("LabelSettings_cltbi")
+horizontal_alignment = 1
+
+[node name="Decrease" type="HBoxContainer" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.2
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 8.0
+offset_top = 22.0
+offset_right = -8.0
+offset_bottom = -5.0
+theme_override_constants/separation = 4
+
+[node name="NoFail" type="TextureButton" parent="Menus/Play/Modifiers/Decrease"]
+self_modulate = Color(1, 1, 1, 0.501961)
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("12_h7cn2")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="LabelIncrease" type="Label" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+offset_left = 8.0
+offset_right = -8.0
+offset_bottom = 17.0
+text = "Difficulty Increase"
+label_settings = SubResource("LabelSettings_cltbi")
+horizontal_alignment = 1
+
+[node name="Increase" type="HBoxContainer" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.8
+offset_left = 8.0
+offset_top = 22.0
+offset_right = -8.0
+offset_bottom = -5.0
+theme_override_constants/separation = 4
+
+[node name="Ghost" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+self_modulate = Color(1, 1, 1, 0.501961)
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("13_4nn4s")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Spin" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+self_modulate = Color(1, 1, 1, 0.501961)
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("14_hd5ug")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Flashlight" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+self_modulate = Color(1, 1, 1, 0.501961)
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("15_2j6xq")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="Chaos" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+self_modulate = Color(1, 1, 1, 0.501961)
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("16_sro6u")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="HardRock" type="TextureButton" parent="Menus/Play/Modifiers/Increase"]
+self_modulate = Color(1, 1, 1, 0.501961)
+custom_minimum_size = Vector2(24, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+texture_normal = ExtResource("17_0m5iv")
+ignore_texture_size = true
+stretch_mode = 5
+
+[node name="StartFrom" type="Panel" parent="Menus/Play/Modifiers"]
+layout_mode = 1
+anchors_preset = -1
+anchor_top = 0.8
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_right = -8.0
+theme_override_styles/panel = SubResource("StyleBoxEmpty_v77in")
+
+[node name="Label" type="Label" parent="Menus/Play/Modifiers/StartFrom"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.2
+anchor_bottom = 1.0
+text = "Start From"
+label_settings = SubResource("LabelSettings_ptq8h")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Menus/Play/Modifiers/StartFrom"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.2
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -67.0
+theme = ExtResource("2_46xtp")
+max_value = 1.0
+step = 0.0
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Menus/Play/Modifiers/StartFrom"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_horizontal = 0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "0:00"
+placeholder_text = "0:00"
+max_length = 5
+context_menu_enabled = false
+flat = true
+caret_blink = true
 
 [node name="Extras" type="Panel" parent="Menus"]
 visible = false

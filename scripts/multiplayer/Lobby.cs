@@ -7,7 +7,7 @@ public class Lobby
     public static int PlayersReady = 0;
     public static Map Map;
     public static double Speed = 1;
-    public static string[] Mods = ["NoFail"];//Array.Empty<string>();
+    public static string[] Mods = [];
 
     public delegate void AllReadyEventHandler();
     public static event AllReadyEventHandler AllReady;
