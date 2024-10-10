@@ -405,8 +405,8 @@ text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
  Record replays
  Toggle hit score popup
  Toggle miss popup
- Ghost modifier
 [/ul]
+ Ghost modifier
  Made score dropoff more lenient (20ms for perfect hit -> 25ms, lowest multiplier 0.65x -> 0.8x)
  This panel :)
 [/ul]
