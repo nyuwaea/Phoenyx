@@ -303,11 +303,6 @@ public partial class Runner : Node3D
 				popup.QueueFree();
 			}));
 			tween.Play();
-
-			if (Lobby.PlayerCount > 1)
-			{
-				ServerManager.Node.Rpc("ValidateScore", Hits);
-			}
 		}
 
 		public void Miss(int index)
@@ -1258,7 +1253,7 @@ public partial class Runner : Node3D
 	{
 		MenuShown = show;
 		Playing = !MenuShown;
-		SoundManager.Song.PitchScale = Playing ? (float)CurrentAttempt.Speed : 0.00000000000001f;	// i'm gonna kms
+		SoundManager.Song.PitchScale = Playing ? (float)CurrentAttempt.Speed : 0.00000000000001f;	// not again
 		Input.MouseMode = MenuShown ? Input.MouseModeEnum.Visible : (Phoenyx.Settings.AbsoluteInput || CurrentAttempt.IsReplay ? Input.MouseModeEnum.ConfinedHidden : Input.MouseModeEnum.Captured);
 
 		if (MenuShown)

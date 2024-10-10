@@ -24,8 +24,6 @@ config/icon="res://icon.svg"
 [autoload]
 
 DiscordRPCLoader="*res://addons/discord-rpc-gd/nodes/discord_autoload.gd"
-ServerManager="*res://scripts/multiplayer/ServerManager.cs"
-ClientManager="*res://scripts/multiplayer/ClientManager.cs"
 Keybinds="*res://scripts/KeybindsManager.cs"
 ToastNotification="*res://scripts/ToastNotification.cs"
 SceneManager="*res://scripts/SceneManager.cs"

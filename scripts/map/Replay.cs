@@ -184,7 +184,7 @@ public struct Replay
 
         for (int i = 0; i < hash.Length; i += 4)
         {
-            hashCode += BitConverter.ToInt32(hash, i);  // this is so fucking ass
+            hashCode += BitConverter.ToInt32(hash, i);  // this is so ass
         }
         
         return hashCode;

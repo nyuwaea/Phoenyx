@@ -667,44 +667,44 @@ public partial class MainMenu : Control
 
 		// Multiplayer
 
-		MultiplayerHolder = PlayMenu.GetNode<Panel>("Multiplayer");
-		IPLine = MultiplayerHolder.GetNode<LineEdit>("IP");
-		PortLine = MultiplayerHolder.GetNode<LineEdit>("Port");
-		ChatLine = MultiplayerHolder.GetNode<LineEdit>("ChatInput");
-		Host = MultiplayerHolder.GetNode<Button>("Host");
-		Join = MultiplayerHolder.GetNode<Button>("Join");
-		ChatScrollContainer = MultiplayerHolder.GetNode<ScrollContainer>("Chat");
-		ChatHolder = ChatScrollContainer.GetNode<VBoxContainer>("Holder");
-
-		Host.Pressed += () => {
-			try
-			{
-				ServerManager.CreateServer(IPLine.Text, PortLine.Text);
-			}
-			catch (Exception exception)
-			{
-				ToastNotification.Notify($"{exception.Message}", 2);
-				return;
-			}
-
-			Host.Disabled = true;
-			Join.Disabled = true;
-		};
-		Join.Pressed += () => {
-			try
-			{
-				ClientManager.CreateClient(IPLine.Text, PortLine.Text);
-			}
-			catch (Exception exception)
-			{
-				ToastNotification.Notify($"{exception.Message}", 2);
-				return;
-			}
-
-			Host.Disabled = true;
-			Join.Disabled = true;
-		};
-
+		//MultiplayerHolder = PlayMenu.GetNode<Panel>("Multiplayer");
+		//IPLine = MultiplayerHolder.GetNode<LineEdit>("IP");
+		//PortLine = MultiplayerHolder.GetNode<LineEdit>("Port");
+		//ChatLine = MultiplayerHolder.GetNode<LineEdit>("ChatInput");
+		//Host = MultiplayerHolder.GetNode<Button>("Host");
+		//Join = MultiplayerHolder.GetNode<Button>("Join");
+		//ChatScrollContainer = MultiplayerHolder.GetNode<ScrollContainer>("Chat");
+		//ChatHolder = ChatScrollContainer.GetNode<VBoxContainer>("Holder");
+		//
+		//Host.Pressed += () => {
+		//	try
+		//	{
+		//		
+		//	}
+		//	catch (Exception exception)
+		//	{
+		//		ToastNotification.Notify($"{exception.Message}", 2);
+		//		return;
+		//	}
+		//
+		//	Host.Disabled = true;
+		//	Join.Disabled = true;
+		//};
+		//Join.Pressed += () => {
+		//	try
+		//	{
+		//		
+		//	}
+		//	catch (Exception exception)
+		//	{
+		//		ToastNotification.Notify($"{exception.Message}", 2);
+		//		return;
+		//	}
+		//
+		//	Host.Disabled = true;
+		//	Join.Disabled = true;
+		//};
+		
 		// Finish
 
 		SoundManager.UpdateJukeboxQueue();
@@ -1151,26 +1151,25 @@ public partial class MainMenu : Control
 			MapsOrder[mapButtons[i].Name] = i;
 		}
 	}
-
-	public static void Chat(string message)
-	{
-		Label chatMessage = ChatMessage.Instantiate<Label>();
-		chatMessage.Text = message;
-
-		ChatHolder.AddChild(chatMessage);
-		ChatScrollContainer.ScrollVertical += 100;
-	}
-
-	private static void SendMessage()
-	{
-		if (ChatLine.Text.Replace(" ", "") == "")
-		{
-			return;
-		}
-		
-		ServerManager.Node.Rpc("ValidateChat", ChatLine.Text);
-		ChatLine.Text = "";
-	}
+	
+	//public static void Chat(string message)
+	//{
+	//	Label chatMessage = ChatMessage.Instantiate<Label>();
+	//	chatMessage.Text = message;
+	//
+	//	ChatHolder.AddChild(chatMessage);
+	//	ChatScrollContainer.ScrollVertical += 100;
+	//}
+	//
+	//private static void SendMessage()
+	//{
+	//	if (ChatLine.Text.Replace(" ", "") == "")
+	//	{
+	//		return;
+	//	}
+	//	
+	//	ChatLine.Text = "";
+	//}
 
 	private static void Transition(string menuName, bool instant = false)
 	{
