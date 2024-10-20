@@ -127,6 +127,8 @@ public partial class SettingsManager : Control
 			Phoenyx.Settings.TrailTime = (float)data["trail_time"];
 			Phoenyx.Settings.SimpleHUD = (bool)data["simple_hud"];
             Phoenyx.Settings.AbsoluteInput = (bool)data["absolute_mode"];
+			Phoenyx.Settings.FPS = (double)data["fps"];
+			Phoenyx.Settings.UnlockFPS = (bool)data["unlock_fps"];
 
 			UpdateSettings();
 
@@ -255,6 +257,14 @@ public partial class SettingsManager : Control
 				break;
 			case "MissPopups":
 				Phoenyx.Settings.MissPopups = (bool)value;
+				break;
+			case "FPS":
+				Phoenyx.Settings.FPS = (double)value;
+				Engine.MaxFps = Phoenyx.Settings.UnlockFPS ? 0 : Convert.ToInt32(value);
+				break;
+			case "UnlockFPS":
+				Phoenyx.Settings.UnlockFPS = (bool)value;
+				Engine.MaxFps = Phoenyx.Settings.UnlockFPS ? 0 : Convert.ToInt32(Phoenyx.Settings.FPS);
 				break;
 		}
 

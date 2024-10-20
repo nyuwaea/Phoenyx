@@ -1081,6 +1081,85 @@ focus_mode = 0
 theme = ExtResource("1_8p7x0")
 flat = true
 
+[node name="UnlockFPS" type="Panel" parent="Holder/Categories/Video/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+tooltip_text = "Unlocks the frame limit cap"
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Video/Container/UnlockFPS"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "Unlock FPS"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="CheckButton" type="CheckButton" parent="Holder/Categories/Video/Container/UnlockFPS"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 0.9
+anchor_bottom = 1.0
+offset_left = 8.0
+grow_vertical = 2
+focus_mode = 0
+theme = ExtResource("1_8p7x0")
+flat = true
+
+[node name="FPS" type="Panel" parent="Holder/Categories/Video/Container"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxEmpty_mgaml")
+
+[node name="Label" type="Label" parent="Holder/Categories/Video/Container/FPS"]
+layout_mode = 1
+anchors_preset = -1
+anchor_right = 0.3
+anchor_bottom = 1.0
+text = "FPS"
+label_settings = SubResource("LabelSettings_glkuk")
+vertical_alignment = 1
+clip_text = true
+text_overrun_behavior = 3
+
+[node name="HSlider" type="HSlider" parent="Holder/Categories/Video/Container/FPS"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.3
+anchor_right = 0.9
+anchor_bottom = 1.0
+theme = ExtResource("1_8p7x0")
+min_value = 60.0
+max_value = 960.0
+step = 5.0
+value = 240.0
+rounded = true
+allow_greater = true
+allow_lesser = true
+scrollable = false
+
+[node name="LineEdit" type="LineEdit" parent="Holder/Categories/Video/Container/FPS"]
+clip_contents = true
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.9
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+mouse_default_cursor_shape = 0
+theme_override_font_sizes/font_size = 16
+text = "240"
+placeholder_text = "240"
+max_length = 5
+context_menu_enabled = false
+flat = true
+caret_blink = true
+
 [node name="Audio" type="ScrollContainer" parent="Holder/Categories"]
 visible = false
 layout_mode = 1
