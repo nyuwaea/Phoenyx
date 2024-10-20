@@ -66,6 +66,8 @@ public partial class Phoenyx : Node
         public static bool RecordReplays {get; set;} = true;
         public static bool HitPopups {get; set;} = true;
         public static bool MissPopups {get; set;} = true;
+        public static double FPS {get; set;} = 240;
+        public static bool UnlockFPS {get; set;} = true;
 
         public static void Save(string profile = null)
         {
