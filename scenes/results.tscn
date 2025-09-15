@@ -1,16 +1,16 @@
 [gd_scene load_steps=34 format=3 uid="uid://bhcvypmhm5rke"]
 
-[ext_resource type="Script" path="res://scripts/menu/Results.cs" id="1_llpx6"]
+[ext_resource type="Script" uid="uid://c0ap38lmc2x0r" path="res://scripts/menu/Results.cs" id="1_llpx6"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_dgnpu"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="2_f4qdi"]
-[ext_resource type="Shader" path="res://scripts/shaders/alpha_gradient.gdshader" id="2_oatel"]
+[ext_resource type="Shader" uid="uid://bp2sv5ynsubi2" path="res://scripts/shaders/alpha_gradient.gdshader" id="2_oatel"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="2_ow183"]
 [ext_resource type="FontFile" uid="uid://bopde8iqsld1o" path="res://fonts/Ubuntu-Regular.ttf" id="3_rsbg1"]
 [ext_resource type="Texture2D" uid="uid://ds6s20eqbh58m" path="res://textures/short_transparent.png" id="3_vdcg2"]
-[ext_resource type="Script" path="res://scripts/menu/Graph.cs" id="4_b55ol"]
+[ext_resource type="Script" uid="uid://ci36kf1g7wv5j" path="res://scripts/menu/Graph.cs" id="4_b55ol"]
 [ext_resource type="FontFile" uid="uid://dvb6fvy008bhv" path="res://fonts/Roboto-Medium.ttf" id="4_yxv8s"]
-[ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="5_eo0oh"]
-[ext_resource type="Shader" path="res://scripts/shaders/dotted.gdshader" id="8_ldb53"]
+[ext_resource type="Shader" uid="uid://cqqs8uux7hqyb" path="res://scripts/shaders/ui_blur.gdshader" id="5_eo0oh"]
+[ext_resource type="Shader" uid="uid://5sq1jdmlom6w" path="res://scripts/shaders/dotted.gdshader" id="8_ldb53"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_6rn6l"]
 shader = ExtResource("2_oatel")

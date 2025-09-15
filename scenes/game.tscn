@@ -1,25 +1,25 @@
 [gd_scene load_steps=68 format=3 uid="uid://vp1nmsiqt5yv"]
 
-[ext_resource type="Script" path="res://scripts/game/Runner.cs" id="1_1hgss"]
+[ext_resource type="Script" uid="uid://vvcvrjfmgdn5" path="res://scripts/game/Runner.cs" id="1_1hgss"]
 [ext_resource type="ArrayMesh" uid="uid://rniojt7yiv8q" path="res://meshes/squircle.obj" id="2_chdyw"]
 [ext_resource type="Texture2D" uid="uid://b3g4aw54n6bow" path="res://skin/grid.png" id="2_q78ea"]
-[ext_resource type="Script" path="res://scripts/game/Renderer.cs" id="3_ew8wr"]
+[ext_resource type="Script" uid="uid://cceyrodcpk2yl" path="res://scripts/game/Renderer.cs" id="3_ew8wr"]
 [ext_resource type="Texture2D" uid="uid://3e1tjlr4m0wt" path="res://skin/cursor.png" id="3_negii"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="4_rvp5o"]
 [ext_resource type="FontFile" uid="uid://4bnnn01f4dqr" path="res://fonts/Ubuntu-Medium.ttf" id="5_pxgh4"]
 [ext_resource type="Texture2D" uid="uid://cxv6ey5xb6b0f" path="res://skin/health_background.png" id="6_bbly8"]
 [ext_resource type="Texture2D" uid="uid://4x2vfpyjkri6" path="res://skin/health.png" id="7_wjg6i"]
 [ext_resource type="Texture2D" uid="uid://dmc5f6ajp8xv1" path="res://skin/progress_background.png" id="8_eu3ux"]
-[ext_resource type="Shader" path="res://scripts/shaders/video_background.gdshader" id="8_ocxsu"]
+[ext_resource type="Shader" uid="uid://dsysoy6w8ndnk" path="res://scripts/shaders/video_background.gdshader" id="8_ocxsu"]
 [ext_resource type="Texture2D" uid="uid://d3s17ehomjscd" path="res://skin/progress.png" id="9_nde5v"]
 [ext_resource type="FontFile" uid="uid://cmjos3o0k2f6t" path="res://fonts/Comfortaa-Medium.ttf" id="11_o37lt"]
 [ext_resource type="Texture2D" uid="uid://80bitp5weqrb" path="res://skin/panel_left_background.png" id="11_sdncv"]
 [ext_resource type="FontFile" uid="uid://b6hgjef6s6oly" path="res://fonts/Comfortaa-Bold.ttf" id="12_axsek"]
 [ext_resource type="Texture2D" uid="uid://diba7c3s8as4s" path="res://skin/panel_right_background.png" id="12_whe6p"]
 [ext_resource type="Texture2D" uid="uid://dw2gxd3m24h4m" path="res://skin/hits.png" id="13_6rhgc"]
-[ext_resource type="Shader" path="res://scripts/shaders/alpha_gradient.gdshader" id="14_3xchs"]
+[ext_resource type="Shader" uid="uid://bp2sv5ynsubi2" path="res://scripts/shaders/alpha_gradient.gdshader" id="14_3xchs"]
 [ext_resource type="Texture2D" uid="uid://c3x2cp3tx4vqt" path="res://skin/misses.png" id="14_bqf11"]
-[ext_resource type="Shader" path="res://scripts/shaders/combo_progress.gdshader" id="14_y51pe"]
+[ext_resource type="Shader" uid="uid://bx4888tau78tk" path="res://scripts/shaders/combo_progress.gdshader" id="14_y51pe"]
 [ext_resource type="AudioStream" uid="uid://deh3syobn5363" path="res://sounds/bell.mp3" id="20_2qbs1"]
 [ext_resource type="Texture2D" uid="uid://b1ihebmvna0bq" path="res://textures/jesus.png" id="21_6sy1o"]
 [ext_resource type="Texture2D" uid="uid://lfj8i1bi6kfs" path="res://textures/pause.png" id="23_7silw"]
@@ -230,6 +230,7 @@ script = ExtResource("1_1hgss")
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 3.75)
 fov = 70.0
+size = 5.0
 
 [node name="Notes" type="MultiMeshInstance3D" parent="."]
 material_override = SubResource("StandardMaterial3D_73q55")
@@ -248,7 +249,7 @@ multimesh = SubResource("MultiMesh_e28va")
 mesh = SubResource("QuadMesh_xij4d")
 
 [node name="Health" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -6.2, -10)
+transform = Transform3D(1, 0, 0, 0, 0.965926, 0.258819, 0, -0.258819, 0.965926, 0, -6.3, -10)
 cast_shadow = 0
 mesh = SubResource("QuadMesh_b1hbo")
 
@@ -684,10 +685,14 @@ flat = true
 [node name="Holder" type="Panel" parent="Menu"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.35
-anchor_top = 0.15
-anchor_right = 0.65
-anchor_bottom = 0.85
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -220.0
+offset_top = -280.0
+offset_right = 220.0
+offset_bottom = 280.0
 mouse_filter = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_43mxh")
 

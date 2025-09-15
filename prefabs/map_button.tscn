@@ -2,7 +2,7 @@
 
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="1_rhnis"]
 [ext_resource type="Texture2D" uid="uid://cacq7g5ijo7sy" path="res://skin/favorite.png" id="2_c1lr1"]
-[ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="2_q8uhd"]
+[ext_resource type="Shader" uid="uid://cqqs8uux7hqyb" path="res://scripts/shaders/ui_blur.gdshader" id="2_q8uhd"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_bchh2"]
 shader = ExtResource("2_q8uhd")

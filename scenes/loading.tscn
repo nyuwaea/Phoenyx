@@ -1,7 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://dhsbxdw3kleyx"]
+[gd_scene load_steps=6 format=3 uid="uid://dhsbxdw3kleyx"]
 
-[ext_resource type="Script" path="res://scripts/menu/Loading.cs" id="1_0yo7s"]
+[ext_resource type="Script" uid="uid://csyygb424655e" path="res://scripts/menu/Loading.cs" id="1_0yo7s"]
 [ext_resource type="Texture2D" uid="uid://bapka5rtcgm8a" path="res://textures/boot_splash.png" id="2_50ns2"]
+[ext_resource type="Shader" uid="uid://ujothoxymyrm" path="res://scripts/shaders/loading_splash.gdshader" id="2_dhqfv"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_101rs"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dhqfv"]
+shader = ExtResource("2_dhqfv")
+shader_parameter/shift = 1.0
 
 [node name="SceneLoading" type="Control"]
 layout_mode = 3
@@ -23,6 +30,20 @@ color = Color(0, 0, 0, 1)
 
 [node name="Splash" type="TextureRect" parent="."]
 modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_101rs")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+texture = ExtResource("2_50ns2")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="SplashShift" type="TextureRect" parent="."]
+modulate = Color(1, 1, 1, 0)
+material = SubResource("ShaderMaterial_dhqfv")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0

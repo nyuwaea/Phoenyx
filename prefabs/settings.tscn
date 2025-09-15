@@ -554,6 +554,7 @@ selected = 0
 fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "default"
+popup/item_0/id = 0
 
 [node name="SkinFolder" type="Button" parent="Holder/Categories/Visuals/Container/Skin"]
 layout_mode = 1
@@ -636,6 +637,7 @@ selected = 0
 fit_to_longest_item = false
 item_count = 3
 popup/item_0/text = "skin"
+popup/item_0/id = 0
 popup/item_1/text = "void"
 popup/item_1/id = 1
 popup/item_2/text = "grid"
@@ -1571,6 +1573,7 @@ selected = 0
 fit_to_longest_item = false
 item_count = 1
 popup/item_0/text = "default"
+popup/item_0/id = 0
 
 [node name="CreateProfile" type="Button" parent="Holder/Header"]
 layout_mode = 1

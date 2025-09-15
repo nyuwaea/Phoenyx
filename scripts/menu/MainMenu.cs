@@ -29,6 +29,7 @@ public partial class MainMenu : Control
 	private static AudioEffectSpectrumAnalyzerInstance AudioSpectrum;
 	private static Panel ContextMenu;
 	private static TextureRect Peruchor;
+	private static ShaderMaterial MainBackgroundMaterial;
 
 	private static Panel PlayMenu;
 	private static Panel SubTopBar;
@@ -183,36 +184,36 @@ public partial class MainMenu : Control
 			}));
 			
 			//string[] args = OS.GetCmdlineArgs();
-            string[] args = [
-                "--a=\"H:\\Sound Space\\Quantum_Editors\\Sound Space Quantum Editor\\cached\\Camellia feat. Nanahira - べィスドロップ・フリークス (2018 Redrop ver.).asset\"",
-                "--t=\"H:\\Sound Space\\Quantum_Editors\\Sound Space Quantum Editor\\assets\\temp\\tempmap.txt\""
-            ];
-            
-            if (args.Length > 0)
-            {
-                string audioString = "";
-                string mapString = "";
+			string[] args = [
+				"--a=\"H:\\Sound Space\\Quantum_Editors\\Sound Space Quantum Editor\\cached\\Camellia feat. Nanahira - べィスドロップ・フリークス (2018 Redrop ver.).asset\"",
+				"--t=\"H:\\Sound Space\\Quantum_Editors\\Sound Space Quantum Editor\\assets\\temp\\tempmap.txt\""
+			];
+			
+			if (args.Length > 0)
+			{
+				string audioString = "";
+				string mapString = "";
 
-                foreach (string arg in args)
-                {
-                    switch (arg.Substr(0, 3))
-                    {
-                        case "--a":
-                            audioString = arg.Substr(5, arg.Length - 1).Trim('"');
-                            break;
-                        case "--t":
-                            mapString = arg.Substr(5, arg.Length - 1).Trim('"');
-                            break;
-                    }
-                }
+				foreach (string arg in args)
+				{
+					switch (arg.Substr(0, 3))
+					{
+						case "--a":
+							audioString = arg.Substr(5, arg.Length - 1).Trim('"');
+							break;
+						case "--t":
+							mapString = arg.Substr(5, arg.Length - 1).Trim('"');
+							break;
+					}
+				}
 
 				//Select("tempmap", true, false);
-                
-                //Map map = MapParser.Decode(mapString, audioString, false, false);
-                //map.Ephemeral = true;
-                //SoundManager.Song.Stop();
-                //SceneManager.Load("res://scenes/game.tscn");
-            }
+				
+				//Map map = MapParser.Decode(mapString, audioString, false, false);
+				//map.Ephemeral = true;
+				//SoundManager.Song.Stop();
+				//SceneManager.Load("res://scenes/game.tscn");
+			}
 		}
 
 		// General
@@ -231,6 +232,7 @@ public partial class MainMenu : Control
 		AudioSpectrum = (AudioEffectSpectrumAnalyzerInstance)AudioServer.GetBusEffectInstance(0, 0);
 		ContextMenu = GetNode<Panel>("ContextMenu");
 		Peruchor = Main.GetNode<TextureRect>("Peruchor");
+		MainBackgroundMaterial = Background.Material as ShaderMaterial;
 		LoadedMaps = [];
 		FavoritedMaps = [];
 
@@ -733,10 +735,10 @@ public partial class MainMenu : Control
 		SoundManager.Song.VolumeDb = -180;
 	}
 
-    public override void _Process(double delta)
-    {
+	public override void _Process(double delta)
+	{
 		ulong now = Time.GetTicksUsec();
-        delta = (now - LastFrame) / 1000000;
+		delta = (now - LastFrame) / 1000000;
 		LastFrame = now;
 		Scroll = Mathf.Lerp(Scroll, TargetScroll, 8 * (float)delta);
 		MapList.ScrollVertical = (int)Scroll;
@@ -808,10 +810,17 @@ public partial class MainMenu : Control
 
 		Main.Position = Main.Position.Lerp((Size / 2 - MousePosition) * (4 / Size.Y), Math.Min(1, (float)delta * 16));
 		Extras.Position = Main.Position;
-    }
 
-    public override void _Input(InputEvent @event)
-    {
+		if (Phoenyx.Util.Quitting)
+		{
+			MainBackgroundMaterial.SetShaderParameter("opaqueness", Mathf.Lerp((float)MainBackgroundMaterial.GetShaderParameter("opaqueness"), 0, delta * 8));
+		}
+		
+		MainBackgroundMaterial.SetShaderParameter("window_position", DisplayServer.WindowGetPosition());
+	}
+
+	public override void _Input(InputEvent @event)
+	{
 		if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
 			if (eventKey.AsText() == PeruSequence[PeruSequenceIndex])
@@ -929,11 +938,11 @@ public partial class MainMenu : Control
 				TargetScroll = Math.Clamp((MousePosition.Y - 50) / (DisplayServer.WindowGetSize().Y - 100), 0, 1) * MaxScroll;
 			}
 		}
-    }
+	}
 
-    public override void _UnhandledInput(InputEvent @event)
-    {
-        if (@event is InputEventKey eventKey && eventKey.Pressed)
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (@event is InputEventKey eventKey && eventKey.Pressed)
 		{
 			if (eventKey.CtrlPressed)
 			{
@@ -975,7 +984,7 @@ public partial class MainMenu : Control
 					break;
 			}
 		}
-    }
+	}
 
 	public static Dictionary<string, bool> Import(string[] files)
 	{
@@ -1230,7 +1239,7 @@ public partial class MainMenu : Control
 		SettingsManager.Holder.GetNode("Categories").GetNode("Audio").GetNode("Container").GetNode("VolumeMaster").GetNode<HSlider>("HSlider").Value = Phoenyx.Settings.VolumeMaster;
 	}
 
-    public static void UpdateMapList()
+	public static void UpdateMapList()
 	{
 		double start = Time.GetTicksUsec();
 		int i = 0;

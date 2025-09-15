@@ -1,10 +1,11 @@
-[gd_scene load_steps=60 format=3 uid="uid://do18270a428ma"]
+[gd_scene load_steps=62 format=3 uid="uid://do18270a428ma"]
 
-[ext_resource type="Script" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
+[ext_resource type="Script" uid="uid://b31laysqrwbgs" path="res://scripts/menu/MainMenu.cs" id="1_wfqfe"]
 [ext_resource type="Theme" uid="uid://dhuhu3mmaew1a" path="res://theme/theme.tres" id="2_46xtp"]
 [ext_resource type="FontFile" uid="uid://dotb3skhwouha" path="res://fonts/Roboto-Bold.ttf" id="2_nj0d7"]
+[ext_resource type="Shader" uid="uid://c7ldko1kfg2ho" path="res://scripts/shaders/noise_waves.gdshader" id="2_r2d8r"]
 [ext_resource type="StyleBox" uid="uid://6flsits2jjqm" path="res://theme/button_stylebox_normal.tres" id="3_cp44m"]
-[ext_resource type="Shader" path="res://scripts/shaders/p.gdshader" id="3_gfhy0"]
+[ext_resource type="Shader" uid="uid://c3i58kmo8tcre" path="res://scripts/shaders/p.gdshader" id="3_gfhy0"]
 [ext_resource type="Texture2D" uid="uid://dqr46iek4sfxo" path="res://textures/p.png" id="4_dbx8x"]
 [ext_resource type="StyleBox" uid="uid://ddj6fwlab413t" path="res://theme/button_stylebox_pressed.tres" id="4_iqqm8"]
 [ext_resource type="StyleBox" uid="uid://744pdht5vadn" path="res://theme/button_stylebox_hover.tres" id="4_xf0oq"]
@@ -24,7 +25,7 @@
 [ext_resource type="Texture2D" uid="uid://c0wbm1qc5npty" path="res://textures/discord_pressed.png" id="15_sy0m2"]
 [ext_resource type="Texture2D" uid="uid://ba8nnsyx5yiw8" path="res://skin/mod_chaos.png" id="16_sro6u"]
 [ext_resource type="Texture2D" uid="uid://bugx1qn5t88e3" path="res://skin/mod_hardrock.png" id="17_0m5iv"]
-[ext_resource type="Shader" path="res://scripts/shaders/ui_blur.gdshader" id="21_bm8r1"]
+[ext_resource type="Shader" uid="uid://cqqs8uux7hqyb" path="res://scripts/shaders/ui_blur.gdshader" id="21_bm8r1"]
 
 [sub_resource type="SystemFont" id="SystemFont_lsskb"]
 font_names = PackedStringArray("Ubuntu")
@@ -33,6 +34,11 @@ subpixel_positioning = 0
 [sub_resource type="Theme" id="Theme_nlclj"]
 resource_name = "Phoenix"
 default_font = SubResource("SystemFont_lsskb")
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_2672j"]
+shader = ExtResource("2_r2d8r")
+shader_parameter/window_position = Vector2(0, 0)
+shader_parameter/opaqueness = 1.0
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_yiicd"]
 
@@ -185,6 +191,7 @@ use_native_dialog = true
 
 [node name="Background" type="ColorRect" parent="."]
 z_index = -10
+material = SubResource("ShaderMaterial_2672j")
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -354,7 +361,7 @@ offset_left = 24.0
 offset_top = 8.0
 offset_right = -24.0
 offset_bottom = 32.0
-text = "NEWS"
+text = "1.0.2"
 label_settings = SubResource("LabelSettings_0uejd")
 
 [node name="Panel" type="Panel" parent="Menus/Main/News"]
@@ -382,7 +389,12 @@ offset_bottom = -8.0
 theme = ExtResource("2_46xtp")
 theme_override_fonts/normal_font = ExtResource("8_jfynb")
 bbcode_enabled = true
-text = "[font_size=30][i]Phoenyx 1.0 Release[/i]
+text = "fixed hit sound polyphony (1 -> 16)
+[font_size=300]:3c[font_size=30]
+
+
+
+[i]Phoenyx 1.0 Release[/i]
 [font_size=24]Changelog
 
 [font_size=16][i]FEATURES & MAIN CHANGES[/i][ul]
@@ -1551,7 +1563,7 @@ anchor_top = 0.5
 anchor_bottom = 0.5
 offset_left = 64.0
 grow_vertical = 2
-text = "Phoenyx v1.0.0"
+text = "Phoenyx v1.0.2"
 label_settings = SubResource("LabelSettings_1o5ig")
 vertical_alignment = 1
 

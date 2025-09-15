@@ -5,28 +5,28 @@ using Godot;
 
 public partial class SettingsManager : Control
 {
-    public static Control Control;
+	public static Control Control;
 
-    public static ColorRect Settings;
-    public static Panel Holder;
+	public static ColorRect Settings;
+	public static Panel Holder;
 	public static bool Shown = false;
-    public static LineEdit FocusedLineEdit = null;
+	public static LineEdit FocusedLineEdit = null;
 
-    public override void _Ready()
-    {
-        Control = this;
+	public override void _Ready()
+	{
+		Control = this;
 
-        Settings = GD.Load<PackedScene>("res://prefabs//settings.tscn").Instantiate<ColorRect>();
-        Holder = Settings.GetNode<Panel>("Holder");
+		Settings = GD.Load<PackedScene>("res://prefabs//settings.tscn").Instantiate<ColorRect>();
+		Holder = Settings.GetNode<Panel>("Holder");
 		Settings.GetNode<Button>("Deselect").Pressed += HideSettings;
 
-        AddChild(Settings);
+		AddChild(Settings);
 		HideSettings();
 		GetViewport().SizeChanged += () => {
 			Settings.SetSize(DisplayServer.WindowGetSize());
 		};
 
-        Settings.SetSize(DisplayServer.WindowGetSize());
+		Settings.SetSize(DisplayServer.WindowGetSize());
 
 		foreach (Node holder in Holder.GetNode("Sidebar").GetNode("Container").GetChildren())
 		{
@@ -85,10 +85,10 @@ public partial class SettingsManager : Control
 			Phoenyx.Settings.Skin = skins.GetItemText((int)item);
 			Phoenyx.Skin.Load();
 
-            if (SceneManager.Scene.Name == "SceneMenu")
-            {
-                Menu.MainMenu.Cursor.Texture = Phoenyx.Skin.CursorImage;
-            }
+			if (SceneManager.Scene.Name == "SceneMenu")
+			{
+				Menu.MainMenu.Cursor.Texture = Phoenyx.Skin.CursorImage;
+			}
 
 			Holder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Colors").GetNode<LineEdit>("LineEdit").Text = Phoenyx.Skin.RawColors;
 		};
@@ -99,7 +99,7 @@ public partial class SettingsManager : Control
 			Phoenyx.Settings.Space = spaces.GetItemText((int)item);
 		};
 
-        Holder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<Button>("SkinFolder").Pressed += () => {
+		Holder.GetNode("Categories").GetNode("Visuals").GetNode("Container").GetNode("Skin").GetNode<Button>("SkinFolder").Pressed += () => {
 			OS.ShellOpen($"{Phoenyx.Constants.UserFolder}/skins/{Phoenyx.Settings.Skin}");
 		};
 		Holder.GetNode("Categories").GetNode("Other").GetNode("Container").GetNode("RhythiaImport").GetNode<Button>("Button").Pressed += () => {
@@ -110,7 +110,7 @@ public partial class SettingsManager : Control
 			}
 
 			Godot.FileAccess file = Godot.FileAccess.Open($"{OS.GetDataDir()}/SoundSpacePlus/settings.json", Godot.FileAccess.ModeFlags.Read);
-            Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)Json.ParseString(file.GetAsText());
+			Godot.Collections.Dictionary data = (Godot.Collections.Dictionary)Json.ParseString(file.GetAsText());
 
 			Phoenyx.Settings.ApproachRate = (float)data["approach_rate"];
 			Phoenyx.Settings.ApproachDistance = (float)data["spawn_distance"];
@@ -126,7 +126,7 @@ public partial class SettingsManager : Control
 			Phoenyx.Settings.CursorTrail = (bool)data["cursor_trail"];
 			Phoenyx.Settings.TrailTime = (float)data["trail_time"];
 			Phoenyx.Settings.SimpleHUD = (bool)data["simple_hud"];
-            Phoenyx.Settings.AbsoluteInput = (bool)data["absolute_mode"];
+			Phoenyx.Settings.AbsoluteInput = (bool)data["absolute_mode"];
 			Phoenyx.Settings.FPS = (double)data["fps"];
 			Phoenyx.Settings.UnlockFPS = (bool)data["unlock_fps"];
 
@@ -136,13 +136,13 @@ public partial class SettingsManager : Control
 		};
 
 		UpdateSettings(true);
-    }
+	}
 
-    public static void ShowSettings(bool show = true)
+	public static void ShowSettings(bool show = true)
 	{
 		Shown = show;
 		Settings.GetNode<Button>("Deselect").MouseFilter = Shown ? MouseFilterEnum.Stop : MouseFilterEnum.Ignore;
-        Control.CallDeferred("move_to_front");
+		Control.CallDeferred("move_to_front");
 
 		if (Shown)
 		{
@@ -206,10 +206,10 @@ public partial class SettingsManager : Control
 			case "CursorScale":
 				Phoenyx.Settings.CursorScale = (double)value;
 				
-                if (SceneManager.Scene.Name == "SceneMenu")
-                {
-                    Menu.MainMenu.Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
-                }
+				if (SceneManager.Scene.Name == "SceneMenu")
+				{
+					Menu.MainMenu.Cursor.Size = new Vector2(32 * (float)Phoenyx.Settings.CursorScale, 32 * (float)Phoenyx.Settings.CursorScale);
+				}
 
 				break;
 			case "FadeOut":
@@ -246,9 +246,9 @@ public partial class SettingsManager : Control
 			case "AutoplayJukebox":
 				Phoenyx.Settings.AutoplayJukebox = (bool)value;
 				break;
-            case "AbsoluteInput":
-                Phoenyx.Settings.AbsoluteInput = (bool)value;
-                break;
+			case "AbsoluteInput":
+				Phoenyx.Settings.AbsoluteInput = (bool)value;
+				break;
 			case "RecordReplays":
 				Phoenyx.Settings.RecordReplays = (bool)value;
 				break;
@@ -394,8 +394,8 @@ public partial class SettingsManager : Control
 				{
 					LineEdit lineEdit = option.GetNode<LineEdit>("LineEdit");
 
-                    void set(string text)
-                    {
+					void set(string text)
+					{
 						if (text == "")
 						{
 							text = lineEdit.PlaceholderText;
@@ -433,9 +433,9 @@ public partial class SettingsManager : Control
 						}
 
 						lineEdit.ReleaseFocus();
-                    }
+					}
 
-                    if (connections)
+					if (connections)
 					{
 						lineEdit.FocusEntered += () => {
 							FocusedLineEdit = lineEdit;
@@ -453,16 +453,16 @@ public partial class SettingsManager : Control
 		}
 	}
 
-    public static void ShowMouse()
+	public static void ShowMouse()
 	{
 		Input.MouseMode = Input.MouseModeEnum.Visible;
 	}
 
 	public static void HideMouse()
 	{
-        if (SceneManager.Scene.Name == "SceneMenu")
-        {
-            Input.MouseMode = Input.MouseModeEnum.Hidden;
-        }
+		if (SceneManager.Scene.Name == "SceneMenu")
+		{
+			Input.MouseMode = Input.MouseModeEnum.Hidden;
+		}
 	}
 }

@@ -1,6 +1,6 @@
 [gd_scene load_steps=8 format=3 uid="uid://dtkff13bgd1u4"]
 
-[ext_resource type="Script" path="res://scripts/spaces/Grid.cs" id="1_3f34m"]
+[ext_resource type="Script" uid="uid://d2u74uvsmmkt" path="res://scripts/spaces/Grid.cs" id="1_3f34m"]
 [ext_resource type="Texture2D" uid="uid://cnqebcj2iorfr" path="res://textures/grid_tile.png" id="2_mnxl2"]
 
 [sub_resource type="Environment" id="Environment_ge866"]
